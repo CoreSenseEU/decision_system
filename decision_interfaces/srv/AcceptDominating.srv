@@ -1,0 +1,9 @@
+# Request
+Alternative[] choice
+Judgement[] judgements
+string[] axies
+
+---
+# Response
+string result
+bool success

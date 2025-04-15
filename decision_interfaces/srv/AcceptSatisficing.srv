@@ -1,0 +1,9 @@
+# Request
+Alternative[] choice
+Judgement[] judgements
+Feature[] features
+
+---
+# Response
+string result
+bool success
