@@ -9,10 +9,14 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/AcceptRelational.srv"
   "srv/AcceptSatisficing.srv"
   "srv/AcceptDominating.srv"
+  "srv/TakeN.srv"
+  "srv/TakeRelative.srv"
 
   "msg/Alternative.msg"
   "msg/Feature.msg"
-  "msg/Judgement.msg"
+  "msg/Judgment.msg"
+  "msg/Choice.msg"
+  "msg/WeakOrdering.msg"
   # DEPENDENCIES geometry_msgs
 )
 

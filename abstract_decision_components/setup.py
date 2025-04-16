@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'accept_service = abstract_decision_components.accept:main',
+            'take_service = abstract_decision_components.take:main',
         ],
     },
 )
