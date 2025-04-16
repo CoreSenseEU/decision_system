@@ -22,7 +22,7 @@ from decision_interfaces.srv import AcceptChoice, AcceptRelational, \
     AcceptSatisficing, AcceptDominating
 
 
-class Accept(Node):
+class AcceptNode(Node):
     def __init__(self):
         super().__init__('accept_server')
         self.get_logger().info('Starting ACCEPT servers')
@@ -30,31 +30,31 @@ class Accept(Node):
         # All services can be called in parallel
         cb_group = ReentrantCallbackGroup()
 
-        self.srv = self.create_service(
+        self.srv_always = self.create_service(
             AcceptChoice,
-            'always_accept',
+            'accept_always',
             self.always_accept_cb,
             callback_group=cb_group)
 
-        self.srv = self.create_service(
+        self.srv_n_relational = self.create_service(
             AcceptRelational,
             'accept_n_relational',
             self.accept_n_relational_cb,
             callback_group=cb_group)
 
-        self.srv = self.create_service(
+        self.srv_one_satisficing = self.create_service(
             AcceptSatisficing,
             'accept_one_satisficing',
             self.accept_one_satisficing_cb,
             callback_group=cb_group)
 
-        self.srv = self.create_service(
+        self.srv_all_satisficing = self.create_service(
             AcceptSatisficing,
             'accept_all_satisficing',
             self.accept_all_satisficing_cb,
             callback_group=cb_group)
 
-        self.srv = self.create_service(
+        self.srv_dominating = self.create_service(
             AcceptDominating,
             'accept_dominating',
             self.accept_dominating_cb,
@@ -64,7 +64,7 @@ class Accept(Node):
         """
         Always accepts the choice no matter what it is.
         """
-        self.get_logger().info(f'Accepting choice {request.choice} with policy: always_accept')
+        self.get_logger().info(f'Accepting choice {request.choice} with policy: accept_always')
         response.success = True
         return response
 
@@ -94,11 +94,12 @@ class Accept(Node):
                 self.get_logger().warn(f"Recieved invalid relational operator: '{request.op}'. Defaulting to '='.")
                 response.success = len(request.choice) == request.n
 
+        response.result = f'test: {len(request.choice)} {request.op} {request.n}?'
         if response.success:
             verb = 'Accepting'
         else:
             verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {request.choice} with policy: accept_n_relational, "{request.op} {request.n}"')
+        self.get_logger().info(f'{verb} choice {request.choice} with policy: accept_n_relational, "len(choice) {request.op} {request.n}"')
         return response
 
     def accept_one_satisficing_cb(self, request, response):
@@ -107,20 +108,24 @@ class Accept(Node):
         greater than or equal to the threshold values of each requested axis.
         """
         response.success = True
-        if len(request.choice) != 1:
-            response.success = False
-        else:
-            judgement = {feature.axis : feature.score for feature in request.judgements[0]}
-            for feature in request.features:
-                if judgement[feature.name] < feature.score:
+        if len(request.choice) == 1:
+            judgment = next(j for j in request.judgments if j.alternative.id == request.choice[0].id)
+            features_ = {f.axis : f.score for f in request.features}
+
+            for feature in judgment.features:
+                if feature.axis in features_ and feature.score < features_[feature.axis]:
+                    response.result = f'Feature(axis={feature.axis},score={feature.score}) does not meet threshold {features_[feature.axis]}.'
                     response.success = False
                     break
+        else:
+            response.result = f'len(choice)={len(request.choice)} must be 1'
+            response.success = False
 
         if response.success:
             verb = 'Accepting'
         else:
             verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {request.choice} with policy: accept_one_satisficing, "{request.features}"')
+        self.get_logger().info(f'{verb} choice {request.choice} with policy: accept_one_satisficing with thresholds {features_}')
         return response
 
     def accept_all_satisficing_cb(self, request, response):
@@ -128,10 +133,16 @@ class Accept(Node):
         Accepts a choice if the scores of all chosen alternatives are
         greater than or equal to the threshold values of each requested axis.
         """
-        chosen_alternatives = request.choice
-        for chosen in chosen_alternatives:
-            request.choice = [chosen]
-            response = self.accept_one_satisficing_cb(request, response)
+        response.success = True
+        features_ = {f.axis : f.score for f in request.features}
+        for chosen in request.choice:
+            judgment = next(j for j in request.judgments if j.alternative.id == chosen.id)
+
+            for feature in judgment.features:
+                if feature.axis in features_ and feature.score < features_[feature.axis]:
+                    response.result = f'{feature} of chosen {chosen} does not meet threshold {features_[feature.axis]}.'
+                    response.success = False
+                    break
             if not response.success:
                 break
 
@@ -148,20 +159,21 @@ class Accept(Node):
         greater than the best unchosen alternative for each requested axis.
         """
         best_scores_unchosen = { axis : float('-inf') for axis in request.axies }
-        best_scores_chosen = { axis : float('-inf') for axis in request.axies }
+        worst_scores_chosen = { axis : float('inf') for axis in request.axies }
 
-        for judgement in request.judgements:
-            for feature in judgement.features:
-                if feature.axis not in request.features:
+        for judgment in request.judgments:
+            for feature in judgment.features:
+                if feature.axis not in request.axies:
                     continue
-                if judgement.alternative in request.choice:
-                    best_scores_chosen[feature.axis] = max(best_scores_chosen[feature.axis], feature.score)
+                if judgment.alternative in request.choice:
+                    worst_scores_chosen[feature.axis] = min(worst_scores_chosen[feature.axis], feature.score)
                 else:
                     best_scores_unchosen[feature.axis] = max(best_scores_unchosen[feature.axis], feature.score)
 
         response.success = True
         for axis in request.axies:
-            if best_scores_chosen[axis] <= best_scores_unchosen[axis]:
+            if worst_scores_chosen[axis] <= best_scores_unchosen[axis]:
+                response.result = f'A chosen alternative has Feature({axis},{worst_scores_chosen[axis]}) but it is dominated by {best_scores_unchosen[axis]}.'
                 response.success = False
                 break
 
@@ -169,14 +181,14 @@ class Accept(Node):
             verb = 'Accepting'
         else:
             verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {request.choice} with policy: accept_dominating, "{request.features}"')
+        self.get_logger().info(f'{verb} choice {request.choice} with policy: accept_dominating, "{request.axies}"')
         return response
 
 
 def main(args=None):
     rclpy.init(args=args)
 
-    accept_server = Accept()
+    accept_server = AcceptNode()
     try:
         rclpy.spin(accept_server)
     except KeyboardInterrupt:
@@ -186,7 +198,6 @@ def main(args=None):
     finally:
         accept_server.destroy_node()
         rclpy.try_shutdown()
-
 
 
 if __name__ == "__main__":
