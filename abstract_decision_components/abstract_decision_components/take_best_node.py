@@ -11,18 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import sys
-from operator import itemgetter
-import random
 
 import rclpy
 from rclpy.node import Node
-from rclpy.callback_groups import ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup
-from rclpy.executors import MultiThreadedExecutor
 
-# from decision_interfaces.msg import Choice, WeakOrdering, Judgement
-from decision_interfaces.srv import TakeN, TakeRelative
+from decision_interfaces.msg import Choice, OrderedEvaluation
 import take
 
 
@@ -31,68 +25,68 @@ class TakeBestNode(Node):
         super().__init__('take_best_node')
         self.get_logger().info('Starting TAKE server with policy: take_best')
 
-        # All services can be called in parallel
-        cb_group = ReentrantCallbackGroup()
+        self.declare_parameter('n', 0)
+        self.declare_parameter('random_ties', False)
 
-        self.srv_take_n = self.create_service(
-            TakeN,
-            'take_n',
-            self.take_n_cb,
-            callback_group=cb_group)
+        self.sub_ = self.create_subscription(
+                OrderedEvaluation,
+                'ordered_evaluation',
+                self.choice_cb,
+                10)
+        self.pub_ = self.create_publisher(
+                Choice,
+                'choice',
+                10)
 
-        self.srv_take_n_random = self.create_service(
-            TakeN,
-            'take_n_random',
-            self.take_n_random_cb,
-            callback_group=cb_group)
+    def choice_cb(self, msg):
+        n = self.get_parameter('n').integer_value
+        ranked_alternatives = take.create_ordered_pairs(msg.ordering.alternatives, msg.ordering.ranks)
 
-        self.srv_take_best = self.create_service(
-            TakeRelative,
-            'take_best',
-            self.take_best_cb,
-            callback_group=cb_group)
+        choice = Choice(evaluation=msg.evaluation)
+        if n == 0:
+            choice.chosen = self.take_best(ranked_alternatives)
+        elif self.get_parameter('random_ties').bool_value:
+            choice.chosen = self.take_n_random(ranked_alternatives)
+        else:
+            choice.chosen = self.take_n(ranked_alternatives)
 
+        self.pub_.publish(choice)
 
-    def take_n_cb(self, request, response):
+    def take_n(self, ranked_alternatives, n):
         """
         Takes the best N alternatives.
         """
-        ranked_alternatives = take.create_ordered_pairs(request.ordering.alternatives, request.ordering.ranks)
-        response.choice = take.take_best(ranked_alternatives, n=request.n)
+        chosen = take.take_best(ranked_alternatives, n=n)
 
-        self.get_logger().info(f'{response.choice} taken with policy: take_n, n={request.n}')
-        return response
+        self.get_logger().info(f'{chosen} taken with policy: take_n, n={n}')
+        return chosen
 
-    def take_n_random_cb(self, request, response):
+    def take_n_random(self, ranked_alternatives, n):
         """
         Takes the best N alternatives, randomly selecting among tied classes.
         """
-        ranked_alternatives = take.create_ordered_pairs(request.ordering.alternatives, request.ordering.ranks)
-        response.choice = take.take_best(ranked_alternatives, n=request.n, random_ties=True)
+        chosen = take.take_best(ranked_alternatives, n=n, random_ties=True)
 
-        self.get_logger().info(f'{response.choice} taken with policy: take_n_random, n={request.n}')
-        return response
+        self.get_logger().info(f'{chosen} taken with policy: take_n_random, n={n}')
+        return chosen
 
-    def take_best_cb(self, request, response):
+    def take_best(self, ranked_alternatives):
         """
         Takes all the alternatives tied for best score.
         """
-        ranked_alternatives = take.create_ordered_pairs(request.ordering.alternatives, request.ordering.ranks)
-        response.choice = take.take_best(ranked_alternatives)
+        chosen = take.take_best(ranked_alternatives)
 
-        self.get_logger().info(f'{response.choice} taken with policy: take_best')
-        return response
+        self.get_logger().info(f'{chosen} taken with policy: take_best')
+        return chosen
 
 
 def main(args=None):
     rclpy.init(args=args)
 
     node = TakeBestNode()
-    executor = MultiThreadedExecutor()
-    executor.add_node(node)
 
     try:
-        executor.spin()
+        rclpy.spin(node)
     except KeyboardInterrupt:
         pass
     except rclpy.executors.ExternalShutdownException:

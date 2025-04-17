@@ -1,2 +1,2 @@
-Alternative[] chosen
+WeakOrdering ordering
 Judgment[] evaluation

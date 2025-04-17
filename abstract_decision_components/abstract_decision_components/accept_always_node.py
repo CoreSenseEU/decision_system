@@ -16,44 +16,41 @@ import sys
 
 import rclpy
 from rclpy.node import Node
-from rclpy.callback_groups import ReentrantCallbackGroup
-from rclpy.executors import MultiThreadedExecutor
 
-from decision_interfaces.srv import AcceptChoice
+from decision_interfaces.msg import Choice, Decision
 
 
 class AcceptAlwaysNode(Node):
+    """
+    Always accepts the choice no matter what it is.
+    """
     def __init__(self):
         super().__init__('accept_always_node')
         self.get_logger().info('Starting ACCEPT node with policy: accept_always')
 
-        # All services can be called in parallel
-        cb_group = ReentrantCallbackGroup()
+        self.sub_choice_ = self.create_subscription(
+                Choice,
+                'choice',
+                self.choice_cb,
+                10)
+        
+        self.pub_ = self.create_publisher(
+                Decision,
+                'decision',
+                10)
 
-        self.srv_always = self.create_service(
-            AcceptChoice,
-            'accept_always',
-            self.always_accept_cb,
-            callback_group=cb_group)
-
-    def always_accept_cb(self, request, response):
-        """
-        Always accepts the choice no matter what it is.
-        """
-        self.get_logger().info(f'Accepting choice {request.choice} with policy: accept_always')
-        response.success = True
-        return response
+    def choice_cb(self, msg):
+        self.get_logger().info(f'Accepting choice {msg.chosen} with policy: accept_always')
+        self.pub_.publish(Decision(choice=msg.chosen, success=True, reason='Always accepted'))
 
 
 def main(args=None):
     rclpy.init(args=args)
 
     node = AcceptAlwaysNode()
-    executor = MultiThreadedExecutor()
-    executor.add_node(node)
 
     try:
-        executor.spin()
+        rclpy.spin(node)
     except KeyboardInterrupt:
         pass
     except rclpy.executors.ExternalShutdownException:

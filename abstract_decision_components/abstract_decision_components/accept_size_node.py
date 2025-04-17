@@ -16,54 +16,58 @@ import sys
 
 import rclpy
 from rclpy.node import Node
-from rclpy.callback_groups import ReentrantCallbackGroup
-from rclpy.executors import MultiThreadedExecutor
 
-from decision_interfaces.srv import AcceptRelational
+from decision_interfaces.msg import Choice, Decision
 import accept
 
 
 class AcceptSizeNode(Node):
+    """
+    Accepts a choice based on the number of chosen alternatives.
+    """
     def __init__(self):
         super().__init__('accept_size_node')
         self.get_logger().info('Starting ACCEPT node with policy: accept_n_relational')
 
-        # All services can be called in parallel
-        cb_group = ReentrantCallbackGroup()
+        self.declare_parameter('n', 1)
+        self.declare_parameter('relation', '=')
 
-        self.srv_n_relational = self.create_service(
-            AcceptRelational,
-            'accept_n_relational',
-            self.accept_n_relational_cb,
-            callback_group=cb_group)
+        self.sub_ = self.create_subscription(
+                Choice,
+                'choice',
+                self.choice_cb,
+                10)
+        self.pub_ = self.create_publisher(
+                Decision,
+                'decision',
+                10)
 
-    def accept_n_relational_cb(self, request, response):
-        """
-        Accepts a choice based on the number of chosen alternatives.
-        """
+    def choice_cb(self, msg):
+        decision = Decision(choice=msg.choice)
+        n = self.get_parameter('n').integer_value
+        relation = self.get_parameter('relation').string_value
+
         try:
-            response.result, response.success = accept.compare_size(request.choice, request.n, relation=request.op)
+            decision.result, decision.success = accept.compare_size(msg.choice, n, relation=relation)
         except ValueError as e:
             self.get_logger().warn(e + " Defaulting to '='")
-            response.result, response.success = accept.compare_size(request.choice, request.n)
+            decision.result, decision.success = accept.compare_size(msg.choice, n)
 
-        if response.success:
+        if decision.success:
             verb = 'Accepting'
         else:
             verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {request.choice} with policy: accept_n_relational, "|choice| {request.op} {request.n}"')
-        return response
+        self.get_logger().info(f'{verb} choice {msg.choice} with policy: accept_n_relational, "|choice| {relation} {n}"')
+        self.pub_.publish(decision)
 
 
 def main(args=None):
     rclpy.init(args=args)
 
     node = AcceptSizeNode()
-    executor = MultiThreadedExecutor()
-    executor.add_node(node)
 
     try:
-        executor.spin()
+        rclpy.spin(node)
     except KeyboardInterrupt:
         pass
     except rclpy.executors.ExternalShutdownException:

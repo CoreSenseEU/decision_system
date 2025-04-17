@@ -1,9 +1,0 @@
-# Request
-Alternative[] choice
-Judgment[] judgments
-string[] axies
-
----
-# Response
-string reason
-bool success

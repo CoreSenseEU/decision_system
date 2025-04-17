@@ -5,17 +5,12 @@ find_package(rosidl_default_generators REQUIRED)
 # find_package(geometry_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "srv/AcceptChoice.srv"
-  "srv/AcceptRelational.srv"
-  "srv/AcceptSatisficing.srv"
-  "srv/AcceptDominating.srv"
-  "srv/TakeN.srv"
-  "srv/TakeRelative.srv"
-
   "msg/Alternative.msg"
+  "msg/Choice.msg"
+  "msg/Decision.msg"
   "msg/Feature.msg"
   "msg/Judgment.msg"
-  "msg/Choice.msg"
+  "msg/OrderedEvaluation.msg"
   "msg/WeakOrdering.msg"
   # DEPENDENCIES geometry_msgs
 )

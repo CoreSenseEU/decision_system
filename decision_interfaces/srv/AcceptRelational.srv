@@ -1,9 +1,0 @@
-# Request
-Alternative[] choice
-int8 n
-string op
-
----
-# Response
-string reason
-bool success

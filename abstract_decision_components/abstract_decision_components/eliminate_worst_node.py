@@ -13,16 +13,11 @@
 # limitations under the License.
 
 import sys
-from operator import itemgetter
-import random
 
 import rclpy
 from rclpy.node import Node
-from rclpy.callback_groups import ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup
-from rclpy.executors import MultiThreadedExecutor
 
-# from decision_interfaces.msg import Choice, WeakOrdering, Judgement
-from decision_interfaces.srv import TakeN, TakeRelative
+from decision_interfaces.msg import Choice, OrderedEvaluation
 import take
 
 
@@ -31,67 +26,68 @@ class EliminateWorstNode(Node):
         super().__init__('eliminate_worst_node')
         self.get_logger().info('Starting TAKE server with policy: eliminate_worst')
 
-        # All services can be called in parallel
-        cb_group = ReentrantCallbackGroup()
+        self.declare_parameter('n', 0)
+        self.declare_parameter('random_ties', False)
 
-        self.srv_eliminate_n = self.create_service(
-            TakeN,
-            'eliminate_n',
-            self.eliminate_n_cb,
-            callback_group=cb_group)
+        self.sub_ = self.create_subscription(
+                OrderedEvaluation,
+                'ordered_evaluation',
+                self.choice_cb,
+                10)
+        self.pub_ = self.create_publisher(
+                Choice,
+                'choice',
+                10)
 
-        self.srv_eliminate_n_random = self.create_service(
-            TakeN,
-            'eliminate_n_random',
-            self.eliminate_n_random_cb,
-            callback_group=cb_group)
+    def choice_cb(self, msg):
+        n = self.get_parameter('n').integer_value
+        ranked_alternatives = take.create_ordered_pairs(msg.ordering.alternatives, msg.ordering.ranks)
 
-        self.srv_eliminate_worst = self.create_service(
-            TakeRelative,
-            'eliminate_worst',
-            self.eliminate_worst_cb,
-            callback_group=cb_group)
+        choice = Choice(evaluation=msg.evaluation)
+        if n == 0:
+            choice.chosen = self.eliminate_worst(ranked_alternatives)
+        elif self.get_parameter('random_ties').bool_value:
+            choice.chosen = self.eliminate_n_random(ranked_alternatives)
+        else:
+            choice.chosen = self.eliminate_n(ranked_alternatives)
 
-    def emilinate_n_cb(self, request, response):
+        self.pub_.publish(choice)
+
+    def emilinate_n_cb(self, ranked_alternatives, n):
         """
         Eliminates the worst N alternatives.
         """
-        ranked_alternatives = take.create_ordered_pairs(request.ordering.alternatives, request.ordering.ranks)
-        response.choice = take.eliminate_worst(ranked_alternatives, n=request.n)
+        chosen = take.eliminate_worst(ranked_alternatives, n=n)
 
-        self.get_logger().info(f'{response.choice} taken with policy: eliminate_n, n={request.n}')
-        return response
+        self.get_logger().info(f'{chosen} taken with policy: eliminate_n, n={n}')
+        return chosen
 
-    def eliminate_n_random_cb(self, request, response):
+    def eliminate_n_random_cb(self, ranked_alternatives, n):
         """
         Eliminates the worst N alternatives, randomly selecting among tied classes.
         """
-        ranked_alternatives = take.create_ordered_pairs(request.ordering.alternatives, request.ordering.ranks)
-        response.choice = take.eliminate_worst(ranked_alternatives, n=request.n, random_ties=False)
+        chosen = take.eliminate_worst(ranked_alternatives, n=n, random_ties=False)
 
-        self.get_logger().info(f'{response.choice} taken with policy: eliminate_n_random, n={request.n}')
-        return response
+        self.get_logger().info(f'{chosen} taken with policy: eliminate_n_random, n={n}')
+        return chosen
 
-    def eliminate_worst_cb(self, request, response):
+    def eliminate_worst_cb(self, ranked_alternatives):
         """
         Eliminates all the alternatives tied for worst score.
         """
-        ranked_alternatives = take.create_ordered_pairs(request.ordering.alternatives, request.ordering.ranks)
-        response.choice = take.eliminate_worst(ranked_alternatives)
+        chosen = take.eliminate_worst(ranked_alternatives)
 
-        self.get_logger().info(f'{response.choice} taken with policy: eliminate_worst')
-        return response
+        self.get_logger().info(f'{chosen} taken with policy: eliminate_worst')
+        return chosen
 
 
 def main(args=None):
     rclpy.init(args=args)
 
     node = EliminateWorstNode()
-    executor = MultiThreadedExecutor()
-    executor.add_node(node)
 
     try:
-        executor.spin()
+        rclpy.spin(node)
     except KeyboardInterrupt:
         pass
     except rclpy.executors.ExternalShutdownException:

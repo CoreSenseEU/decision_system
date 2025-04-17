@@ -16,51 +16,52 @@ import sys
 
 import rclpy
 from rclpy.node import Node
-from rclpy.callback_groups import ReentrantCallbackGroup
-from rclpy.executors import MultiThreadedExecutor
 
-from decision_interfaces.srv import AcceptDominating
+from decision_interfaces.msg import Choice, Decision
 import accept
 
 
 class AcceptDominatingNode(Node):
+    """
+    Accepts a choice if the scores of all chosen alternatives are strictly
+    greater than the best unchosen alternative for each requested axis.
+    """
     def __init__(self):
         super().__init__('accept_dominating_node')
         self.get_logger().info('Starting ACCEPT node with policy: accept_dominating')
+        
+        self.declare_parameter('axies', [])
 
-        # All services can be called in parallel
-        cb_group = ReentrantCallbackGroup()
+        self.sub_ = self.create_subscription(
+                Choice,
+                'choice',
+                self.choice_cb,
+                10)
+        self.pub_ = self.create_publisher(
+                Decision,
+                'decision',
+                10)
 
-        self.srv_dominating = self.create_service(
-            AcceptDominating,
-            'accept_dominating',
-            self.accept_dominating_cb,
-            callback_group=cb_group)
+    def choice_cb(self, msg):
+        decision = Decision(choice=msg.choice)
+        axies = self.get_parameter('axies').get_parameter_value().string_array_value
+        decision.reason, decision.success = accept.satisficing(msg.choice, msg.evaluation, axies=axies)
 
-    def accept_dominating_cb(self, request, response):
-        """
-        Accepts a choice if the scores of all chosen alternatives are strictly
-        greater than the best unchosen alternative for each requested axis.
-        """
-        response.reason, response.success = accept.satisficing(request.choice, request.judgments, axies=request.axies)
-
-        if response.success:
+        if decision.success:
             verb = 'Accepting'
         else:
             verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {request.choice} with policy: accept_dominating, "{request.axies}"')
-        return response
+        self.get_logger().info(f'{verb} choice {decision.choice} with policy: accept_dominating, "{axies}"')
+        self.pub_.publish(decision)
  
 
 def main(args=None):
     rclpy.init(args=args)
 
     node = AcceptDominatingNode()
-    executor = MultiThreadedExecutor()
-    executor.add_node(node)
 
     try:
-        executor.spin()
+        rclpy.spin(node)
     except KeyboardInterrupt:
         pass
     except rclpy.executors.ExternalShutdownException:

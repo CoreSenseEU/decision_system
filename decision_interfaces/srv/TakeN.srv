@@ -1,7 +1,0 @@
-# Request
-WeakOrdering ordering
-uint8 n 1
-
----
-# Response
-Alternative[] choice
