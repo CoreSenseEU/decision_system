@@ -20,8 +20,12 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'accept_service = abstract_decision_components.accept:main',
-            'take_service = abstract_decision_components.take:main',
+            'accept_always = abstract_decision_components.accept_always_node:main',
+            'accept_size = abstract_decision_components.accept_size_node:main',
+            'accept_satisficing = abstract_decision_components.accept_satisficing_node:main',
+            'accept_domminating = abstract_decision_components.accept_dominating_node:main',
+            'take_best = abstract_decision_components.take_best:main',
+            'eliminate_worst = abstract_decision_components.eliminate_worst:main',
         ],
     },
 )

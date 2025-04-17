@@ -5,5 +5,5 @@ Feature[] features
 
 ---
 # Response
-string result
+string reason
 bool success

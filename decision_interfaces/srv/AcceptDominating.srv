@@ -5,5 +5,5 @@ string[] axies
 
 ---
 # Response
-string result
+string reason
 bool success

@@ -5,5 +5,5 @@ string op
 
 ---
 # Response
-string result
+string reason
 bool success

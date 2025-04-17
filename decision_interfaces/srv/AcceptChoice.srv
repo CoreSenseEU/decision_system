@@ -4,5 +4,5 @@ Judgment[] judgments
 
 ---
 # Response
-string result
+string reason
 bool success

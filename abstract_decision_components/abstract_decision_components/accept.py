@@ -12,193 +12,117 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 
-import rclpy
-from rclpy.node import Node
-from rclpy.callback_groups import ReentrantCallbackGroup
+def compare_size(choice, rhs, relation='='):
+    """Accepts a ``choice`` relating the number of chosen alternatives to the right
+    hand side, ``rhs``, with a binary ``relation``.
 
-from decision_interfaces.srv import AcceptChoice, AcceptRelational, \
-    AcceptSatisficing, AcceptDominating
+    :param choice: A set of chosen :class:`decision_interfaces.msg.Alternative`
+        alternatives.
+    :param rhs: A natural number to compare the size of ``choice`` to.
+    :param relation: A relational operator with the rhs of ``choice`` on the
+        right hand size and ``rhs`` on the left. Valid relation operators are:
+            `<`, `>`, `<=`, `>=`, `=`, and `!=`. Treats invalid operators as =.
+        Defaults to '='
+
+    :raises ValueError: If ``relation`` is invald.
+
+    :return: A :class:`boolean` indicating success or failure and a :class:`string`
+        message indicating the reason.
+    """
+    match relation:
+        case '>':
+            success = len(choice) > rhs
+        case '<':
+            success = len(choice) < rhs
+        case '>=':
+            success = len(choice) >= rhs
+        case '<=':
+            success = len(choice) <= rhs
+        case '=':
+            success = len(choice) == rhs
+        case '!=':
+            success = len(choice) != rhs
+        case _:
+            raise ValueError(f"Recieved invalid relational operator: '{relation}'.")
+
+    reason = f'test: {len(choice)} {relation} {rhs}?'
+    return success, reason
 
 
-class AcceptNode(Node):
-    def __init__(self):
-        super().__init__('accept_server')
-        self.get_logger().info('Starting ACCEPT servers')
+def satisficing(choice, judgments, features):
+    """Accepts a ``choice`` if the scores of all chosen alternatives are
+    greater than or equal to the threshold values of each requested axis.
 
-        # All services can be called in parallel
-        cb_group = ReentrantCallbackGroup()
+    :param choice: A set of chosen :class:`decision_interfaces.msg.Alternative`
+        alternatives.
+    :param judgments: A set of :class:`decision_interfaces.msg.Judgment`
+        judgments for each considered alternative.
+    :param features: A set of :class:`decision_interfaces.msg.Feature`
+        features to compare all chosen alternatives to.
 
-        self.srv_always = self.create_service(
-            AcceptChoice,
-            'accept_always',
-            self.always_accept_cb,
-            callback_group=cb_group)
+    :raises ValueError: If no judgment is found matching a chosen alternative.
 
-        self.srv_n_relational = self.create_service(
-            AcceptRelational,
-            'accept_n_relational',
-            self.accept_n_relational_cb,
-            callback_group=cb_group)
+    :return: A :class:`boolean` indicating success or failure and a :class:`string`
+        message indicating the reason.
+    """
+    success = True
+    reason = ''
+    features_ = {f.axis : f.score for f in features}
+    for chosen in choice:
+        try:
+            judgment = next(j for j in judgments if j.alternative.id == chosen.id)
+        except StopIteration:
+            raise ValueError(f'No judgment found for chosen alternative {chosen.id}')
 
-        self.srv_one_satisficing = self.create_service(
-            AcceptSatisficing,
-            'accept_one_satisficing',
-            self.accept_one_satisficing_cb,
-            callback_group=cb_group)
-
-        self.srv_all_satisficing = self.create_service(
-            AcceptSatisficing,
-            'accept_all_satisficing',
-            self.accept_all_satisficing_cb,
-            callback_group=cb_group)
-
-        self.srv_dominating = self.create_service(
-            AcceptDominating,
-            'accept_dominating',
-            self.accept_dominating_cb,
-            callback_group=cb_group)
-    
-    def always_accept_cb(self, request, response):
-        """
-        Always accepts the choice no matter what it is.
-        """
-        self.get_logger().info(f'Accepting choice {request.choice} with policy: accept_always')
-        response.success = True
-        return response
-
-    def accept_n_relational_cb(self, request, response):
-        """
-        Accepts a choice based on the number of chosen alternatives.
-
-        The number of chosen alternatives is compared to the threshold value (n)
-        using a relational operator (op) with n on the right hand side.
-        Valid operators are: <, >, <=, >=, =, and !=. Treats invalid operators
-        as =.
-        """
-        match request.op:
-            case '>':
-                response.success = len(request.choice) > request.n
-            case '<':
-                response.success = len(request.choice) < request.n
-            case '>=':
-                response.success = len(request.choice) >= request.n
-            case '<=':
-                response.success = len(request.choice) <= request.n
-            case '=':
-                response.success = len(request.choice) == request.n
-            case '!=':
-                response.success = len(request.choice) != request.n
-            case _:
-                self.get_logger().warn(f"Recieved invalid relational operator: '{request.op}'. Defaulting to '='.")
-                response.success = len(request.choice) == request.n
-
-        response.result = f'test: {len(request.choice)} {request.op} {request.n}?'
-        if response.success:
-            verb = 'Accepting'
-        else:
-            verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {request.choice} with policy: accept_n_relational, "len(choice) {request.op} {request.n}"')
-        return response
-
-    def accept_one_satisficing_cb(self, request, response):
-        """
-        Accepts a choice containing only one alternative which scores are
-        greater than or equal to the threshold values of each requested axis.
-        """
-        response.success = True
-        if len(request.choice) == 1:
-            judgment = next(j for j in request.judgments if j.alternative.id == request.choice[0].id)
-            features_ = {f.axis : f.score for f in request.features}
-
-            for feature in judgment.features:
-                if feature.axis in features_ and feature.score < features_[feature.axis]:
-                    response.result = f'Feature(axis={feature.axis},score={feature.score}) does not meet threshold {features_[feature.axis]}.'
-                    response.success = False
-                    break
-        else:
-            response.result = f'len(choice)={len(request.choice)} must be 1'
-            response.success = False
-
-        if response.success:
-            verb = 'Accepting'
-        else:
-            verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {request.choice} with policy: accept_one_satisficing with thresholds {features_}')
-        return response
-
-    def accept_all_satisficing_cb(self, request, response):
-        """
-        Accepts a choice if the scores of all chosen alternatives are
-        greater than or equal to the threshold values of each requested axis.
-        """
-        response.success = True
-        features_ = {f.axis : f.score for f in request.features}
-        for chosen in request.choice:
-            judgment = next(j for j in request.judgments if j.alternative.id == chosen.id)
-
-            for feature in judgment.features:
-                if feature.axis in features_ and feature.score < features_[feature.axis]:
-                    response.result = f'{feature} of chosen {chosen} does not meet threshold {features_[feature.axis]}.'
-                    response.success = False
-                    break
-            if not response.success:
+        for feature in judgment.features:
+            if feature.axis in features_ and feature.score < features_[feature.axis]:
+                reason = f'{feature} of chosen {chosen} does not meet threshold {features_[feature.axis]}.'
+                success = False
                 break
+        if not success:
+            break
 
-        if response.success:
-            verb = 'Accepting'
-        else:
-            verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {request.choice} with policy: accept_all_satisficing, "{request.features}"')
-        return response
-
-    def accept_dominating_cb(self, request, response):
-        """
-        Accepts a choice if the scores of all chosen alternatives are strictly
-        greater than the best unchosen alternative for each requested axis.
-        """
-        best_scores_unchosen = { axis : float('-inf') for axis in request.axies }
-        worst_scores_chosen = { axis : float('inf') for axis in request.axies }
-
-        for judgment in request.judgments:
-            for feature in judgment.features:
-                if feature.axis not in request.axies:
-                    continue
-                if judgment.alternative in request.choice:
-                    worst_scores_chosen[feature.axis] = min(worst_scores_chosen[feature.axis], feature.score)
-                else:
-                    best_scores_unchosen[feature.axis] = max(best_scores_unchosen[feature.axis], feature.score)
-
-        response.success = True
-        for axis in request.axies:
-            if worst_scores_chosen[axis] <= best_scores_unchosen[axis]:
-                response.result = f'A chosen alternative has Feature({axis},{worst_scores_chosen[axis]}) but it is dominated by {best_scores_unchosen[axis]}.'
-                response.success = False
-                break
-
-        if response.success:
-            verb = 'Accepting'
-        else:
-            verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {request.choice} with policy: accept_dominating, "{request.axies}"')
-        return response
+    return success, reason
 
 
-def main(args=None):
-    rclpy.init(args=args)
+def dominating(choice, judgments, axies=None):
+    """
+    Accepts a ``choice`` if the scores of all chosen alternatives are strictly
+    greater than the best unchosen alternatives for each axis in ``axies``.
 
-    accept_server = AcceptNode()
-    try:
-        rclpy.spin(accept_server)
-    except KeyboardInterrupt:
-        pass
-    except rclpy.executors.ExternalShutdownException:
-        sys.exit(1)
-    finally:
-        accept_server.destroy_node()
-        rclpy.try_shutdown()
+    :param choice: A set of chosen :class:`decision_interfaces.msg.Alternative`
+        alternatives.
+    :param judgments: A set of :class:`decision_interfaces.msg.Judgment`
+        judgments for each considered alternative.
+    :param axies: A set of :class:`string` axis names to check chosen alternatives
+        for domination. Defaults to all axies
 
+    :return: A :class:`boolean` indicating success or failure and a :class:`string`
+        message indicating the reason.
+    """
+    best_scores_unchosen = { axis : float('-inf') for axis in axies }
+    worst_scores_chosen = { axis : float('inf') for axis in axies }
 
-if __name__ == "__main__":
-    main()
+    if axies is None and len(judgments) > 0:
+        axies = {f.axis : f.score for f in judgments[0].features}
+
+    for judgment in judgments:
+        for feature in judgment.features:
+            if feature.axis not in axies:
+                continue
+            if judgment.alternative in choice:
+                worst_scores_chosen[feature.axis] = min(worst_scores_chosen[feature.axis], feature.score)
+            else:
+                best_scores_unchosen[feature.axis] = max(best_scores_unchosen[feature.axis], feature.score)
+
+    success = True
+    reason = ''
+    for axis in axies:
+        if worst_scores_chosen[axis] <= best_scores_unchosen[axis]:
+            reason = f'A chosen alternative has Feature({axis},{worst_scores_chosen[axis]}) but it is dominated by {best_scores_unchosen[axis]}.'
+            success = False
+            break
+
+    return success, reason
+
