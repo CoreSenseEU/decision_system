@@ -23,7 +23,7 @@ import take
 class TakeBestNode(Node):
     def __init__(self):
         super().__init__('take_best_node')
-        self.get_logger().info('Starting TAKE server with policy: take_best')
+        self.get_logger().info('Starting TAKE node with policy: take_best')
 
         self.declare_parameter('n', 0)
         self.declare_parameter('random_ties', False)

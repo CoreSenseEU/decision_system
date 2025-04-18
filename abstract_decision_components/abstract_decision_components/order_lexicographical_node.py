@@ -1,0 +1,80 @@
+# Copyright 2025 KAS-Lab
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import sys
+
+import rclpy
+from rclpy.node import Node
+
+import numpy as np
+
+from decision_interfaces.msg import Evaluation, OrderedEvaluation, Ordering
+import order
+from order import LexJudgment
+
+
+class OrderLexicographicalNode(Node):
+    def __init__(self):
+        super().__init__('order_lexicographical_node')
+        self.get_logger().info('Starting ORDER node with policy: order_lexicographical')
+
+        self.declare_parameter('axis_ordering', [])
+
+        self.sub_ = self.create_subscription(
+                Evaluation,
+                'evaluation',
+                self.evaluation_cb,
+                10)
+        self.pub_ = self.create_publisher(
+                OrderedEvaluation,
+                'ordered_evaluation',
+                10)
+
+    def evaluation_cb(self, msg):
+        axies = self.get_parameter('axis_ordering').string_array_value
+        if len(axies) == 0:
+            self.get_logger().warn(f'Parameter `axis_ordering` is unset. Assuming ordering in recieved evaluation: {msg.axies}')
+            axies = msg.axies
+        else:
+            assert(len(axies) == len(msg.axies) and sorted(axies) == sorted(msg.axies))
+        
+        # TODO: fail gracefully when this doesn't work?
+        feature_matrix = np.array(msg.feature_matrix).reshape((len(msg.alternatives),len(msg.axies)))
+
+        judgments = [LexJudgment(alternative, feature_matrix[i,:], axies) for i, alternative in enumerate(msg.alternatives)]
+        alternatives, ranks = order.lexicographical(judgments)
+        ordering = Ordering(alternatives=alternatives, ranks=ranks)
+        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg)
+
+        self.get_logger().info(f'{alternatives} ordered {ranks} with policy: order_lexicographical "{axies}"')
+        self.pub_.publish(ordered_eval)
+
+
+def main(args=None):
+    rclpy.init(args=args)
+
+    node = OrderLexicographicalNode()
+
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    except rclpy.executors.ExternalShutdownException:
+        sys.exit(1)
+    finally:
+        node.destroy_node()
+        rclpy.try_shutdown()
+
+
+if __name__ == "__main__":
+    main()

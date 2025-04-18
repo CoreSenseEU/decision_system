@@ -24,7 +24,7 @@ import take
 class EliminateWorstNode(Node):
     def __init__(self):
         super().__init__('eliminate_worst_node')
-        self.get_logger().info('Starting TAKE server with policy: eliminate_worst')
+        self.get_logger().info('Starting TAKE node with policy: eliminate_worst')
 
         self.declare_parameter('n', 0)
         self.declare_parameter('random_ties', False)

@@ -8,6 +8,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Alternative.msg"
   "msg/Choice.msg"
   "msg/Decision.msg"
+  "msg/Evaluation.msg"
   "msg/Feature.msg"
   "msg/Judgment.msg"
   "msg/OrderedEvaluation.msg"
