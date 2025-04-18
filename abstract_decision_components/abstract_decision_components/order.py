@@ -83,6 +83,37 @@ def lexicographical(judgments, axies):
     return [j.alternative for j in lex_judgments], [j.rank for j in lex_judgments]
 
 
+def majority_rule(judgments, strict=False):
+    """Rank each alternative by the number of dominating features it has.
+
+    :param judgments: A set of :class:`decision_interfaces.msg.Judgment`
+        judgments for each considered alternative.
+
+    :return: A list of integer ranks matching the indicies of the feature matrix.
+    """
+    feature_matrix = create_feature_matrix(judgments)
+
+    if strict:
+        strict_cols = np.sum(feature_matrix == np.max(feature_matrix, axis=0), axis=0) == 1
+        feature_matrix = feature_matrix[:,strict_cols]
+    totals = np.sum(feature_matrix == np.max(feature_matrix, axis=0), axis=1)
+
+    ranks = max(totals) - totals 
+    return [j.alternative for j in judgments], ranks
+
+
+def inverse_borda(judgments):
+    """The naiive ordering of alternatives based on a single utility score.
+
+    :param judgments: A set of :class:`decision_interfaces.msg.Judgment`
+        judgments for each considered alternative.
+
+    :return: A list of integer ranks matching the indicies of the feature matrix.
+    """
+    assert(len(judgments[0].features) == 1)
+    return lexicographical(judgments, [judgments[0].features[0].axis])
+
+
 def copeland_method(judgments):
     """Rank each alternative by difference in the number of others that are worse
     than it and better than in in each feature.
@@ -119,7 +150,8 @@ def create_feature_matrix(judgments):
     feature_matrix = np.zeros((n_alternatives, n_features))
     
     for i, judgment in enumerate(judgments):
-        feature_matrix[i,:] = [f.score for f in sorted(judgment.features, key=attrgetter('axis'))]
+        # Assume all judgments have the same features in the same order
+        feature_matrix[i,:] = [f.score for f in judgment.features]
 
     return feature_matrix
 
