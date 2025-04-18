@@ -18,7 +18,7 @@ from rclpy.node import Node
 
 import numpy as np
 
-from decision_interfaces.msg import Evaluation, OrderedEvaluation, Ordering
+from decision_interfaces.msg import Evaluation, OrderedEvaluation, WeakOrdering
 import order
 
 
@@ -38,12 +38,9 @@ class OrderParetoFrontsNode(Node):
                 10)
 
     def evaluation_cb(self, msg):
-        # TODO: fail gracefully when this doesn't work?
-        feature_matrix = np.array(msg.feature_matrix).reshape((len(msg.alternatives),len(msg.axies)))
-
-        ranks = order.pareto_fronts(feature_matrix)
-        ordering = Ordering(alternatives=msg.alternatives, ranks=ranks)
-        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg)
+        alternatives, ranks = order.pareto_fronts(msg.judgments)
+        ordering = WeakOrdering(alternatives=alternatives, ranks=ranks)
+        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg.judgments)
 
         self.get_logger().info(f'{msg.alternatives} ordered {ranks} with policy: order_pareto_fronts')
         self.pub_.publish(ordered_eval)

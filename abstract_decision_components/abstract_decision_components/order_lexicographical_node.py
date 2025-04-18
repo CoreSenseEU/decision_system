@@ -18,7 +18,7 @@ from rclpy.node import Node
 
 import numpy as np
 
-from decision_interfaces.msg import Evaluation, OrderedEvaluation, Ordering
+from decision_interfaces.msg import Evaluation, OrderedEvaluation, WeakOrdering
 import order
 from order import LexJudgment
 
@@ -48,12 +48,8 @@ class OrderLexicographicalNode(Node):
         else:
             assert(len(axies) == len(msg.axies) and sorted(axies) == sorted(msg.axies))
         
-        # TODO: fail gracefully when this doesn't work?
-        feature_matrix = np.array(msg.feature_matrix).reshape((len(msg.alternatives),len(msg.axies)))
-
-        judgments = [LexJudgment(alternative, feature_matrix[i,:], axies) for i, alternative in enumerate(msg.alternatives)]
-        alternatives, ranks = order.lexicographical(judgments)
-        ordering = Ordering(alternatives=alternatives, ranks=ranks)
+        alternatives, ranks = order.lexicographical(msg.judgments, axies)
+        ordering = WeakOrdering(alternatives=alternatives, ranks=ranks)
         ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg)
 
         self.get_logger().info(f'{alternatives} ordered {ranks} with policy: order_lexicographical "{axies}"')

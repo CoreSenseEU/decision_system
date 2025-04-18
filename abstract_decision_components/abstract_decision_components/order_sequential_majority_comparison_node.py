@@ -18,7 +18,7 @@ from rclpy.node import Node
 
 import numpy as np
 
-from decision_interfaces.msg import Evaluation, OrderedEvaluation, Ordering
+from decision_interfaces.msg import Evaluation, OrderedEvaluation, WeakOrdering
 import order
 
 
@@ -38,12 +38,9 @@ class OrderSequentialMajorityComparisonNode(Node):
                 10)
 
     def evaluation_cb(self, msg):
-        # TODO: fail gracefully when this doesn't work?
-        feature_matrix = np.array(msg.feature_matrix).reshape((len(msg.alternatives),len(msg.axies)))
-
-        ranks = order.sequential_majority_comparison(feature_matrix)
-        ordering = Ordering(alternatives=msg.alternatives, ranks=ranks)
-        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg)
+        alternatives, ranks = order.sequential_majority_comparison(msg.judgments)
+        ordering = WeakOrdering(alternatives=alternatives, ranks=ranks)
+        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg.judgments)
 
         self.get_logger().info(f'{msg.alternatives} ordered {ranks} with policy: order_sequential_majority_comparison')
         self.pub_.publish(ordered_eval)

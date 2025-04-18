@@ -12,35 +12,56 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import functools
 from operator import attrgetter
 
 import numpy as np
 
 
 class LexJudgment:
-    def __init__(self, alternative, scores, axies):
+    def __init__(self, judgment, axies):
         """
         :param judgment: A :class:`decision_interfaces.msg.Judgment`
         :param axies: A list of :class:`string` axis names in tie-breaking order
             with most significant first.
         """
-        self.features_ = scores
+        self.features_ = {f.axis : f.score for f in judgment.features}
         self.rank = 0
-        self.alternative = alternative
+        self.alternative = judgment.alternative
         self.axies_ = axies
 
     def __lt__(self, other):
         # Assume other is also a LexJudgment
-        for axis in range(len(self.feaures_)):
+        for axis in self.axies_:
             if self.features_[axis] < other.features_[axis]:
                 return True
             if self.features_[axis] > other.features_[axis]:
                 return False
-        return False # They are equal
+        return False # they are equal
 
 
-def lexicographical(judgments):
+# class LexJudgment:
+#     def __init__(self, alternative, scores, axies):
+#         """
+#         :param judgment: A :class:`decision_interfaces.msg.Judgment`
+#         :param axies: A list of :class:`string` axis names in tie-breaking order
+#             with most significant first.
+#         """
+#         self.features_ = scores
+#         self.rank = 0
+#         self.alternative = alternative
+#         self.axies_ = axies
+#
+#     def __lt__(self, other):
+#         # Assume other is also a LexJudgment
+#         for axis in range(len(self.feaures_)):
+#             if self.features_[axis] < other.features_[axis]:
+#                 return True
+#             if self.features_[axis] > other.features_[axis]:
+#                 return False
+#         return False # They are equal
+
+
+def lexicographical(judgments, axies):
     """Rank each alternative by their score along each axis, breaking ties by
     the order of the axies.
 
@@ -49,20 +70,20 @@ def lexicographical(judgments):
     :return: A pair of lists of alternatives and their corresponding integer ranks.
     """
     assert(len(judgments) > 0)
-    judgments.sort()
+    lex_judgments = sorted([LexJudgment(j, axies) for j in judgments])
 
-    judgments[0].rank = 0
+    lex_judgments[0].rank = 0
     i = 1
-    while i < len(judgments):
-        if judgments[i-1] < judgments[i]:
-            judgments[i].rank = judgments[i-1].rank + 1
+    while i < len(lex_judgments):
+        if lex_judgments[i-1] < lex_judgments[i]:
+            lex_judgments[i].rank = lex_judgments[i-1].rank + 1
         else:
-            judgments[i].rank = judgments[i-1].rank
+            lex_judgments[i].rank = lex_judgments[i-1].rank
 
-    return [j.alternative for j in judgments], [j.rank for j in judgments]
+    return [j.alternative for j in lex_judgments], [j.rank for j in lex_judgments]
 
 
-def copeland_method(feature_matrix):
+def copeland_method(judgments):
     """Rank each alternative by difference in the number of others that are worse
     than it and better than in in each feature.
 
@@ -71,11 +92,12 @@ def copeland_method(feature_matrix):
 
     :return: A list of integer ranks matching the indicies of the feature matrix.
     """
+    feature_matrix = create_feature_matrix(judgments)
     net_pref = net_preferences(feature_matrix)
     copeland = np.sum(np.sign(net_pref), axis=0)
 
     ranks = max(copeland) - copeland
-    return ranks.astype(int).tolist()
+    return [j.alternative for j in judgments], ranks.astype(int).tolist()
 
 
 def net_preferences(feature_matrix):
@@ -91,7 +113,6 @@ def net_preferences(feature_matrix):
 def create_feature_matrix(judgments):
     """Create a matrix of features from a set of judgments
     """
-
     # convert judgments into an A x F matix
     n_alternatives = len(judgments)
     n_features = len(judgments[0].features)
@@ -103,7 +124,7 @@ def create_feature_matrix(judgments):
     return feature_matrix
 
 
-def sequential_majority_comparison(feature_matrix):
+def sequential_majority_comparison(judgments):
     """Get single winning alternative by making pairwise comparisons of all alternatives.
     Note: this is essentially one iteration of swap sort
 
@@ -112,6 +133,7 @@ def sequential_majority_comparison(feature_matrix):
 
     :return: A pair of lists of alternatives and their corresponding integer ranks.
     """
+    feature_matrix = create_feature_matrix(judgments)
     net_pref = net_preferences(feature_matrix)
     n_alternatives = feature_matrix.shape[0]
     winner = 0
@@ -121,7 +143,7 @@ def sequential_majority_comparison(feature_matrix):
     ranks = [0] * len(n_alternatives)
     ranks[winner] = 1
 
-    return ranks
+    return [j.alternative for j in judgments], ranks
 
 
 def pareto_fronts(judgments):
