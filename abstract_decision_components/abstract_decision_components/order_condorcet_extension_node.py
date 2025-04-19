@@ -16,16 +16,18 @@ import sys
 import rclpy
 from rclpy.node import Node
 
+import numpy as np
+
 from decision_interfaces.msg import Evaluation, OrderedEvaluation, WeakOrdering
 import order
 
 
-class OrderMajorityNode(Node):
+class OrderCondorcetExtensionNode(Node):
     def __init__(self):
-        super().__init__('order_majority_node')
-        self.get_logger().info('Starting ORDER node with policy: order_majority_rule')
+        super().__init__('order_condorcet_extension_node')
+        self.get_logger().info('Starting ORDER node with policy: order_condorcet_extension')
 
-        self.declare_parameter('strict', False)
+        self.declare_parameter('policy', 'copeland')
 
         self.sub_ = self.create_subscription(
                 Evaluation,
@@ -38,19 +40,28 @@ class OrderMajorityNode(Node):
                 10)
 
     def evaluation_cb(self, msg):
-        strict = self.get_parameter('strict').bool_value
-        alternatives, ranks = order.majority_rule(msg.judgments, strict=strict)
-        ordering = WeakOrdering(alternatives=alternatives, ranks=ranks)
-        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg.judgments)
+        raise NotImplementedError("Not yet been tested")
+        policy = self.get_parameter('policy').string_value
+        match policy:
+            case 'copeland':
+                alternatives, ranks = order.copeland_method(msg.judgments)
+            case 'sequential_majority_comparison':
+                alternatives, ranks = order.sequential_majority_comparison(msg.judgments)
+            case _:
+                self.get_logger().warn("Policy not recognized. Defaulting to 'copeland'")
+                alternatives, ranks = order.copeland_method(msg.judgments)
 
-        self.get_logger().info(f'{msg.alternatives} ordered {ranks} with policy: order_majority_rule')
+        ordering = WeakOrdering(alternatives=alternatives, ranks=ranks)
+        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg.alternatives)
+
+        self.get_logger().info(f'{msg.alternatives} ordered {ranks} with policy: order_{policy}')
         self.pub_.publish(ordered_eval)
 
 
 def main(args=None):
     rclpy.init(args=args)
 
-    node = OrderMajorityNode()
+    node = OrderCondorcetExtensionNode()
 
     try:
         rclpy.spin(node)

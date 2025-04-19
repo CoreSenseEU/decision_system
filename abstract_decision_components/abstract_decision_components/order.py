@@ -101,17 +101,17 @@ def majority_rule(judgments, strict=False):
     ranks = max(totals) - totals 
     return [j.alternative for j in judgments], ranks
 
-
-def inverse_borda(judgments):
-    """The naiive ordering of alternatives based on a single utility score.
-
-    :param judgments: A set of :class:`decision_interfaces.msg.Judgment`
-        judgments for each considered alternative.
-
-    :return: A list of integer ranks matching the indicies of the feature matrix.
-    """
-    assert(len(judgments[0].features) == 1)
-    return lexicographical(judgments, [judgments[0].features[0].axis])
+#
+# def inverse_borda(judgments):
+#     """The naiive ordering of alternatives based on a single utility score.
+#
+#     :param judgments: A set of :class:`decision_interfaces.msg.Judgment`
+#         judgments for each considered alternative.
+#
+#     :return: A list of integer ranks matching the indicies of the feature matrix.
+#     """
+#     assert(len(judgments[0].features) == 1)
+#     return lexicographical(judgments, [judgments[0].features[0].axis])
 
 
 def copeland_method(judgments):
