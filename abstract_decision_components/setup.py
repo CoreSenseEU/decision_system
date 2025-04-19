@@ -24,11 +24,17 @@ setup(
             'accept_size = abstract_decision_components.accept_size_node:main',
             'accept_satisficing = abstract_decision_components.accept_satisficing_node:main',
             'accept_domminating = abstract_decision_components.accept_dominating_node:main',
+
             'take_best = abstract_decision_components.take_best_node:main',
             'eliminate_worst = abstract_decision_components.eliminate_worst_node:main',
+
             'order_condorcet_extension = abstract_decision_components.order_condorcet_extension_node:main',
             'order_lexicographical = abstract_decision_components.order_lexicographical_node:main',
             'order_dominating = abstract_decision_components.order_dominating_node:main',
+
+            'aggregate_preferences = abstract_decision_components.aggregate_preferences_node:main',
+            'aggregate_utility = abstract_decision_components.aggregate_utility_node:main',
+            'aggregate_multi_value_utility = abstract_decision_components.aggregate_multi_value_utility_node:main',
         ],
     },
 )

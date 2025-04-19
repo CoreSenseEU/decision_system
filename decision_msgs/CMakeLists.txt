@@ -10,6 +10,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/AssessmentArray.msg"
   "msg/Choice.msg"
   "msg/Cue.msg"
+  "msg/CueWeights.msg"
   "msg/Decision.msg"
   "msg/Evaluation.msg"
   "msg/Feature.msg"
