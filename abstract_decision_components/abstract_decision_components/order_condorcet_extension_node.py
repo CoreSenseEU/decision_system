@@ -16,9 +16,7 @@ import sys
 import rclpy
 from rclpy.node import Node
 
-import numpy as np
-
-from decision_interfaces.msg import Evaluation, OrderedEvaluation, WeakOrdering
+from decision_msgs.msg import Evaluation, OrderedEvaluation, WeakOrdering
 import order
 
 

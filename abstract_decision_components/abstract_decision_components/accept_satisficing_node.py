@@ -17,7 +17,7 @@ import sys
 import rclpy
 from rclpy.node import Node
 
-from decision_interfaces.msg import Choice, Decision, Feature
+from decision_msgs.msg import Choice, Decision, Feature
 import accept
 
 
