@@ -42,24 +42,24 @@ class OrderLexicographicalNode(Node):
 
     def evaluation_cb(self, msg):
         raise NotImplementedError("Not yet been tested")
-        axies = self.get_parameter('axis_ordering').string_array_value
+        axes = self.get_parameter('axis_ordering').string_array_value
         policy = 'lexicographical'
-        n_axies_recieved = len(msg.judgments[0].features)
+        n_axes_recieved = len(msg.judgments[0].features)
 
-        if n_axies_recieved == 1:
+        if n_axes_recieved == 1:
             policy = 'maximize'
-            axies = [msg.judgments[0].features[0].axis]
-        elif len(axies) == 0:
-            self.get_logger().warn(f'Parameter `axis_ordering` is unset. Assuming ordering in recieved evaluation: {msg.axies}')
-            axies = msg.axies
+            axes = [msg.judgments[0].features[0].axis]
+        elif len(axes) == 0:
+            self.get_logger().warn(f'Parameter `axis_ordering` is unset. Assuming ordering in recieved evaluation: {msg.axes}')
+            axes = msg.axes
         else:
-            assert(len(axies) == n_axies_recieved and sorted(axies) == sorted(msg.axies))
+            assert(len(axes) == n_axes_recieved and sorted(axes) == sorted(msg.axes))
         
-        alternatives, ranks = order.lexicographical(msg.judgments, axies)
+        alternatives, ranks = order.lexicographical(msg.judgments, axes)
         ordering = WeakOrdering(alternatives=alternatives, ranks=ranks)
         ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg)
 
-        self.get_logger().info(f'{alternatives} ordered {ranks} with policy: order_{policy} "{axies}"')
+        self.get_logger().info(f'{alternatives} ordered {ranks} with policy: order_{policy} "{axes}"')
         self.pub_.publish(ordered_eval)
 
 

@@ -18,20 +18,20 @@ import numpy as np
 
 
 class LexJudgment:
-    def __init__(self, judgment, axies):
+    def __init__(self, judgment, axes):
         """
         :param judgment: A :class:`decision_interfaces.msg.Judgment`
-        :param axies: A list of :class:`string` axis names in tie-breaking order
+        :param axes: A list of :class:`string` axis names in tie-breaking order
             with most significant first.
         """
         self.features_ = {f.axis : f.score for f in judgment.features}
         self.rank = 0
         self.alternative = judgment.alternative
-        self.axies_ = axies
+        self.axes_ = axes
 
     def __lt__(self, other):
         # Assume other is also a LexJudgment
-        for axis in self.axies_:
+        for axis in self.axes_:
             if self.features_[axis] < other.features_[axis]:
                 return True
             if self.features_[axis] > other.features_[axis]:
@@ -40,16 +40,16 @@ class LexJudgment:
 
 
 # class LexJudgment:
-#     def __init__(self, alternative, scores, axies):
+#     def __init__(self, alternative, scores, axes):
 #         """
 #         :param judgment: A :class:`decision_interfaces.msg.Judgment`
-#         :param axies: A list of :class:`string` axis names in tie-breaking order
+#         :param axes: A list of :class:`string` axis names in tie-breaking order
 #             with most significant first.
 #         """
 #         self.features_ = scores
 #         self.rank = 0
 #         self.alternative = alternative
-#         self.axies_ = axies
+#         self.axes_ = axes
 #
 #     def __lt__(self, other):
 #         # Assume other is also a LexJudgment
@@ -61,16 +61,16 @@ class LexJudgment:
 #         return False # They are equal
 
 
-def lexicographical(judgments, axies):
+def lexicographical(judgments, axes):
     """Rank each alternative by their score along each axis, breaking ties by
-    the order of the axies.
+    the order of the axes.
 
     :param judgments: A set of :class:`LexJudgment` judgments for each considered alternative.
 
     :return: A pair of lists of alternatives and their corresponding integer ranks.
     """
     assert(len(judgments) > 0)
-    lex_judgments = sorted([LexJudgment(j, axies) for j in judgments])
+    lex_judgments = sorted([LexJudgment(j, axes) for j in judgments])
 
     lex_judgments[0].rank = 0
     i = 1
