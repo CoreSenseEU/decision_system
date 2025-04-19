@@ -43,6 +43,7 @@ class AcceptSizeNode(Node):
                 10)
 
     def choice_cb(self, msg):
+        raise NotImplementedError("Not yet been tested")
         decision = Decision(choice=msg.choice)
         n = self.get_parameter('n').integer_value
         relation = self.get_parameter('relation').string_value

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 def compare_size(choice, rhs, relation='='):
     """Accepts a ``choice`` relating the number of chosen alternatives to the right
     hand side, ``rhs``, with a binary ``relation``.

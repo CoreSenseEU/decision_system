@@ -40,6 +40,7 @@ class EliminateWorstNode(Node):
                 10)
 
     def choice_cb(self, msg):
+        raise NotImplementedError("Not yet been tested")
         n = self.get_parameter('n').integer_value
         ranked_alternatives = take.create_ordered_pairs(msg.ordering.alternatives, msg.ordering.ranks)
 

@@ -43,6 +43,7 @@ class AcceptSatisficingNode(Node):
                 10)
 
     def choice_cb(self, msg):
+        raise NotImplementedError("Not yet been tested")
         decision = Decision(choice=msg.choice)
         axies = self.get_parameter('axies').get_parameter_value().string_array_value
         scores = self.get_parameter('thresholds').get_parameter_value().double_array_value
