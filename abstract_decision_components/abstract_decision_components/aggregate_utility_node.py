@@ -38,10 +38,10 @@ class AggregateUtilityNode(Node):
                 10)
         self.weights_ = {}
 
-        self.sub_choice_ = self.create_subscription(
+        self.sub_assesments_ = self.create_subscription(
                 AssessmentArray,
                 'assessments',
-                self.choice_cb,
+                self.assessments_cb,
                 10)
         
         self.pub_ = self.create_publisher(
@@ -49,7 +49,7 @@ class AggregateUtilityNode(Node):
                 'evaluation',
                 10)
 
-    def choice_cb(self, msg):
+    def assessments_cb(self, msg):
         raise NotImplementedError("Not yet been tested")
         policy = self.get_parameter('policy').string_value
 

@@ -32,14 +32,14 @@ class EliminateWorstNode(Node):
         self.sub_ = self.create_subscription(
                 OrderedEvaluation,
                 'ordered_evaluation',
-                self.choice_cb,
+                self.ordered_evaluation_cb,
                 10)
         self.pub_ = self.create_publisher(
                 Choice,
                 'choice',
                 10)
 
-    def choice_cb(self, msg):
+    def ordered_evaluation_cb(self, msg):
         raise NotImplementedError("Not yet been tested")
         n = self.get_parameter('n').integer_value
         ranked_alternatives = take.create_ordered_pairs(msg.ordering.alternatives, msg.ordering.ranks)
@@ -54,7 +54,7 @@ class EliminateWorstNode(Node):
 
         self.pub_.publish(choice)
 
-    def emilinate_n_cb(self, ranked_alternatives, n):
+    def emilinate_n(self, ranked_alternatives, n):
         """
         Eliminates the worst N alternatives.
         """
@@ -63,7 +63,7 @@ class EliminateWorstNode(Node):
         self.get_logger().info(f'{chosen} taken with policy: eliminate_n, n={n}')
         return chosen
 
-    def eliminate_n_random_cb(self, ranked_alternatives, n):
+    def eliminate_n_random(self, ranked_alternatives, n):
         """
         Eliminates the worst N alternatives, randomly selecting among tied classes.
         """
@@ -72,7 +72,7 @@ class EliminateWorstNode(Node):
         self.get_logger().info(f'{chosen} taken with policy: eliminate_n_random, n={n}')
         return chosen
 
-    def eliminate_worst_cb(self, ranked_alternatives):
+    def eliminate_worst(self, ranked_alternatives):
         """
         Eliminates all the alternatives tied for worst score.
         """

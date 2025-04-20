@@ -27,10 +27,10 @@ class AggregatePreferencesNode(Node):
         super().__init__('aggregate_preferences_node')
         self.get_logger().info('Starting AGGREGATE node with policy: aggregate_preferences')
 
-        self.sub_choice_ = self.create_subscription(
+        self.sub_ = self.create_subscription(
                 AssessmentArray,
                 'assessments',
-                self.choice_cb,
+                self.assessments_cb,
                 10)
         
         self.pub_ = self.create_publisher(
@@ -38,7 +38,7 @@ class AggregatePreferencesNode(Node):
                 'evaluation',
                 10)
 
-    def choice_cb(self, msg):
+    def assessments_cb(self, msg):
         raise NotImplementedError("Not yet been tested")
         # Assume all assessments use the same alternatives
         judgments_map = {p.alternative.id : Judgment(alternative=p.alternative) for p in msg.assessments[0].preferences}

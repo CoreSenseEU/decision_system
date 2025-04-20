@@ -31,14 +31,14 @@ class TakeBestNode(Node):
         self.sub_ = self.create_subscription(
                 OrderedEvaluation,
                 'ordered_evaluation',
-                self.choice_cb,
+                self.ordered_evaluation_cb,
                 10)
         self.pub_ = self.create_publisher(
                 Choice,
                 'choice',
                 10)
 
-    def choice_cb(self, msg):
+    def ordered_evaluation_cb(self, msg):
         raise NotImplementedError("Not yet been tested")
         n = self.get_parameter('n').integer_value
         ranked_alternatives = take.create_ordered_pairs(msg.ordering.alternatives, msg.ordering.ranks)

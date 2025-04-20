@@ -34,10 +34,10 @@ class AggregateMultiValueUtilityNode(Node):
         self.declare_parameter('boolean_operator', []) # An operator for boolean comparisons per assessment
         self.declare_parameter('policy', 'weighted_sum')
 
-        self.sub_choice_ = self.create_subscription(
+        self.sub_ = self.create_subscription(
                 AssessmentArray,
                 'assessments',
-                self.choice_cb,
+                self.assessments_cb,
                 10)
         
         self.pub_ = self.create_publisher(
@@ -45,7 +45,7 @@ class AggregateMultiValueUtilityNode(Node):
                 'evaluation',
                 10)
 
-    def choice_cb(self, msg):
+    def assessments_cb(self, msg):
         raise NotImplementedError("Not yet been tested")
         policy = self.get_parameter('policy').string_value
         match policy:
