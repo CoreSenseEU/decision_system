@@ -35,6 +35,8 @@ setup(
             'aggregate_preferences = abstract_decision_components.aggregate_preferences_node:main',
             'aggregate_utility = abstract_decision_components.aggregate_utility_node:main',
             'aggregate_multi_value_utility = abstract_decision_components.aggregate_multi_value_utility_node:main',
+
+            'assess = abstract_decision_components.assess_node:main',
         ],
     },
 )

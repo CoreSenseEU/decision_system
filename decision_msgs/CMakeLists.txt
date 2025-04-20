@@ -6,10 +6,12 @@ find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Alternative.msg"
+  "msg/AlternativeArray.msg"
   "msg/Assessment.msg"
   "msg/AssessmentArray.msg"
   "msg/Choice.msg"
   "msg/Cue.msg"
+  "msg/CueArray.msg"
   "msg/CueWeights.msg"
   "msg/Decision.msg"
   "msg/Evaluation.msg"
@@ -18,6 +20,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/OrderedEvaluation.msg"
   "msg/Preference.msg"
   "msg/WeakOrdering.msg"
+
+  "srv/AssessAlternatives.srv"
   # DEPENDENCIES geometry_msgs
 )
 
