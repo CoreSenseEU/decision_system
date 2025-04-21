@@ -28,7 +28,7 @@ class AcceptAlwaysNode(Node):
         super().__init__('accept_always_node')
         self.get_logger().info('Starting ACCEPT node with policy: accept_always')
 
-        self.sub_choice_ = self.create_subscription(
+        self.sub_ = self.create_subscription(
                 Choice,
                 'choice',
                 self.choice_cb,
