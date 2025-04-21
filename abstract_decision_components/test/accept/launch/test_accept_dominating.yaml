@@ -1,0 +1,12 @@
+launch:
+  - node:
+      pkg: abstract_decision_components
+      exec: accept_dominating
+      name: accept_dominating1
+      namespace: accept_dominating1
+      param:
+        - name: axes
+          value: 
+            - saturation
+            - lightness 
+            - hue

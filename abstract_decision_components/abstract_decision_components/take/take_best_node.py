@@ -15,6 +15,7 @@ import sys
 
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 
 from decision_msgs.msg import Choice, OrderedEvaluation
 from abstract_decision_components.take import take
@@ -25,8 +26,8 @@ class TakeBestNode(Node):
         super().__init__('take_best_node')
         self.get_logger().info('Starting TAKE node with policy: take_best')
 
-        self.declare_parameter('n', 0)
-        self.declare_parameter('random_ties', False)
+        self.declare_parameter('n', 0, Parameter.Type.INTEGER)
+        self.declare_parameter('random_ties', False, Parameter.Type.BOOL)
 
         self.sub_ = self.create_subscription(
                 OrderedEvaluation,

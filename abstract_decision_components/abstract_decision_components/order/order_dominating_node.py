@@ -15,6 +15,7 @@ import sys
 
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 
 from decision_msgs.msg import Evaluation, OrderedEvaluation, WeakOrdering
 from abstract_decision_components.order import order
@@ -25,8 +26,8 @@ class OrderDominatingNode(Node):
         super().__init__('order_dominating_node')
         self.get_logger().info('Starting ORDER node with policy: order_dominating')
 
-        self.declare_parameter('strict', False)
-        self.declare_parameter('policy', 'majority_rule')
+        self.declare_parameter('strict', False, Parameter.Type.BOOL)
+        self.declare_parameter('policy', 'majority_rule', Parameter.Type.STRING)
 
         self.sub_ = self.create_subscription(
                 Evaluation,

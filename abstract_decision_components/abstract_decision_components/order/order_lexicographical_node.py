@@ -15,6 +15,7 @@ import sys
 
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 
 from decision_msgs.msg import Evaluation, OrderedEvaluation, WeakOrdering
 from abstract_decision_components.order import order
@@ -25,7 +26,7 @@ class OrderLexicographicalNode(Node):
         super().__init__('order_lexicographical_node')
         self.get_logger().info('Starting ORDER node with policy: order_lexicographical')
 
-        self.declare_parameter('axis_ordering', [])
+        self.declare_parameter('axis_ordering', Parameter.Type.STRING_ARRAY)
 
         self.sub_ = self.create_subscription(
                 Evaluation,

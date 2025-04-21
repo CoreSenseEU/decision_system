@@ -16,6 +16,7 @@ import sys
 
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 
 from decision_msgs.msg import Choice, Decision
 from abstract_decision_components.accept import accept
@@ -30,7 +31,7 @@ class AcceptDominatingNode(Node):
         super().__init__('accept_dominating_node')
         self.get_logger().info('Starting ACCEPT node with policy: accept_dominating')
         
-        self.declare_parameter('axies', [])
+        self.declare_parameter('axes', Parameter.Type.STRING_ARRAY)
 
         self.sub_ = self.create_subscription(
                 Choice,
@@ -43,16 +44,15 @@ class AcceptDominatingNode(Node):
                 10)
 
     def choice_cb(self, msg):
-        raise NotImplementedError("Not yet been tested")
-        decision = Decision(choice=msg.choice)
-        axies = self.get_parameter('axies').value
-        decision.reason, decision.success = accept.satisficing(msg.choice, msg.evaluation, axies=axies)
+        decision = Decision(choice=msg.chosen)
+        axes = self.get_parameter('axes').value
+        decision.success, decision.reason = accept.dominating(msg.chosen, msg.evaluation, axes=axes)
 
         if decision.success:
             verb = 'Accepting'
         else:
             verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {decision.choice} with policy: accept_dominating, "{axies}"')
+        self.get_logger().info(f'{verb} choice {decision.choice} with policy: accept_dominating, "{axes}"')
         self.pub_.publish(decision)
  
 

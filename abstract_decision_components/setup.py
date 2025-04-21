@@ -23,7 +23,7 @@ setup(
             'accept_always = abstract_decision_components.accept.accept_always_node:main',
             'accept_size = abstract_decision_components.accept.accept_size_node:main',
             'accept_satisficing = abstract_decision_components.accept.accept_satisficing_node:main',
-            'accept_domminating = abstract_decision_components.accept.accept_dominating_node:main',
+            'accept_dominating = abstract_decision_components.accept.accept_dominating_node:main',
 
             'take_best = abstract_decision_components.take.take_best_node:main',
             'eliminate_worst = abstract_decision_components.take.eliminate_worst_node:main',

@@ -16,6 +16,7 @@ import sys
 
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 
 from decision_msgs.msg import Evaluation, AssessmentArray, CueWeights, Judgment, Feature
 from abstract_decision_components.aggregate import aggregate
@@ -28,8 +29,8 @@ class AggregateUtilityNode(Node):
         super().__init__('aggregate_utility_node')
         self.get_logger().info('Starting AGGREGATE node with policy: aggregate_utility')
 
-        self.declare_parameter('boolean_operator', 'and') # An operator for boolean comparisons
-        self.declare_parameter('policy', 'unweighted_sum')
+        self.declare_parameter('boolean_operator', 'and', Parameter.Type.STRING) # An operator for boolean comparisons
+        self.declare_parameter('policy', 'unweighted_sum', Parameter.Type.STRING)
 
         self.sub_weights_ = self.create_subscription(
                 CueWeights,

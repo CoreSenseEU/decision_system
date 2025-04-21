@@ -15,6 +15,7 @@ import sys
 
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 
 from decision_msgs.msg import Evaluation, OrderedEvaluation, WeakOrdering
 from abstract_decision_components.order import order
@@ -25,7 +26,7 @@ class OrderCondorcetExtensionNode(Node):
         super().__init__('order_condorcet_extension_node')
         self.get_logger().info('Starting ORDER node with policy: order_condorcet_extension')
 
-        self.declare_parameter('policy', 'copeland')
+        self.declare_parameter('policy', 'copeland', Parameter.Type.STRING)
 
         self.sub_ = self.create_subscription(
                 Evaluation,

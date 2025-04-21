@@ -16,6 +16,7 @@ import sys
 
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 
 from decision_msgs.msg import Evaluation, AssessmentArray
 from abstract_decision_components.aggregate import aggregate
@@ -28,12 +29,12 @@ class AggregateMultiValueUtilityNode(Node):
         super().__init__('aggregate_multi_value_utility_node')
         self.get_logger().info('Starting AGGREGATE node with policy: aggregate_multi_value_utility')
 
-        self.declare_parameter('features', []) # A list of features of final judgments
+        self.declare_parameter('features', Parameter.Type.STRING_ARRAY) # A list of features of final judgments
         # TODO: how to specify which assessments to use for which features??
         # - [I] Maybe use separate aggregators and some other node to combine them <-- probably the easiest option
 
-        self.declare_parameter('boolean_operator', []) # An operator for boolean comparisons per assessment
-        self.declare_parameter('policy', 'weighted_sum')
+        self.declare_parameter('boolean_operator', Parameter.Type.STRING_ARRAY) # An operator for boolean comparisons per assessment
+        self.declare_parameter('policy', 'weighted_sum', Parameter.Type.STRING)
 
         self.sub_ = self.create_subscription(
                 AssessmentArray,

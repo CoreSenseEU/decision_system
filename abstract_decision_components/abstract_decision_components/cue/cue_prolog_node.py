@@ -16,6 +16,7 @@ import sys
 
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 from rcl_interfaces.msg import SetParametersResult
 
 from decision_msgs.msg import Preference
@@ -33,8 +34,8 @@ class CuePrologNode(Node):
         super().__init__('cue_prolog_service')
         self.get_logger().info('Starting CUE node which queries a prolog knowledge base')
 
-        self.declare_parameter('query','') # prolog query referring to the alternative as A
-        self.declare_parameter('knowledge_base','') # knowledge base path
+        self.declare_parameter('query', Parameter.Type.STRING) # prolog query referring to the alternative as A
+        self.declare_parameter('knowledge_base', Parameter.Type.STRING) # knowledge base path
         self.add_on_set_parameters_callback(self._reload_kb)
 
         self.srv_ = self.create_service(

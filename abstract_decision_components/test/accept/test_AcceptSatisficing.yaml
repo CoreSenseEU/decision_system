@@ -1,4 +1,4 @@
-choice:
+chosen:
   - id: red
   - id: blue
   - id: green
@@ -55,20 +55,22 @@ judgments:
       - 
         axis: lightness
         score: 26
-  # - 
-  #   alternative:
-  #     id: "#c247eb"
-  #   features:
-  #     - 
-  #       axis: hue
-  #       score: 285
-  #     - 
-  #       axis: saturation
-  #       score: 80
-  #     - 
-  #       axis: lightness
-  #       score: 60
-axies:
-  - saturation
-  - lightness
+  - 
+    alternative:
+      id: "#c247eb"
+    features:
+      - 
+        axis: hue
+        score: 285
+      - 
+        axis: saturation
+        score: 80
+      - 
+        axis: lightness
+        score: 60
+features:
+  - axis: saturation
+    score: 100
+  - axis: lightness
+    score: 50
 

@@ -16,9 +16,10 @@ import sys
 
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 
 from decision_msgs.msg import Choice, Decision, Feature
-import accept
+from abstract_decision_components.accept import accept
 
 
 class AcceptSatisficingNode(Node):
@@ -29,8 +30,8 @@ class AcceptSatisficingNode(Node):
         super().__init__('accept_satisficing_node')
         self.get_logger().info('Starting ACCEPT node with policy: accept_satisficing')
 
-        self.declare_parameter('axies', [])
-        self.declare_parameter('thresholds', [])
+        self.declare_parameter('axes', Parameter.Type.STRING_ARRAY) 
+        self.declare_parameter('thresholds', Parameter.Type.DOUBLE_ARRAY)
 
         self.sub_ = self.create_subscription(
                 Choice,
@@ -44,17 +45,17 @@ class AcceptSatisficingNode(Node):
 
     def choice_cb(self, msg):
         raise NotImplementedError("Not yet been tested")
-        decision = Decision(choice=msg.choice)
-        axies = self.get_parameter('axies').value
+        decision = Decision(choice=msg.chosen)
+        axes = self.get_parameter('axes').value
         scores = self.get_parameter('thresholds').value
-        features = [Feature(axis=a, score=s) for a, s in zip(axies, scores)]
-        decision.reason, decision.success = accept.satisficing(msg.choice, msg.evaluation, features)
+        features = [Feature(axis=a, score=s) for a, s in zip(axes, scores)]
+        decision.success, decision.reason = accept.satisficing(msg.chosen, msg.evaluation, features)
 
         if decision.success:
             verb = 'Accepting'
         else:
             verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {msg.choice} with policy: accept_satisficing, "{zip(axies,scores)}"')
+        self.get_logger().info(f'{verb} choice {msg.chosen} with policy: accept_satisficing, "{zip(axes,scores)}"')
         self.pub_.publish(decision)
 
 

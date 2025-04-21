@@ -85,41 +85,48 @@ def satisficing(choice, judgments, features):
     return success, reason
 
 
-def dominating(choice, judgments, axies=None):
+def dominating(choice, judgments, axes=None):
     """
     Accepts a ``choice`` if the scores of all chosen alternatives are strictly
-    greater than the best unchosen alternatives for each axis in ``axies``.
+    greater than the best unchosen alternatives for each axis in ``axes``.
 
     :param choice: A set of chosen :class:`decision_interfaces.msg.Alternative`
         alternatives.
     :param judgments: A set of :class:`decision_interfaces.msg.Judgment`
         judgments for each considered alternative.
-    :param axies: A set of :class:`string` axis names to check chosen alternatives
-        for domination. Defaults to all axies
+    :param axes: A set of :class:`string` axis names to check chosen alternatives
+        for domination. Defaults to all axes
 
     :return: A :class:`boolean` indicating success or failure and a :class:`string`
         message indicating the reason.
     """
-    best_scores_unchosen = { axis : float('-inf') for axis in axies }
-    worst_scores_chosen = { axis : float('inf') for axis in axies }
+    best_scores_unchosen = { axis : float('-inf') for axis in axes }
+    worst_scores_chosen = { axis : float('inf') for axis in axes }
+    worst_chosen_by_axis = {}
+    best_unchosen_by_axis = {}
 
-    if axies is None and len(judgments) > 0:
-        axies = {f.axis : f.score for f in judgments[0].features}
+    if axes is None and len(judgments) > 0:
+        axes = {f.axis : f.score for f in judgments[0].features}
 
     for judgment in judgments:
         for feature in judgment.features:
-            if feature.axis not in axies:
+            if feature.axis not in axes:
                 continue
             if judgment.alternative in choice:
                 worst_scores_chosen[feature.axis] = min(worst_scores_chosen[feature.axis], feature.score)
+                worst_chosen_by_axis.update({feature.axis: judgment.alternative.id})
             else:
                 best_scores_unchosen[feature.axis] = max(best_scores_unchosen[feature.axis], feature.score)
+                best_unchosen_by_axis.update({feature.axis: judgment.alternative.id})
 
     success = True
     reason = ''
-    for axis in axies:
+    for axis in axes:
         if worst_scores_chosen[axis] <= best_scores_unchosen[axis]:
-            reason = f'A chosen alternative has Feature({axis},{worst_scores_chosen[axis]}) but it is dominated by {best_scores_unchosen[axis]}.'
+            reason = f'Chosen Alternative({worst_chosen_by_axis[axis]})' \
+                   + f' has Feature({axis},{worst_scores_chosen[axis]}) but it is dominated' \
+                   + f' by unchosen Alternative({best_unchosen_by_axis[axis]})' \
+                   + f' with Feature({axis},{best_scores_unchosen[axis]}).'
             success = False
             break
 
