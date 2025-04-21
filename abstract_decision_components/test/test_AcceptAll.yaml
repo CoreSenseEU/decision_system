@@ -3,8 +3,7 @@ chosen:
   - id: blue
   - id: green
 evaluation:
-  - 
-    alternative:
+  - alternative:
       id: red
     features:
       - 
@@ -16,8 +15,7 @@ evaluation:
       - 
         axis: lightness
         score: 50
-  - 
-    alternative:
+  - alternative:
       id: green
     features:
       - 
@@ -29,8 +27,7 @@ evaluation:
       - 
         axis: lightness
         score: 50
-  - 
-    alternative:
+  - alternative:
       id: blue
     features:
       - 
@@ -42,8 +39,7 @@ evaluation:
       - 
         axis: lightness
         score: 50
-  - 
-    alternative:
+  - alternative:
       id: "#808006"
     features:
       - 

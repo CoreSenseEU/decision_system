@@ -51,7 +51,7 @@ class AggregateUtilityNode(Node):
 
     def assessments_cb(self, msg):
         raise NotImplementedError("Not yet been tested")
-        policy = self.get_parameter('policy').string_value
+        policy = self.get_parameter('policy').value
 
         policy_str = policy
 
@@ -64,7 +64,7 @@ class AggregateUtilityNode(Node):
                 policy_str += f' weights={weights}'
                 utilities = self.weighted_sum(msg, weights)
             case 'boolean':
-                operator = self.get_parameter('boolean_operator').string_value
+                operator = self.get_parameter('boolean_operator').value
                 policy_str += f' operator={operator}'
                 utilities = self.boolean_combination(msg, operator)
             case 'dawes':

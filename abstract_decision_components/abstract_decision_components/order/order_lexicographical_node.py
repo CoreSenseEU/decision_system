@@ -39,7 +39,7 @@ class OrderLexicographicalNode(Node):
 
     def evaluation_cb(self, msg):
         raise NotImplementedError("Not yet been tested")
-        axes = self.get_parameter('axis_ordering').string_array_value
+        axes = self.get_parameter('axis_ordering').value
         policy = 'lexicographical'
         n_axes_recieved = len(msg.judgments[0].features)
 

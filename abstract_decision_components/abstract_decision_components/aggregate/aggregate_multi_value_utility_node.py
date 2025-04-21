@@ -47,7 +47,7 @@ class AggregateMultiValueUtilityNode(Node):
 
     def assessments_cb(self, msg):
         raise NotImplementedError("Not yet been tested")
-        policy = self.get_parameter('policy').string_value
+        policy = self.get_parameter('policy').value
         match policy:
             case 'weighted_sum':
                 ...

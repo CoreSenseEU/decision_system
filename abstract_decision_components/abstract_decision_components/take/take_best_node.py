@@ -40,13 +40,13 @@ class TakeBestNode(Node):
 
     def ordered_evaluation_cb(self, msg):
         raise NotImplementedError("Not yet been tested")
-        n = self.get_parameter('n').integer_value
+        n = self.get_parameter('n').value
         ranked_alternatives = take.create_ordered_pairs(msg.ordering.alternatives, msg.ordering.ranks)
 
         choice = Choice(evaluation=msg.evaluation)
         if n == 0:
             choice.chosen = self.take_best(ranked_alternatives)
-        elif self.get_parameter('random_ties').bool_value:
+        elif self.get_parameter('random_ties').value:
             choice.chosen = self.take_n_random(ranked_alternatives)
         else:
             choice.chosen = self.take_n(ranked_alternatives)

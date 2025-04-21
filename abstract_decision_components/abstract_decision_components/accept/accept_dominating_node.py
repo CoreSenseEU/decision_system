@@ -17,20 +17,20 @@ import sys
 import rclpy
 from rclpy.node import Node
 
-from decision_msgs.msg import Choice, Decision, Feature
-import accept
+from decision_msgs.msg import Choice, Decision
+from abstract_decision_components.accept import accept
 
 
-class AcceptSatisficingNode(Node):
-    """Accepts a choice if the scores of all chosen alternatives are
-    greater than or equal to the threshold values of each requested axis.
+class AcceptDominatingNode(Node):
+    """
+    Accepts a choice if the scores of all chosen alternatives are strictly
+    greater than the best unchosen alternative for each requested axis.
     """
     def __init__(self):
-        super().__init__('accept_satisficing_node')
-        self.get_logger().info('Starting ACCEPT node with policy: accept_satisficing')
-
+        super().__init__('accept_dominating_node')
+        self.get_logger().info('Starting ACCEPT node with policy: accept_dominating')
+        
         self.declare_parameter('axies', [])
-        self.declare_parameter('thresholds', [])
 
         self.sub_ = self.create_subscription(
                 Choice,
@@ -45,23 +45,21 @@ class AcceptSatisficingNode(Node):
     def choice_cb(self, msg):
         raise NotImplementedError("Not yet been tested")
         decision = Decision(choice=msg.choice)
-        axies = self.get_parameter('axies').get_parameter_value().string_array_value
-        scores = self.get_parameter('thresholds').get_parameter_value().double_array_value
-        features = [Feature(axis=a, score=s) for a, s in zip(axies, scores)]
-        decision.reason, decision.success = accept.satisficing(msg.choice, msg.evaluation, features)
+        axies = self.get_parameter('axies').value
+        decision.reason, decision.success = accept.satisficing(msg.choice, msg.evaluation, axies=axies)
 
         if decision.success:
             verb = 'Accepting'
         else:
             verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {msg.choice} with policy: accept_satisficing, "{zip(axies,scores)}"')
+        self.get_logger().info(f'{verb} choice {decision.choice} with policy: accept_dominating, "{axies}"')
         self.pub_.publish(decision)
-
+ 
 
 def main(args=None):
     rclpy.init(args=args)
 
-    node = AcceptSatisficingNode()
+    node = AcceptDominatingNode()
 
     try:
         rclpy.spin(node)

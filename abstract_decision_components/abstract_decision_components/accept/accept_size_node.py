@@ -18,19 +18,19 @@ import rclpy
 from rclpy.node import Node
 
 from decision_msgs.msg import Choice, Decision
-import accept
+from abstract_decision_components.accept import accept
 
 
-class AcceptDominatingNode(Node):
+class AcceptSizeNode(Node):
     """
-    Accepts a choice if the scores of all chosen alternatives are strictly
-    greater than the best unchosen alternative for each requested axis.
+    Accepts a choice based on the number of chosen alternatives.
     """
     def __init__(self):
-        super().__init__('accept_dominating_node')
-        self.get_logger().info('Starting ACCEPT node with policy: accept_dominating')
-        
-        self.declare_parameter('axies', [])
+        super().__init__('accept_size_node')
+        self.get_logger().info('Starting ACCEPT node with policy: accept_n_relational')
+
+        self.declare_parameter('n', 1)
+        self.declare_parameter('relation', '=')
 
         self.sub_ = self.create_subscription(
                 Choice,
@@ -45,21 +45,27 @@ class AcceptDominatingNode(Node):
     def choice_cb(self, msg):
         raise NotImplementedError("Not yet been tested")
         decision = Decision(choice=msg.choice)
-        axies = self.get_parameter('axies').get_parameter_value().string_array_value
-        decision.reason, decision.success = accept.satisficing(msg.choice, msg.evaluation, axies=axies)
+        n = self.get_parameter('n').value
+        relation = self.get_parameter('relation').value
+
+        try:
+            decision.result, decision.success = accept.compare_size(msg.choice, n, relation=relation)
+        except ValueError as e:
+            self.get_logger().warn(e + " Defaulting to '='")
+            decision.result, decision.success = accept.compare_size(msg.choice, n)
 
         if decision.success:
             verb = 'Accepting'
         else:
             verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {decision.choice} with policy: accept_dominating, "{axies}"')
+        self.get_logger().info(f'{verb} choice {msg.choice} with policy: accept_n_relational, "|choice| {relation} {n}"')
         self.pub_.publish(decision)
- 
+
 
 def main(args=None):
     rclpy.init(args=args)
 
-    node = AcceptDominatingNode()
+    node = AcceptSizeNode()
 
     try:
         rclpy.spin(node)

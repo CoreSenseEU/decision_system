@@ -20,13 +20,12 @@ from decision_msgs.msg import Evaluation, OrderedEvaluation, WeakOrdering
 import order
 
 
-class OrderDominatingNode(Node):
+class OrderCondorcetExtensionNode(Node):
     def __init__(self):
-        super().__init__('order_dominating_node')
-        self.get_logger().info('Starting ORDER node with policy: order_dominating')
+        super().__init__('order_condorcet_extension_node')
+        self.get_logger().info('Starting ORDER node with policy: order_condorcet_extension')
 
-        self.declare_parameter('strict', False)
-        self.declare_parameter('policy', 'majority_rule')
+        self.declare_parameter('policy', 'copeland')
 
         self.sub_ = self.create_subscription(
                 Evaluation,
@@ -40,19 +39,18 @@ class OrderDominatingNode(Node):
 
     def evaluation_cb(self, msg):
         raise NotImplementedError("Not yet been tested")
-        strict = self.get_parameter('strict').bool_value
-        policy = self.get_parameter('policy').string_value
+        policy = self.get_parameter('policy').value
         match policy:
-            case 'pareto_fronts':
-                alternatives, ranks = order.pareto_fronts(msg.judgments)
-            case 'majority_rule':
-                alternatives, ranks = order.majority_rule(msg.judgments, strict=strict)
+            case 'copeland':
+                alternatives, ranks = order.copeland_method(msg.judgments)
+            case 'sequential_majority_comparison':
+                alternatives, ranks = order.sequential_majority_comparison(msg.judgments)
             case _:
-                self.get_logger().warn("Policy not recognized. Defaulting to 'majority_rule'")
-                alternatives, ranks = order.majority_rule(msg.judgments, strict=strict)
+                self.get_logger().warn("Policy not recognized. Defaulting to 'copeland'")
+                alternatives, ranks = order.copeland_method(msg.judgments)
 
         ordering = WeakOrdering(alternatives=alternatives, ranks=ranks)
-        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg.judgments)
+        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg.alternatives)
 
         self.get_logger().info(f'{msg.alternatives} ordered {ranks} with policy: order_{policy}')
         self.pub_.publish(ordered_eval)
@@ -61,7 +59,7 @@ class OrderDominatingNode(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    node = OrderDominatingNode()
+    node = OrderCondorcetExtensionNode()
 
     try:
         rclpy.spin(node)

@@ -17,20 +17,20 @@ import sys
 import rclpy
 from rclpy.node import Node
 
-from decision_msgs.msg import Choice, Decision
+from decision_msgs.msg import Choice, Decision, Feature
 import accept
 
 
-class AcceptSizeNode(Node):
-    """
-    Accepts a choice based on the number of chosen alternatives.
+class AcceptSatisficingNode(Node):
+    """Accepts a choice if the scores of all chosen alternatives are
+    greater than or equal to the threshold values of each requested axis.
     """
     def __init__(self):
-        super().__init__('accept_size_node')
-        self.get_logger().info('Starting ACCEPT node with policy: accept_n_relational')
+        super().__init__('accept_satisficing_node')
+        self.get_logger().info('Starting ACCEPT node with policy: accept_satisficing')
 
-        self.declare_parameter('n', 1)
-        self.declare_parameter('relation', '=')
+        self.declare_parameter('axies', [])
+        self.declare_parameter('thresholds', [])
 
         self.sub_ = self.create_subscription(
                 Choice,
@@ -45,27 +45,23 @@ class AcceptSizeNode(Node):
     def choice_cb(self, msg):
         raise NotImplementedError("Not yet been tested")
         decision = Decision(choice=msg.choice)
-        n = self.get_parameter('n').integer_value
-        relation = self.get_parameter('relation').string_value
-
-        try:
-            decision.result, decision.success = accept.compare_size(msg.choice, n, relation=relation)
-        except ValueError as e:
-            self.get_logger().warn(e + " Defaulting to '='")
-            decision.result, decision.success = accept.compare_size(msg.choice, n)
+        axies = self.get_parameter('axies').value
+        scores = self.get_parameter('thresholds').value
+        features = [Feature(axis=a, score=s) for a, s in zip(axies, scores)]
+        decision.reason, decision.success = accept.satisficing(msg.choice, msg.evaluation, features)
 
         if decision.success:
             verb = 'Accepting'
         else:
             verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {msg.choice} with policy: accept_n_relational, "|choice| {relation} {n}"')
+        self.get_logger().info(f'{verb} choice {msg.choice} with policy: accept_satisficing, "{zip(axies,scores)}"')
         self.pub_.publish(decision)
 
 
 def main(args=None):
     rclpy.init(args=args)
 
-    node = AcceptSizeNode()
+    node = AcceptSatisficingNode()
 
     try:
         rclpy.spin(node)
