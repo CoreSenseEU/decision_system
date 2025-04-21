@@ -17,7 +17,7 @@ import rclpy
 from rclpy.node import Node
 
 from decision_msgs.msg import Evaluation, OrderedEvaluation, WeakOrdering
-import order
+from abstract_decision_components.order import order
 
 
 class OrderCondorcetExtensionNode(Node):

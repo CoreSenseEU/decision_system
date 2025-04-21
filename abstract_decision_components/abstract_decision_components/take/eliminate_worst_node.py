@@ -18,7 +18,7 @@ import rclpy
 from rclpy.node import Node
 
 from decision_msgs.msg import Choice, OrderedEvaluation
-import take
+from abstract_decision_components.take import take
 
 
 class EliminateWorstNode(Node):

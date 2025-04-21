@@ -18,6 +18,7 @@ import rclpy
 from rclpy.node import Node
 
 from decision_msgs.msg import Evaluation, AssessmentArray
+from abstract_decision_components.aggregate import aggregate
 
 
 class AggregateMultiValueUtilityNode(Node):

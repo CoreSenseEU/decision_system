@@ -18,7 +18,7 @@ import rclpy
 from rclpy.node import Node
 
 from decision_msgs.msg import Evaluation, AssessmentArray, CueWeights, Judgment, Feature
-import aggregate
+from abstract_decision_components.aggregate import aggregate
 
 
 class AggregateUtilityNode(Node):
