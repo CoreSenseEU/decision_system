@@ -67,7 +67,7 @@ class AssessNode(Node):
 
         # start each cue
         futures = []
-        for cue_id, client in self.cue_clients_.entries():
+        for cue_id, client in self.cue_clients_.items():
             request = AssessAlternatives.Request(alternatives=msg.alternatives)
             futures.append((self.cues_[cue_id], client, client.call_async(request)))
 
@@ -75,13 +75,13 @@ class AssessNode(Node):
         assessments = []
         then = self.get_clock().now().nanoseconds
         for cue, client, future in futures:
-            timeout_sec = self._srv_timeout_ - (self.get_clock().now().nanoseconds - then) / 10**9
+            timeout_sec = self.srv_timeout_ - (self.get_clock().now().nanoseconds - then) / 10**9
             if timeout_sec > 0:
                 self.executor.spin_until_future_complete(future, timeout_sec=timeout_sec)
 
             if future.done():
                 result = future.result()
-                assessments.append(Assessment(cue=cue, preference=result.preferences))
+                assessments.append(Assessment(cue=cue, preferences=result.preferences))
             else:
                 client.remove_pending_request(future)
                 self.get_logger().error(f'Cue {cue} failed or timed out')
@@ -94,6 +94,10 @@ class AssessNode(Node):
         self.pub_.publish(AssessmentArray(assessments=assessments))
 
     def update_cues_cb(self, msg):
+        if len(msg.cues) < 1:
+            self.get_logger().error('Recieved empty list of cues')
+            return
+
         for client in self.cue_clients_:
             self.destroy_client(client)
 
@@ -104,7 +108,8 @@ class AssessNode(Node):
                     AssessAlternatives,
                     cue.service,
                     callback_group=self.cue_cb_group_)
-            self.cue_clients_.update({cue.id, client})
+            self.cue_clients_.update({cue.id: client})
+        self.get_logger().info(f'Updating cues: {self.cues_}')
 
     # def assess(self, cue, alternatives):
     #     """Adapted from https://github.com/kas-lab/krr_mirte_skills/blob/main/krr_mirte_skills/krr_mirte_skills/get_object_info.py

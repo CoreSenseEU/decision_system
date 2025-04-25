@@ -37,6 +37,8 @@ setup(
             # 'aggregate_multi_value_utility = abstract_decision_components.aggregate.aggregate_multi_value_utility_node:main',
 
             'assess = abstract_decision_components.assess.assess_node:main',
+
+            'cue_prolog = abstract_decision_components.cue.cue_prolog_node:main',
         ],
     },
 )

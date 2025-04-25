@@ -1,6 +1,6 @@
 alternatives:
   - id: red
-  - id: blue
   - id: green
+  - id: blue
   - id: "#808006"
   - id: "#c247eb"
