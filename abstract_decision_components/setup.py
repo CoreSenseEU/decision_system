@@ -33,7 +33,7 @@ setup(
             'order_dominating = abstract_decision_components.order.order_dominating_node:main',
 
             'aggregate_preferences = abstract_decision_components.aggregate.aggregate_preferences_node:main',
-            'aggregate_utility = abstract_decision_components.aggregte.aggregate_utility_node:main',
+            'aggregate_utility = abstract_decision_components.aggregate.aggregate_utility_node:main',
             # 'aggregate_multi_value_utility = abstract_decision_components.aggregate.aggregate_multi_value_utility_node:main',
 
             'assess = abstract_decision_components.assess.assess_node:main',

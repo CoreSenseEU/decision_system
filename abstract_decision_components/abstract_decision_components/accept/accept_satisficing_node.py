@@ -17,6 +17,7 @@ import sys
 import rclpy
 from rclpy.node import Node
 from rclpy.parameter import Parameter
+from rclpy.exceptions import ParameterException
 
 from decision_msgs.msg import Choice, Decision, Feature
 from abstract_decision_components.accept import accept
@@ -25,6 +26,11 @@ from abstract_decision_components.accept import accept
 class AcceptSatisficingNode(Node):
     """Accepts a choice if the scores of all chosen alternatives are
     greater than or equal to the threshold values of each requested axis.
+
+    :param axes: A list of strings of axes to check if satisficing. Must be the
+        same length as ``thresholds``.
+    :param thresholds: A list of doubles of thresholds for each axis. Must be
+        the same length as ``axes``.
     """
     def __init__(self):
         super().__init__('accept_satisficing_node')
@@ -44,19 +50,29 @@ class AcceptSatisficingNode(Node):
                 10)
 
     def choice_cb(self, msg):
-        raise NotImplementedError("Not yet been tested")
         decision = Decision(choice=msg.chosen)
         axes = self.get_parameter('axes').value
-        scores = self.get_parameter('thresholds').value
-        features = [Feature(axis=a, score=s) for a, s in zip(axes, scores)]
-        decision.success, decision.reason = accept.satisficing(msg.chosen, msg.evaluation, features)
+        thresholds = self.get_parameter('thresholds').value
+        self._check_params(axes, thresholds)
+
+        features = list(zip(axes, thresholds))
+        try:
+            decision.success, decision.reason = accept.satisficing(msg.chosen, msg.evaluation, features)
+        except ValueError as e:
+            self.get_logger().error(str(e))
+            return
 
         if decision.success:
             verb = 'Accepting'
         else:
             verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {msg.chosen} with policy: accept_satisficing, "{zip(axes,scores)}"')
+        self.get_logger().info(f'{verb} choice {msg.chosen} with policy:' \
+                             + f' accept_satisficing, "{features}"')
         self.pub_.publish(decision)
+
+    def _check_params(self, axes, thresholds):
+        if len(axes) != len(thresholds):
+            raise ParameterException('Parameters have unequal lengths', ['axes', 'thresholds'])
 
 
 def main(args=None):

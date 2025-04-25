@@ -24,23 +24,52 @@ def create_ordered_pairs(alternatives, ranks):
     :param ranks: A list of positive integer ranks, corresponding to each
         alternative.
 
+    :raises ValueError: If the list of ``alternatives`` is empty or ``ranks`` and
+        ``alternatives`` have unequal lengths.
+
     :return: A list of a list of pairs of ``alternatives`` and their ``ranks``
         ordered by rank.
     """
+    n_alternatives = len(alternatives)
+    n_ranks = len(ranks)
+
+    if n_alternatives < 1:
+        raise ValueError('Recieved empty list of alternatives')
+    if n_alternatives != n_ranks:
+        raise ValueError(f"Ordering contains lists of unequal lengths: alternatives={n_alternatives} ranks={n_ranks}")
+
     return sorted(zip(alternatives, ranks), key = itemgetter(1))
 
 
 def _choose_with_ties(ranked_alternatives, start):
+    i = _march_backward(ranked_alternatives, start)
+    j = _march_forward(ranked_alternatives, start)
+
+    choice = []
+    if i > 0:
+        best, _ = zip(*ranked_alternatives[:i])
+        choice += best
+    if j - i > 0:
+        ties, _ = zip(*random.sample(ranked_alternatives[i:j], k=start-i+1))
+        choice += ties
+
+    return choice
+
+
+def _march_forward(ranked_alternatives, start):
     i = start
-    j = start + 1
+    tied_rank = ranked_alternatives[start][1]
+    while i < len(ranked_alternatives) and ranked_alternatives[i][1] == tied_rank:
+        i += 1
+    return i
+
+
+def _march_backward(ranked_alternatives, start):
+    i = start
     tied_rank = ranked_alternatives[start][1]
     while i > 0 and ranked_alternatives[i-1][1] == tied_rank:
         i -= 1
-    while j < len(ranked_alternatives) and ranked_alternatives[j-1][1] == tied_rank:
-        j += 1
-
-    choice = zip(*ranked_alternatives[:i]) + zip(*random.choices(ranked_alternatives[i:j], k=start-i+1))
-    return choice
+    return i
 
 
 def take_best(ranked_alternatives, n=None, random_ties=False):
@@ -59,13 +88,15 @@ def take_best(ranked_alternatives, n=None, random_ties=False):
 
     """
     if n is None:
-        return _choose_with_ties(ranked_alternatives, 0)
-    if random_ties:
+        chosen, _ = zip(*ranked_alternatives[:_march_forward(ranked_alternatives, 0)])
+    elif random_ties:
         return _choose_with_ties(ranked_alternatives, n - 1)
-    return zip(*ranked_alternatives[:n])
+    else:
+        chosen, _ = zip(*ranked_alternatives[:n])
+    return chosen
 
 
-def eliminate_worst(ranked_alternatives, n, random_ties=False):
+def eliminate_worst(ranked_alternatives, n=None, random_ties=False):
     """Eliminates the worst alternatives.
 
     :param ranked_alternatives: A list of pairs of :class:`decision_interfaces.msg.Alternative`
@@ -81,7 +112,9 @@ def eliminate_worst(ranked_alternatives, n, random_ties=False):
 
     """
     if n is None: # Eliminate all tied for worst score
-        return _choose_with_ties(ranked_alternatives, len(ranked_alternatives) - 1)
-    if random_ties:
-        return _choose_with_ties(ranked_alternatives, len(ranked_alternatives) - n)
-    return zip(*ranked_alternatives[:-n])
+        chosen, _ = zip(*ranked_alternatives[:_march_backward(ranked_alternatives, len(ranked_alternatives) - 1)])
+    elif random_ties:
+        return _choose_with_ties(ranked_alternatives, len(ranked_alternatives) - n - 1)
+    else:
+        chosen, _ = zip(*ranked_alternatives[:-n])
+    return chosen

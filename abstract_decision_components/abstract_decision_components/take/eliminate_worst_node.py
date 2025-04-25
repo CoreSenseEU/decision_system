@@ -16,7 +16,6 @@ import sys
 
 import rclpy
 from rclpy.node import Node
-from rclpy.parameter import Parameter
 
 from decision_msgs.msg import Choice, OrderedEvaluation
 from abstract_decision_components.take import take
@@ -27,8 +26,8 @@ class EliminateWorstNode(Node):
         super().__init__('eliminate_worst_node')
         self.get_logger().info('Starting TAKE node with policy: eliminate_worst')
 
-        self.declare_parameter('n', 0, Parameter.Type.INTEGER)
-        self.declare_parameter('random_ties', False, Parameter.Type.BOOL)
+        self.declare_parameter('n', 0)
+        self.declare_parameter('random_ties', False)
 
         self.sub_ = self.create_subscription(
                 OrderedEvaluation,
@@ -41,21 +40,24 @@ class EliminateWorstNode(Node):
                 10)
 
     def ordered_evaluation_cb(self, msg):
-        raise NotImplementedError("Not yet been tested")
         n = self.get_parameter('n').value
-        ranked_alternatives = take.create_ordered_pairs(msg.ordering.alternatives, msg.ordering.ranks)
+        try:
+            ranked_alternatives = take.create_ordered_pairs(msg.ordering.alternatives, msg.ordering.ranks)
+        except ValueError as e:
+            self.get_logger().error(str(e))
+            return
 
         choice = Choice(evaluation=msg.evaluation)
         if n == 0:
             choice.chosen = self.eliminate_worst(ranked_alternatives)
         elif self.get_parameter('random_ties').value:
-            choice.chosen = self.eliminate_n_random(ranked_alternatives)
+            choice.chosen = self.eliminate_n_random(ranked_alternatives, n)
         else:
-            choice.chosen = self.eliminate_n(ranked_alternatives)
+            choice.chosen = self.eliminate_n(ranked_alternatives, n)
 
         self.pub_.publish(choice)
 
-    def emilinate_n(self, ranked_alternatives, n):
+    def eliminate_n(self, ranked_alternatives, n):
         """
         Eliminates the worst N alternatives.
         """
@@ -68,7 +70,7 @@ class EliminateWorstNode(Node):
         """
         Eliminates the worst N alternatives, randomly selecting among tied classes.
         """
-        chosen = take.eliminate_worst(ranked_alternatives, n=n, random_ties=False)
+        chosen = take.eliminate_worst(ranked_alternatives, n=n, random_ties=True)
 
         self.get_logger().info(f'{chosen} taken with policy: eliminate_n_random, n={n}')
         return chosen

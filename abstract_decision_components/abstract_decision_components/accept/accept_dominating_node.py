@@ -26,6 +26,8 @@ class AcceptDominatingNode(Node):
     """
     Accepts a choice if the scores of all chosen alternatives are strictly
     greater than the best unchosen alternative for each requested axis.
+
+    :param axes: A list of strings of axes to check for dominance.
     """
     def __init__(self):
         super().__init__('accept_dominating_node')
@@ -46,7 +48,11 @@ class AcceptDominatingNode(Node):
     def choice_cb(self, msg):
         decision = Decision(choice=msg.chosen)
         axes = self.get_parameter('axes').value
-        decision.success, decision.reason = accept.dominating(msg.chosen, msg.evaluation, axes=axes)
+        try:
+            decision.success, decision.reason = accept.dominating(msg.chosen, msg.evaluation, axes=axes)
+        except ValueError as e:
+            self.get_logger().error(str(e))
+            return
 
         if decision.success:
             verb = 'Accepting'

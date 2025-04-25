@@ -15,23 +15,39 @@
 import numpy as np
 
 
-def weighted_sum(assessments, weights):
+def weighted_sum(assessments, weights, normalize=False):
     """Return a weighted sum of each assessment.
+
+    :param assessments: A list of :class:`decision_msg.msg.Assessment` assessments.
+    :param weights: A dicitonary with cue names as keys, and float weights as values.
+    :param normalize: If True, linearly transform each assessment over its to
+        the range `[0,1]`. Defaults to False
+
+    :return: A list of utility scores for each assessed alternative.
     """
     assessment_matrix = create_assessment_matrix(assessments) 
 
+    if normalize:
+        mins = np.min(assessment_matrix, axis=0)
+        maxs = np.max(assessment_matrix, axis=0)
+        assessment_matrix = (assessment_matrix - mins) / (maxs - mins)
+
     # Assemble weight vector in same order
-    weight_vector = np.zeros((len(assessments),1))
+    weight_vector = np.zeros(len(assessments))
     for i, assessment in enumerate(assessments):
         weight_vector[i] = weights[assessment.cue.id]
 
     # calculate utilities
     utilities = assessment_matrix @ weight_vector
-    return utilities.to_list()
+    return utilities.tolist()
 
 
 def create_assessment_matrix(assessments):
-    """Create a matrix of features from a set of judgments
+    """Create a matrix of features from a set of assessments
+
+    :param assessments: A list of :class:`decision_msg.msg.Assessment` assessments.
+
+    :return: A numpy array of assessment scores of shape (n_alternatives x n_cues).
     """
     # convert assessments into an A x C matix
     n_alternatives = len(assessments[0].preferences)
@@ -39,14 +55,22 @@ def create_assessment_matrix(assessments):
     assessment_matrix = np.zeros((n_alternatives, n_assessments))
     
     for i, assessment in enumerate(assessments):
-        # Assume all judgments have the same features in the same order
+        # Assume all assessments have the same alternatives in the same order
         assessment_matrix[:,i] = [p.score for p in assessment.preferences]
 
     return assessment_matrix
 
 
-def boolean_combination(assessments, operator):
+def boolean_combination(assessments, operator='and'):
     """Combine assessments via a boolean operation.
+
+    :param assessments: A list of :class:`decision_msg.msg.Assessment` assessments.
+    :param operator: Combine assessments via this logical operator. Valid
+        options are `'or'` or `'and'`, defaults to 'and'
+
+    :raises ValueError: If the operator is invalid.
+
+    :return: A list of utility scores for each assessed alternative.
     """
     assessment_matrix = create_assessment_matrix(assessments) 
 
@@ -58,14 +82,32 @@ def boolean_combination(assessments, operator):
         case _:
             raise ValueError(f"Recieved invalid logical operator: '{operator}'.")
 
-    return truthiness.astype(float).to_list()
+    return truthiness.astype(float).tolist()
+
+
+def tallying(assessments):
+    """Combine assessments by tallying positive scores. Assume 0 is negative!
+
+    :param assessments: A list of :class:`decision_msg.msg.Assessment` assessments.
+
+    :return: A list of utility scores for each assessed alternative.
+    """
+    assessment_matrix = create_assessment_matrix(assessments) 
+
+    tallies = np.sum(assessment_matrix > 0, axis=1)
+    return tallies.astype(float).tolist()
 
 
 def dawes_rule(assessments):
     """Combine assessments via Dawes' rule. Assume 0 is negative!
+
+    :param assessments: A list of :class:`decision_msg.msg.Assessment` assessments.
+
+    :return: A list of utility scores for each assessed alternative.
     """
     assessment_matrix = create_assessment_matrix(assessments) 
 
     dawes = np.sum(assessment_matrix > 0, axis=1) - np.sum(assessment_matrix <= 0, axis=1)
-    return dawes
+    return dawes.astype(float).tolist()
+
 

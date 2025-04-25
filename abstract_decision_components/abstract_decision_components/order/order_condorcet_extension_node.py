@@ -15,18 +15,31 @@ import sys
 
 import rclpy
 from rclpy.node import Node
-from rclpy.parameter import Parameter
 
 from decision_msgs.msg import Evaluation, OrderedEvaluation, WeakOrdering
 from abstract_decision_components.order import order
 
 
 class OrderCondorcetExtensionNode(Node):
+    """Orders alternatives based on how many others they dominate. Highest score is better.
+
+    :param policy: A policy to use to compare dominators.
+        - `'copeland'`: rank each alternative by difference in the number of
+          others that are worse than it and better than it in each feature.
+        - `'sequential_majority_comparison'`: get single winning alternative by
+          making pairwise comparisons of the net preferences of all
+          alternatives two at a time.
+        - `'majority_of_confirming_dimensions'`: get single winning alternative
+          by making pairwise comparisons of the confirming dimensions of
+          alternatives two at a time.
+        Defaults to 'copeland'
+
+    """
     def __init__(self):
         super().__init__('order_condorcet_extension_node')
         self.get_logger().info('Starting ORDER node with policy: order_condorcet_extension')
 
-        self.declare_parameter('policy', 'copeland', Parameter.Type.STRING)
+        self.declare_parameter('policy', 'copeland')
 
         self.sub_ = self.create_subscription(
                 Evaluation,
@@ -39,21 +52,29 @@ class OrderCondorcetExtensionNode(Node):
                 10)
 
     def evaluation_cb(self, msg):
-        raise NotImplementedError("Not yet been tested")
+        if len(msg.judgments) < 1:
+            self.get_logger().error('Recieved empty list of judgments')
+            return
+
         policy = self.get_parameter('policy').value
         match policy:
             case 'copeland':
                 alternatives, ranks = order.copeland_method(msg.judgments)
             case 'sequential_majority_comparison':
                 alternatives, ranks = order.sequential_majority_comparison(msg.judgments)
+            case 'majority_of_confirming_dimensions':
+                raise NotImplementedError("Not yet tested")
+                alternatives, ranks = order.sequential_majority_comparison(msg.judgments, confirming=True)
             case _:
-                self.get_logger().warn("Policy not recognized. Defaulting to 'copeland'")
-                alternatives, ranks = order.copeland_method(msg.judgments)
+                self.get_logger().error(
+                        f"Policy '{policy}' invalid. Valid options are " \
+                         "[copeland, sequential_majority_comparison, majority_of_confirming_dimensions]")
+                return
 
         ordering = WeakOrdering(alternatives=alternatives, ranks=ranks)
-        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg.alternatives)
+        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg.judgments)
 
-        self.get_logger().info(f'{msg.alternatives} ordered {ranks} with policy: order_{policy}')
+        self.get_logger().info(f'{alternatives} ordered {ranks} with policy: order_{policy}')
         self.pub_.publish(ordered_eval)
 
 

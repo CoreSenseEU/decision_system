@@ -15,19 +15,24 @@ import sys
 
 import rclpy
 from rclpy.node import Node
-from rclpy.parameter import Parameter
 
 from decision_msgs.msg import Choice, OrderedEvaluation
 from abstract_decision_components.take import take
 
 
 class TakeBestNode(Node):
+    """Take the best alternatives according to the policy.
+
+    :param n: An integer number of best alternatives to take. Takes all 
+        alternatives tied for best if this is less than `1`. Defaults to 0
+    :param random_ties: If `True`, break ties randomly, default to False
+    """
     def __init__(self):
         super().__init__('take_best_node')
         self.get_logger().info('Starting TAKE node with policy: take_best')
 
-        self.declare_parameter('n', 0, Parameter.Type.INTEGER)
-        self.declare_parameter('random_ties', False, Parameter.Type.BOOL)
+        self.declare_parameter('n', 0)
+        self.declare_parameter('random_ties', False)
 
         self.sub_ = self.create_subscription(
                 OrderedEvaluation,
@@ -40,17 +45,20 @@ class TakeBestNode(Node):
                 10)
 
     def ordered_evaluation_cb(self, msg):
-        raise NotImplementedError("Not yet been tested")
         n = self.get_parameter('n').value
-        ranked_alternatives = take.create_ordered_pairs(msg.ordering.alternatives, msg.ordering.ranks)
+        try:
+            ranked_alternatives = take.create_ordered_pairs(msg.ordering.alternatives, msg.ordering.ranks)
+        except ValueError as e:
+            self.get_logger().error(str(e))
+            return
 
         choice = Choice(evaluation=msg.evaluation)
-        if n == 0:
+        if n < 1:
             choice.chosen = self.take_best(ranked_alternatives)
         elif self.get_parameter('random_ties').value:
-            choice.chosen = self.take_n_random(ranked_alternatives)
+            choice.chosen = self.take_n_random(ranked_alternatives, n)
         else:
-            choice.chosen = self.take_n(ranked_alternatives)
+            choice.chosen = self.take_n(ranked_alternatives, n)
 
         self.pub_.publish(choice)
 

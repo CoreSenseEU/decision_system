@@ -1,9 +1,0 @@
-chosen:
-  - 
-    id: "red"
-  -
-    id: "green"
-  -
-    id: "blue"
-n: 2
-op: "="

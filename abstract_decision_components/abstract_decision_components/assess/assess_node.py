@@ -17,7 +17,7 @@ import sys
 import rclpy
 from rclpy.node import Node
 from rclpy.callback_groups import ReentrantCallbackGroup
-from rclpy.executors import MultiThreadedExecutor
+from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
 
 from decision_msgs.msg import AssessmentArray, AlternativeArray, CueArray, Assessment
 from decision_msgs.srv import AssessAlternatives
@@ -29,6 +29,11 @@ class AssessNode(Node):
     """
 
     def __init__(self, srv_timeout=5.0):
+        """
+        Assesses alternatives based on cues.
+
+        :param srv_timeout: The total time (in seconds) to wait to assess all cues.
+        """
         super().__init__('assess_node')
         self.get_logger().info('Starting ASSESS node')
 
@@ -55,6 +60,9 @@ class AssessNode(Node):
                 10)
 
     def alternatives_cb(self, msg):
+        if len(msg.alternatives) < 1:
+            self.get_logger().error('Recieved empty list of alternatives')
+            return
         self.get_logger().info(f'Assessing alternatives {msg.alternatives} with cues {self.cues_}')
 
         # start each cue
@@ -75,10 +83,13 @@ class AssessNode(Node):
                 result = future.result()
                 assessments.append(Assessment(cue=cue, preference=result.preferences))
             else:
-                # TODO: what should happen if this some cues fail?
-                #   Kirsch says that all cues must be processed.
                 client.remove_pending_request(future)
                 self.get_logger().error(f'Cue {cue} failed or timed out')
+
+        if len(assessments) != len(self.cues_):
+            #  Kirsch says that all cues must be processed.
+            self.get_logger().error("Failed to assess all cues")
+            return
 
         self.pub_.publish(AssessmentArray(assessments=assessments))
 
@@ -95,47 +106,49 @@ class AssessNode(Node):
                     callback_group=self.cue_cb_group_)
             self.cue_clients_.update({cue.id, client})
 
-    def assess(self, cue, alternatives):
-        """Adapted from https://github.com/kas-lab/krr_mirte_skills/blob/main/krr_mirte_skills/krr_mirte_skills/get_object_info.py
-        """
-        request = AssessAlternatives.Request()
-        request.alternatives = alternatives
-
-        # wait for service to be ready
-        client = self.cue_clients_[cue.id]
-        then = self.get_clock().now()
-        if client.wait_for_service(timeout_sec=self.srv_timeout_) is False:
-            self.get_logger().error(f'Service {cue.service} not available for cue {cue.id}')
-            return None
-
-        # wait for service to complete
-        future = client.call_async(request)
-        time_waited = self.get_clock().now() - then
-        self.executor.spin_until_future_complete(future, timeout_sec=(time_waited.nanoseconds / 10**9))
-        if future.done() is False:
-            self.get_logger().error(f'Service not completed or timed out for cue {cue.id}')
-            return None
-        result = future.result()
-
-        assessment = Assessment(cue=cue, preference=result.preferences)
-        return assessment
-
-    def start_assessment_async(self, client, alternatives):
-        """Start an asyncronous assessment.
-        """
-        request = AssessAlternatives.Request()
-        request.alternatives = alternatives
-
-        future = client.call_async(AssessAlternatives.Request(alternatives=alternatives))
-        return future
-
+    # def assess(self, cue, alternatives):
+    #     """Adapted from https://github.com/kas-lab/krr_mirte_skills/blob/main/krr_mirte_skills/krr_mirte_skills/get_object_info.py
+    #     """
+    #     request = AssessAlternatives.Request()
+    #     request.alternatives = alternatives
+    #
+    #     # wait for service to be ready
+    #     client = self.cue_clients_[cue.id]
+    #     then = self.get_clock().now()
+    #     if client.wait_for_service(timeout_sec=self.srv_timeout_) is False:
+    #         self.get_logger().error(f'Service {cue.service} not available for cue {cue.id}')
+    #         return None
+    #
+    #     # wait for service to complete
+    #     future = client.call_async(request)
+    #     time_waited = self.get_clock().now() - then
+    #     self.executor.spin_until_future_complete(future, timeout_sec=(time_waited.nanoseconds / 10**9))
+    #     if future.done() is False:
+    #         self.get_logger().error(f'Service not completed or timed out for cue {cue.id}')
+    #         return None
+    #     result = future.result()
+    #
+    #     assessment = Assessment(cue=cue, preference=result.preferences)
+    #     return assessment
+    #
+    # def start_assessment_async(self, client, alternatives):
+    #     """Start an asyncronous assessment.
+    #     """
+    #     request = AssessAlternatives.Request()
+    #     request.alternatives = alternatives
+    #
+    #     future = client.call_async(AssessAlternatives.Request(alternatives=alternatives))
+    #     return future
 
 
 def main(args=None):
     rclpy.init(args=args)
 
     node = AssessNode()
-    executor = MultiThreadedExecutor()
+    # TODO: figure out how to force the MTE to recieve the exception
+    # executor = MultiThreadedExecutor()
+
+    executor = SingleThreadedExecutor()
     executor.add_node(node)
 
     try:

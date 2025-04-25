@@ -16,22 +16,26 @@ import sys
 
 import rclpy
 from rclpy.node import Node
-from rclpy.parameter import Parameter
 
 from decision_msgs.msg import Choice, Decision
 from abstract_decision_components.accept import accept
 
 
 class AcceptSizeNode(Node):
-    """
-    Accepts a choice based on the number of chosen alternatives.
+    """Accepts a choice based on the number of chosen alternatives.
+
+    :param n: An integer size to compare to. Defaults to 1
+    :param relation: A relational operator with the rhs of ``choice`` on the
+        right hand size and ``rhs`` on the left. Valid relation operators are:
+            `<`, `>`, `<=`, `>=`, `=`, and `!=`.
+        Defaults to '='
     """
     def __init__(self):
         super().__init__('accept_size_node')
         self.get_logger().info('Starting ACCEPT node with policy: accept_n_relational')
 
-        self.declare_parameter('n', 1, Parameter.Type.INTEGER)
-        self.declare_parameter('relation', '=', Parameter.Type.STRING)
+        self.declare_parameter('n', 1)
+        self.declare_parameter('relation', '=')
 
         self.sub_ = self.create_subscription(
                 Choice,
@@ -44,16 +48,14 @@ class AcceptSizeNode(Node):
                 10)
 
     def choice_cb(self, msg):
-        raise NotImplementedError("Not yet been tested")
         decision = Decision(choice=msg.chosen)
         n = self.get_parameter('n').value
         relation = self.get_parameter('relation').value
-
         try:
             decision.success, decision.reason = accept.compare_size(msg.chosen, n, relation=relation)
         except ValueError as e:
-            self.get_logger().warn(e + " Defaulting to '='")
-            decision.success, decision.reason = accept.compare_size(msg.chosen, n)
+            self.get_logger().error(str(e))
+            return
 
         if decision.success:
             verb = 'Accepting'

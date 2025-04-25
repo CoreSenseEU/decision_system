@@ -1,0 +1,4 @@
+cues:
+  - id: R
+  - id: G
+weights: [ 0.3, 0.3 ]

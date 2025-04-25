@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from operator import attrgetter
-
 import numpy as np
 
 
@@ -23,20 +21,32 @@ class LexJudgment:
         :param judgment: A :class:`decision_interfaces.msg.Judgment`
         :param axes: A list of :class:`string` axis names in tie-breaking order
             with most significant first.
+
+        :raises ValueError: if all the set of axes in the judgment and the 
+            ordering set are not equivalent. 
         """
         self.features_ = {f.axis : f.score for f in judgment.features}
+        judgment_axes = sorted(self.features_.keys())
+        if judgment_axes != sorted(axes):
+            raise ValueError(f"Judgment axes {judgment_axes} of" \
+                           + f" alternative '{judgment.alternative.id}' are" \
+                           + f" incompatible with requested ordering {axes}")
         self.rank = 0
         self.alternative = judgment.alternative
         self.axes_ = axes
 
-    def __lt__(self, other):
+
+    def __lt__(self, other): # Higher score is lower, break ties by axies
         # Assume other is also a LexJudgment
         for axis in self.axes_:
-            if self.features_[axis] < other.features_[axis]:
-                return True
             if self.features_[axis] > other.features_[axis]:
+                return True
+            if self.features_[axis] < other.features_[axis]:
                 return False
         return False # they are equal
+
+    def __repr__(self):
+        return f'LexJudgment({self.alternative.id}, {str(self.features_)})'
 
 
 # class LexJudgment:
@@ -69,8 +79,8 @@ def lexicographical(judgments, axes):
 
     :return: A pair of lists of alternatives and their corresponding integer ranks.
     """
-    assert(len(judgments) > 0)
     lex_judgments = sorted([LexJudgment(j, axes) for j in judgments])
+    print(lex_judgments)
 
     lex_judgments[0].rank = 0
     i = 1
@@ -79,29 +89,11 @@ def lexicographical(judgments, axes):
             lex_judgments[i].rank = lex_judgments[i-1].rank + 1
         else:
             lex_judgments[i].rank = lex_judgments[i-1].rank
+        i += 1
 
     return [j.alternative for j in lex_judgments], [j.rank for j in lex_judgments]
 
 
-def majority_rule(judgments, strict=False):
-    """Rank each alternative by the number of dominating features it has.
-
-    :param judgments: A set of :class:`decision_interfaces.msg.Judgment`
-        judgments for each considered alternative.
-
-    :return: A list of integer ranks matching the indicies of the feature matrix.
-    """
-    feature_matrix = create_feature_matrix(judgments)
-
-    if strict:
-        strict_cols = np.sum(feature_matrix == np.max(feature_matrix, axis=0), axis=0) == 1
-        feature_matrix = feature_matrix[:,strict_cols]
-    totals = np.sum(feature_matrix == np.max(feature_matrix, axis=0), axis=1)
-
-    ranks = max(totals) - totals 
-    return [j.alternative for j in judgments], ranks
-
-#
 # def inverse_borda(judgments):
 #     """The naiive ordering of alternatives based on a single utility score.
 #
@@ -114,34 +106,7 @@ def majority_rule(judgments, strict=False):
 #     return lexicographical(judgments, [judgments[0].features[0].axis])
 
 
-def copeland_method(judgments):
-    """Rank each alternative by difference in the number of others that are worse
-    than it and better than in in each feature.
-
-    :param judgments: A set of :class:`decision_interfaces.msg.Judgment`
-        judgments for each considered alternative.
-
-    :return: A list of integer ranks matching the indicies of the feature matrix.
-    """
-    feature_matrix = create_feature_matrix(judgments)
-    net_pref = net_preferences(feature_matrix)
-    copeland = np.sum(np.sign(net_pref), axis=0)
-
-    ranks = max(copeland) - copeland
-    return [j.alternative for j in judgments], ranks.astype(int).tolist()
-
-
-def net_preferences(feature_matrix):
-    """Calcualte the net preferences of a matrix of features.
-    """
-    n_alternatives = feature_matrix.shape[0]
-    net_preferences = np.zeros((n_alternatives, n_alternatives))
-    for i in range(n_alternatives):
-        net_preferences[i,:] = np.sum(np.sign(feature_matrix[i,:] - feature_matrix), axis=0)
-    return net_preferences
-
-
-def create_feature_matrix(judgments):
+def _create_feature_matrix(judgments):
     """Create a matrix of features from a set of judgments
     """
     # convert judgments into an A x F matix
@@ -156,82 +121,114 @@ def create_feature_matrix(judgments):
     return feature_matrix
 
 
-def sequential_majority_comparison(judgments):
+def _net_preferences(feature_matrix):
+    """Calcualte the net preferences of a matrix of features.
+    """
+    n_alternatives = feature_matrix.shape[0]
+    net_preferences = np.zeros((n_alternatives, n_alternatives))
+    for i in range(n_alternatives):
+        net_preferences[i,:] = np.sum(np.sign(feature_matrix[i,:] - feature_matrix), axis=1)
+    return net_preferences
+
+
+def _confirming_preferences(feature_matrix):
+    """Calcualte the confirming preferences of a matrix of features.
+    """
+    n_alternatives = feature_matrix.shape[0]
+    confirming_preferences = np.zeros((n_alternatives, n_alternatives))
+    for i in range(n_alternatives):
+        confirming_preferences[i,:] = np.sum((feature_matrix[i,:] - feature_matrix) > 0, axis=1)
+    return confirming_preferences
+
+
+def copeland_method(judgments):
+    """Rank each alternative by difference in the number of others that are worse
+    than it and better than it in each feature.
+
+    :param judgments: A set of :class:`decision_interfaces.msg.Judgment`
+        judgments for each considered alternative.
+
+    :return: A pair of lists of alternatives and their corresponding integer ranks.
+    """
+    feature_matrix = _create_feature_matrix(judgments)
+    net_pref = _net_preferences(feature_matrix)
+    copeland = np.sum(np.sign(net_pref), axis=1)
+
+    ranks = max(copeland) - copeland
+    return [j.alternative for j in judgments], ranks.astype(int).tolist()
+
+
+def sequential_majority_comparison(judgments, confirming=False):
     """Get single winning alternative by making pairwise comparisons of all alternatives.
     Note: this is essentially one iteration of swap sort
 
     :param judgments: A set of :class:`decision_interfaces.msg.Judgment`
         judgments for each considered alternative.
+    :param confirming: If True, use confirming (positive) dimensions only, else
+        use the net preference. Defaults to False
 
     :return: A pair of lists of alternatives and their corresponding integer ranks.
     """
-    feature_matrix = create_feature_matrix(judgments)
-    net_pref = net_preferences(feature_matrix)
+    feature_matrix = _create_feature_matrix(judgments)
+    if confirming:
+        preferences = _confirming_preferences(feature_matrix)
+    else:
+        preferences = _net_preferences(feature_matrix)
     n_alternatives = feature_matrix.shape[0]
     winner = 0
     for i in range(n_alternatives):
-        if net_pref[i,winner] > 0:
+        if preferences[i,winner] > 0:
             winner = i
-    ranks = [0] * len(n_alternatives)
-    ranks[winner] = 1
+    ranks = [1] * n_alternatives
+    ranks[winner] = 0
 
     return [j.alternative for j in judgments], ranks
 
 
-def pareto_fronts(judgments):
-    """Rank each alternative by the pareto front it belongs to.
-    Adapted from https://github.com/iibrahimli/pareto_fronts/blob/master/pareto_fronts_dynamic.ipynb
+def majority_rule(judgments, strict=False):
+    """Rank each alternative by the number of dominating features it has.
 
     :param judgments: A set of :class:`decision_interfaces.msg.Judgment`
         judgments for each considered alternative.
+    :param strict: If true, assume axis features must be strictly greater than
+        all others to be considered dominating. Defaults to False
 
     :return: A pair of lists of alternatives and their corresponding integer ranks.
     """
-    feature_matrix = create_feature_matrix(judgments)
+    feature_matrix = _create_feature_matrix(judgments)
+
+    if strict:
+        strict_cols = np.sum(feature_matrix == np.max(feature_matrix, axis=0), axis=0) == 1
+        feature_matrix = feature_matrix[:,strict_cols]
+    totals = np.sum(feature_matrix == np.max(feature_matrix, axis=0), axis=1)
+
+    ranks = max(totals) - totals 
+    return [j.alternative for j in judgments], ranks
+
+
+def pareto_fronts(judgments, strict=False):
+    """Rank each alternative by the pareto front it belongs to.
+    Ref: https://github.com/iibrahimli/pareto_fronts/blob/master/pareto_fronts_dynamic.ipynb
+
+    :param judgments: A set of :class:`decision_interfaces.msg.Judgment`
+        judgments for each considered alternative.
+    :param strict: If true, assume axis features must be strictly greater 
+        to be considered dominating. Defaults to False
+
+    :return: A pair of lists of alternatives and their corresponding integer ranks.
+    """
+    feature_matrix = _create_feature_matrix(judgments)
     n_alternatives = feature_matrix.shape[0]
     
     # holds lists of elements dominated by each element
-    dominates = []
-    fronts = [[]]
-    n_dominators = [0] * n_alternatives
+    n_dominates = np.zeros(n_alternatives)
 
-    # finding the first front
     for i in range(n_alternatives):
-        dominates.append([])
+        if strict:
+            n_dominates += np.all(feature_matrix > feature_matrix[i,:], axis=1)
+        else:
+            n_dominates += np.all(feature_matrix >= feature_matrix[i,:], axis=1)
 
-        # TODO: use numpy array functions instead of for loop
-        # dominates_matrix[i,:] = np.all(np.delete(feature_matrix, i, axis=0) < feature_matrix[i,:], axis=1)
-
-        for j in range(n_alternatives):
-            if i == j:
-                continue
-            # if i dominates j
-            if np.all(feature_matrix[i,:] > feature_matrix[j,:]):
-                dominates[i].append(j)
-            # else if i is dominated by j
-            elif np.all(feature_matrix[i,:] < feature_matrix[j,:]):
-                n_dominators[i] += 1
-        if n_dominators[i] == 0:
-            fronts[0].append(i)
-        
-    # front number
-    i = 0
-    while len(fronts[i]) != 0:
-        newfront = []
-        for p in fronts[i]:
-            for q in dominates[p]:
-                n_dominators[q] -= 1
-                if n_dominators[q] == 0:
-                    newfront.append(q)
-        fronts.append(newfront)
-        i += 1
-
-    # assign ranks
-    alternatives = []
-    ranks = []
-    for f, front in enumerate(fronts):
-        for i in front:
-            alternatives.append(judgments[i].alternative)
-            ranks.append(f)
-    return alternatives, ranks
+    ranks = max(n_dominates) - n_dominates
+    return [j.alternative for j in judgments], ranks.astype(int).tolist()
 

@@ -3,21 +3,16 @@ chosen:
   - id: blue
   - id: green
 evaluation:
-  - 
-    alternative:
+  - alternative:
       id: red
     features:
       - 
         axis: hue
         score: 0
       - 
-        axis: saturation
-        score: 100
-      - 
         axis: lightness
         score: 50
-  - 
-    alternative:
+  - alternative:
       id: green
     features:
       - 
@@ -29,8 +24,7 @@ evaluation:
       - 
         axis: lightness
         score: 50
-  - 
-    alternative:
+  - alternative:
       id: blue
     features:
       - 
@@ -42,8 +36,7 @@ evaluation:
       - 
         axis: lightness
         score: 50
-  - 
-    alternative:
+  - alternative:
       id: "#808006"
     features:
       - 
@@ -55,17 +48,16 @@ evaluation:
       - 
         axis: lightness
         score: 26
-  # - 
-  #   alternative:
-  #     id: "#c247eb"
-  #   features:
-  #     - 
-  #       axis: hue
-  #       score: 285
-  #     - 
-  #       axis: saturation
-  #       score: 80
-  #     - 
-  #       axis: lightness
-  #       score: 60
-
+  - 
+    alternative:
+      id: "#c247eb"
+    features:
+      - 
+        axis: hue
+        score: 285
+      - 
+        axis: saturation
+        score: 80
+      - 
+        axis: lightness
+        score: 60

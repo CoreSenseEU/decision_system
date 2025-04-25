@@ -21,7 +21,8 @@ from decision_msgs.msg import Evaluation, AssessmentArray, Judgment, Feature
 
 
 class AggregatePreferencesNode(Node):
-    """Does not perform aggregation and simply passes preferences along as judgments.
+    """
+    Simply passes preferences along as judgments.
     """
     def __init__(self):
         super().__init__('aggregate_preferences_node')
@@ -39,7 +40,10 @@ class AggregatePreferencesNode(Node):
                 10)
 
     def assessments_cb(self, msg):
-        raise NotImplementedError("Not yet been tested")
+        if len(msg.assessments) < 1:
+            self.get_logger().error('Recieved empty list of assessments')
+            return
+
         # Assume all assessments use the same alternatives
         judgments_map = {p.alternative.id : Judgment(alternative=p.alternative) for p in msg.assessments[0].preferences}
         axes = []
@@ -52,7 +56,10 @@ class AggregatePreferencesNode(Node):
 
         alternatives = judgments_map.keys()
         self.get_logger().info(f'Aggregating assessments of {axes} on {alternatives} with policy: aggregate_preferences')
-        self.pub_.publish(Evaluation(judgments=judgments_map.values()))
+
+        print(list(judgments_map.values()))
+
+        self.pub_.publish(Evaluation(judgments=list(judgments_map.values())))
 
 
 def main(args=None):

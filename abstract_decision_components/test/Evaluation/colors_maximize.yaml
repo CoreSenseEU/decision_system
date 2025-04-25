@@ -1,0 +1,32 @@
+judgments:
+  - alternative:
+      id: red
+    features:
+      - 
+        axis: hue
+        score: 0
+  - alternative:
+      id: green
+    features:
+      - 
+        axis: hue
+        score: 120
+  - alternative:
+      id: blue
+    features:
+      - 
+        axis: hue
+        score: 240
+  - alternative:
+      id: "#808006"
+    features:
+      - 
+        axis: hue
+        score: 60
+  - 
+    alternative:
+      id: "#c247eb"
+    features:
+      - 
+        axis: hue
+        score: 285

@@ -1,0 +1,76 @@
+assessments:
+  - 
+    cue:
+      id: R
+      service: /cue/prolog_query/R
+    preferences:
+      -
+        alternative:
+          id: red
+        score: 255
+      -
+        alternative:
+          id: green
+        score: 0
+      -
+        alternative:
+          id: blue
+        score: 0
+      -
+        alternative:
+          id: "#808006"
+        score: 128
+      -
+        alternative:
+          id: "#c247eb"
+        score: 199
+  - 
+    cue:
+      id: G
+      service: /cue/prolog_query/G
+    preferences:
+      -
+        alternative:
+          id: red
+        score: 0
+      -
+        alternative:
+          id: green
+        score: 255
+      -
+        alternative:
+          id: blue
+        score: 0
+      -
+        alternative:
+          id: "#808006"
+        score: 128
+      -
+        alternative:
+          id: "#c247eb"
+        score: 71
+  - 
+    cue:
+      id: B
+      service: /cue/prolog_query/B
+    preferences:
+      -
+        alternative:
+          id: red
+        score: 0
+      -
+        alternative:
+          id: green
+        score: 0
+      -
+        alternative:
+          id: blue
+        score: 255
+      -
+        alternative:
+          id: "#808006"
+        score: 6
+      -
+        alternative:
+          id: "#c247eb"
+        score: 235
