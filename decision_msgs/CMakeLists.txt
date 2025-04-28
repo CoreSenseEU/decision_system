@@ -19,9 +19,13 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Judgment.msg"
   "msg/OrderedEvaluation.msg"
   "msg/Preference.msg"
+  "msg/PrologClause.msg"
+  "msg/PrologAnswer.msg"
+  "msg/PrologBinding.msg"
   "msg/WeakOrdering.msg"
 
   "srv/AssessAlternatives.srv"
+  "srv/PrologQuery.srv"
   # DEPENDENCIES geometry_msgs
 )
 

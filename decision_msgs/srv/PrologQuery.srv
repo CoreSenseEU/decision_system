@@ -1,0 +1,8 @@
+# Request
+PrologClause query
+int8 maxresult -1
+
+---
+# Response
+PrologAnswer[] answers
+bool success
