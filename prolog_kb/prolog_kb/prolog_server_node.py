@@ -107,7 +107,7 @@ class PrologServer(Node):
         auto_dynamic = self.get_parameter('auto_dynamic')
         if auto_dynamic:
             try:
-                for predicate, arity in self._get_predicates(msg.clause):
+                for predicate, arity in self._get_indicators(msg.clause):
                     self.prolog.dynamic(f'{predicate}/{arity}')
             except PrologError as e:
                 self.get_logger().error(str(e))
@@ -126,7 +126,7 @@ class PrologServer(Node):
         auto_dynamic = self.get_parameter('auto_dynamic')
         if auto_dynamic:
             try:
-                for predicate, arity in self._get_predicates(msg.clause):
+                for predicate, arity in self._get_indicators(msg.clause):
                     self.prolog.dynamic(f'{predicate}/{arity}')
             except PrologError as e:
                 self.get_logger().error(str(e))
@@ -148,7 +148,7 @@ class PrologServer(Node):
                 return SetParametersResult(successful=True)
         return SetParametersResult(successful=True)
 
-    def _get_predicates(self, clause):
+    def _get_indicators(self, clause):
         matches = re.findall(r'\s?(\w+?)\((.*?)\)', clause)
         for match in matches:
             if match[1] == '':
