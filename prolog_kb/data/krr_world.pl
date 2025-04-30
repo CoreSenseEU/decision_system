@@ -111,15 +111,16 @@ point_2d(point_2d_4_office_to_living).
 
 % Objects can be in a doorway
 % in_doorway( <obj> , <doorway> ).
-dynamic in_doorway/2.
+:- dynamic in_doorway/2.
 
 % Objects have a pose
 % has_pose( <obj>, <pose> ).
-dynamic has_pose/2.
+:- dynamic has_pose/2.
+:- discontiguous has_pose/2.
 
 % Objects can be held
 % is_held( <obj> ).
-dynamic is_held/1.
+:- dynamic is_held/1.
 
 % Objects cannot have a pose if they are also held
 has_pose(O,_) :- object(O), \+is_held(O), !.
@@ -235,6 +236,7 @@ has_pose(drop_7_trash,      pose_drop_7_trash).
 has_extent(D, extent_drop) :- drop(D).
 
 % Drop locations have a drop_type
+:- discontiguous has_drop_type/2.
 has_drop_type(drop_1_dishwasher, dishwasher).
 has_drop_type(drop_2_tableware, tableware).
 has_drop_type(drop_3_livingroom, livingroom).

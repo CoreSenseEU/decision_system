@@ -30,6 +30,8 @@ class GetDropLocationsPrologAdapter(Node):
     An adapter that intercepts the /get_drop_locations service, and publishes the
     results of the service call into a prolog knowledge base.
     """
+    _drop_tag = 0
+
     def __init__(self):
         super().__init__('get_drop_locations_adapter')
         self.get_logger().info('Starting prolog knowledge base adapter for service: /get_drop_locations')
@@ -37,7 +39,7 @@ class GetDropLocationsPrologAdapter(Node):
         self.srv_get_drop_locations_ = self.create_service(
                 GetDropLocations,
                 'get_drop_locations',
-                self.get_objects_in_room_cb,
+                self.get_drop_locations_cb,
                 callback_group=MutuallyExclusiveCallbackGroup())
 
         self.client_get_drop_locations_ = self.create_client(
@@ -53,33 +55,54 @@ class GetDropLocationsPrologAdapter(Node):
         self.pub_assert_ = self.create_publisher(
                 PrologClause,
                 'assert',
-                self.assert_cb,
                 10)
 
         self.pub_retract_ = self.create_publisher(
                 PrologClause,
                 'retract',
-                self.retract_cb,
                 10)
 
     def get_drop_locations_cb(self, request, result):
         result = self.call_service(self.client_get_drop_locations_, request)
+        if result is None:
+            result = GetDropLocations.Response()
+            return result
         if not result.success:
             return result
 
+        assertions = []
         for drop in result.drop_locations:
-            pose_id = self._create_new_anonymous_pose(drop.drop_pose)
+            try:
+                # TODO: poses may be created in the knowledge base even if others fail
+                #   This leaves the KB in a different state than it started, but maybe that's okay...
+                pose_id = self._create_new_anonymous_pose(drop.drop_pose)
+            except TimeoutError as e:
+                self.get_logger().error(str(e))
+                result.success = False
+                return result
             
             # TODO: move to a new file (similar to Pose.get_next())
-            drop_id = self._get_next_drop()
+            drop_id = GetDropLocationsPrologAdapter._get_next_drop()
 
-            self._assert(f"drop({drop_id})")
-            self._assert(f"has_drop_type({drop_id}, {drop.type})")
-            self._assert(f"has_pose({drop_id}, {pose_id})")
+            assertions.append(f"drop({drop_id})")
+            assertions.append(f"has_drop_type({drop_id}, {drop.type.data})")
+            assertions.append(f"has_pose({drop_id}, {pose_id})")
+
+        for assertion in assertions:
+            self._assert(assertion)
 
         return result
 
+    @classmethod
+    def _get_next_drop(cls):
+        drop_id = f'drop_{cls._drop_tag}'
+        cls._drop_tag += 1
+        return drop_id
+
     def _create_new_anonymous_pose(self, pose):
+        """
+        :raises TimeoutError: if the query does not become available or times out.
+        """
         # TODO: Move this logic to another python file, it is duplicated in get_objects_in_room_prolog_adapter_node.py
         duplicate_id = self._find_duplicate_pose(pose)
         if duplicate_id is not None:
@@ -96,11 +119,14 @@ class GetDropLocationsPrologAdapter(Node):
                          f"{pose.orientation.x}, "
                          f"{pose.orientation.y}, "
                          f"{pose.orientation.z}, "
-                         f"{pose.orientation.w}, "
+                         f"{pose.orientation.w}"
                          ")")
         return pose_id
 
     def _find_duplicate_pose(self, pose):
+        """
+        :raises TimeoutError: if the query does not become available or times out.
+        """
         # TODO: Move this logic to another python file, it is duplicated in get_objects_in_room_prolog_adapter_node.py
         # TODO: evaluate within some tolerance for floating point errors
         answers = self._query(f"has_coordinates_7d(P, "
@@ -110,18 +136,20 @@ class GetDropLocationsPrologAdapter(Node):
                              f"{pose.orientation.x}, "
                              f"{pose.orientation.y}, "
                              f"{pose.orientation.z}, "
-                             f"{pose.orientation.w}, "
+                             f"{pose.orientation.w}"
                              "), pose(P)", maxresult=1)
         if len(answers) == 1:
             return answers[0]["P"]
         return None
 
     def _query(self, clause, maxresult=-1):
+        """
+        :raises TimeoutError: if the query does not become available or times out.
+        """
         request = PrologQuery.Request()
         request.query.clause = clause
         request.maxresult = maxresult
         result = self.call_service(self.client_query_, request)
-
         answers = []
         for answer in result.answers:
             answers.append({binding.key: binding.value for binding in answer.bindings})
@@ -135,18 +163,15 @@ class GetDropLocationsPrologAdapter(Node):
 
     def call_service(self, cli, request):
         """
-        Adopted from https://github.com/kas-lab/krr_mirte_skills/blob/main/krr_mirte_skills/krr_mirte_skills/get_object_info.py
+        Adapted from https://github.com/kas-lab/krr_mirte_skills/blob/main/krr_mirte_skills/krr_mirte_skills/get_object_info.py
+        :raises TimeoutError: if the service does not become available or times out.
         """
-        if cli.wait_for_service(timeout_sec=5.0) is False:
-            self.get_logger().error(
-                'service not available {}'.format(cli.srv_name))
-            return None
+        if not cli.wait_for_service(timeout_sec=5.0):
+            raise TimeoutError('service not available {}'.format(cli.srv_name))
         future = cli.call_async(request)
         self.executor.spin_until_future_complete(future, timeout_sec=5.0)
-        if future.done() is False:
-            self.get_logger().error(
-                'Future not completed {}'.format(cli.srv_name))
-            return None
+        if not future.done():
+            raise TimeoutError('Future not completed {}'.format(cli.srv_name))
         return future.result()
 
 

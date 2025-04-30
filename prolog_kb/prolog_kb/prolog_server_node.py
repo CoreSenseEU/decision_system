@@ -32,8 +32,6 @@ class PrologServer(Node):
     A service to query and update a prolog knowledge base.
 
     :param knowledge_base: A path to an inital prolog knowledge base to consult.
-    :param auto_dynamic: If true make every predicate dynamic. This may mutate
-        a knowledge base in unexpected ways if used without care.
     """
     def __init__(self):
         super().__init__('prolog_kb_server')
@@ -41,7 +39,6 @@ class PrologServer(Node):
 
         self.add_on_set_parameters_callback(self._reload_kb)
         self.declare_parameter('knowledge_base', Parameter.Type.STRING)
-        self.declare_parameter('auto_dynamic', False)
 
         self.srv_ = self.create_service(
                 PrologQuery,
@@ -72,46 +69,32 @@ class PrologServer(Node):
 
         self.get_logger().info(f'Submitting prolog query to knowledge base: "{request.query.clause}"')
         try:
-            answers = self.prolog.query(request.query.clause, 
-                                        maxresult=request.maxresult,
-                                        catcherrors=False)
+            answers = list(self.prolog.query(request.query.clause,
+                                             maxresult=request.maxresult,
+                                             catcherrors=False))
         except PrologError as e:
             self.get_logger().error(str(e))
             return result
 
-        if answers is None:
+        if len(answers) == 0:
             self.get_logger().info('Answer: False')
             return result
-
-        if answers is not None:
+        elif answers[0] == {}:      # Asked a True/False question
             result.success = True
-
-            # Asked a True/False question
-            if answers == {}:
-                self.get_logger().info('Answer: True')
-                return result
-
-            # Asked a question with variables
+            self.get_logger().info('Answer: True')
+        else:                       # Asked a question with variables
             answer_strs = []
-            for answer in list(answers):
+            for answer in answers:
                 answer_strs.append(str(answer))
                 bindings = [PrologBinding(key=key, value=str(value)) for key, value in answer.items()]
                 result.answers.append(PrologAnswer(bindings=bindings))
             self.get_logger().info(f'Answers: [{", ".join(answer_strs)}]')
+            result.success = True
         return result
 
     def assert_cb(self, msg):
         if len(msg.clause) < 1:
             self.get_logger().error('Recieved empty clause.')
-
-        auto_dynamic = self.get_parameter('auto_dynamic')
-        if auto_dynamic:
-            try:
-                for predicate, arity in self._get_indicators(msg.clause):
-                    self.prolog.dynamic(f'{predicate}/{arity}')
-            except PrologError as e:
-                self.get_logger().error(str(e))
-                return
 
         try:
             self.prolog.assertz(msg.clause, catcherrors=False)
@@ -122,15 +105,6 @@ class PrologServer(Node):
     def retract_cb(self, msg):
         if len(msg.clause) < 1:
             self.get_logger().error('Recieved empty clause.')
-
-        auto_dynamic = self.get_parameter('auto_dynamic')
-        if auto_dynamic:
-            try:
-                for predicate, arity in self._get_indicators(msg.clause):
-                    self.prolog.dynamic(f'{predicate}/{arity}')
-            except PrologError as e:
-                self.get_logger().error(str(e))
-                return
 
         try:
             self.prolog.retractall(msg.clause, catcherrors=False)
