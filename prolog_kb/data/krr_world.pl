@@ -1,4 +1,5 @@
 % Drop locations
+:- dynamic drop/1.
 drop(drop_1_dishwasher).
 drop(drop_2_tableware).
 drop(drop_3_livingroom).
@@ -59,6 +60,7 @@ doorway(bedroom_to_office).
 doorway(office_to_living).
 
 % Poses
+:- dynamic pose/1.
 pose(pose_drop_1_dishwasher).
 pose(pose_drop_2_tableware).
 pose(pose_drop_3_livingroom).
@@ -130,6 +132,7 @@ has_pose(O,_) :- object(O), \+is_held(O), !.
 % TODO: when a new object is found, how do we tell which one it is ... ?
 % has_drop_type(obj_0_cup_clean, tableware).    %% Covered by logic
 % has_drop_type(obj_1_cup_dirty, dishwasher).   %% Covered by logic
+:- dynamic has_drop_type/2.
 has_drop_type(obj_3_fidget_spinner, toys).
 has_drop_type(obj_4_book, bedroom).
 has_drop_type(obj_7_bread, trash).
@@ -251,6 +254,7 @@ has_drop_type(drop_7_trash, trash).
 % --------------------------------
 
 % Poses have 7D coordinates X,Y,Z, quaterion    [meters, _]
+:- dynamic has_coordinates_7d/8.
 has_coordinates_7d(pose_drop_1_dishwasher, 1.5, 0, 0, 0, 0, 0, 0).
 has_coordinates_7d(pose_drop_2_tableware, 0.356888, -1.47612, 0, 0, 0, 0, 0).
 has_coordinates_7d(pose_drop_3_livingroom, -4, -3, 0, 0, 0, 0, 0).

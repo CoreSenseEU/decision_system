@@ -15,17 +15,15 @@
 import sys
 
 import rclpy
-from rclpy.node import Node
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
 from krr_mirte_skills_msgs.srv import GetDropLocations
-from decision_msgs.msg import PrologClause
-from decision_msgs.srv import PrologQuery
 
 from prolog_kb.pose import Pose
+from prolog_kb.prolog_adapter import PrologAdapter
 
 
-class GetDropLocationsPrologAdapter(Node):
+class GetDropLocationsPrologAdapter(PrologAdapter):
     """
     An adapter that intercepts the /get_drop_locations service, and publishes the
     results of the service call into a prolog knowledge base.
@@ -33,8 +31,7 @@ class GetDropLocationsPrologAdapter(Node):
     _drop_tag = 0
 
     def __init__(self):
-        super().__init__('get_drop_locations_adapter')
-        self.get_logger().info('Starting prolog knowledge base adapter for service: /get_drop_locations')
+        super().__init__('get_drop_locations')
 
         self.srv_get_drop_locations_ = self.create_service(
                 GetDropLocations,
@@ -46,21 +43,6 @@ class GetDropLocationsPrologAdapter(Node):
                 GetDropLocations,
                 'shadow/get_drop_locations',
                 callback_group=MutuallyExclusiveCallbackGroup())
-
-        self.client_query_ = self.create_client(
-                PrologQuery,
-                'query',
-                callback_group=MutuallyExclusiveCallbackGroup())
-
-        self.pub_assert_ = self.create_publisher(
-                PrologClause,
-                'assert',
-                10)
-
-        self.pub_retract_ = self.create_publisher(
-                PrologClause,
-                'retract',
-                10)
 
     def get_drop_locations_cb(self, request, result):
         result = self.call_service(self.client_get_drop_locations_, request)
@@ -89,7 +71,7 @@ class GetDropLocationsPrologAdapter(Node):
             assertions.append(f"has_pose({drop_id}, {pose_id})")
 
         for assertion in assertions:
-            self._assert(assertion)
+            self.assertz(assertion)
 
         return result
 
@@ -111,8 +93,8 @@ class GetDropLocationsPrologAdapter(Node):
         else:
             pose_id = Pose.get_next()
             # Create new pose
-            self._assert(f"pose({pose_id})")
-            self._assert(f"has_coordinates_7d({pose_id}, "
+            self.assertz(f"pose({pose_id})")
+            self.assertz(f"has_coordinates_7d({pose_id}, "
                          f"{pose.position.x}, "
                          f"{pose.position.y}, "
                          f"{pose.position.z}, "
@@ -129,7 +111,7 @@ class GetDropLocationsPrologAdapter(Node):
         """
         # TODO: Move this logic to another python file, it is duplicated in get_objects_in_room_prolog_adapter_node.py
         # TODO: evaluate within some tolerance for floating point errors
-        answers = self._query(f"has_coordinates_7d(P, "
+        answers = self.query(f"has_coordinates_7d(P, "
                              f"{pose.position.x}, "
                              f"{pose.position.y}, "
                              f"{pose.position.z}, "
@@ -141,38 +123,6 @@ class GetDropLocationsPrologAdapter(Node):
         if len(answers) == 1:
             return answers[0]["P"]
         return None
-
-    def _query(self, clause, maxresult=-1):
-        """
-        :raises TimeoutError: if the query does not become available or times out.
-        """
-        request = PrologQuery.Request()
-        request.query.clause = clause
-        request.maxresult = maxresult
-        result = self.call_service(self.client_query_, request)
-        answers = []
-        for answer in result.answers:
-            answers.append({binding.key: binding.value for binding in answer.bindings})
-        return answers
-
-    def _assert(self, clause):
-        self.pub_assert_.publish(PrologClause(clause=clause))
-
-    def _retract(self, clause):
-        self.pub_retract_.publish(PrologClause(clause=clause))
-
-    def call_service(self, cli, request):
-        """
-        Adapted from https://github.com/kas-lab/krr_mirte_skills/blob/main/krr_mirte_skills/krr_mirte_skills/get_object_info.py
-        :raises TimeoutError: if the service does not become available or times out.
-        """
-        if not cli.wait_for_service(timeout_sec=5.0):
-            raise TimeoutError('service not available {}'.format(cli.srv_name))
-        future = cli.call_async(request)
-        self.executor.spin_until_future_complete(future, timeout_sec=5.0)
-        if not future.done():
-            raise TimeoutError('Future not completed {}'.format(cli.srv_name))
-        return future.result()
 
 
 def main(args=None):

@@ -21,8 +21,8 @@ from decision_msgs.srv import PrologQuery
 
 class PrologAdapter(Node):
     """
-    An adapter that shadows each of the `KRR_mirte_skills` services, echoing 
-    the results of each service call to a prolog knowledge base.
+    An adapter that a node can inherit to facilitate communicating with a
+    prolog knowledge base.
     """
     def __init__(self, name):
         super().__init__(f'{name}_prolog_adapter')
@@ -36,46 +36,40 @@ class PrologAdapter(Node):
         self.pub_assert_ = self.create_publisher(
                 PrologClause,
                 'assert',
-                self.assert_cb,
                 10)
 
         self.pub_retract_ = self.create_publisher(
                 PrologClause,
                 'retract',
-                self.retract_cb,
                 10)
 
-    def _query(self, clause, maxresult=-1):
+    def query(self, clause, maxresult=-1):
+        """
+        :raises TimeoutError: if the query does not become available or times out.
+        """
         request = PrologQuery.Request()
         request.query.clause = clause
         request.maxresult = maxresult
         result = self.call_service(self.client_query_, request)
+        return [{b.key: b.value for b in ans.bindings} for ans in result.answers]
 
-        answers = []
-        for answer in result.answers:
-            answers.append({binding.key: binding.value for binding in answer.bindings})
-        return answers
-
-    def _assert(self, clause):
+    def assertz(self, clause):
         self.pub_assert_.publish(PrologClause(clause=clause))
 
-    def _retract(self, clause):
+    def retract(self, clause):
         self.pub_retract_.publish(PrologClause(clause=clause))
 
     def call_service(self, cli, request):
         """
-        Adopted from https://github.com/kas-lab/krr_mirte_skills/blob/main/krr_mirte_skills/krr_mirte_skills/get_object_info.py
+        Adapted from https://github.com/kas-lab/krr_mirte_skills/blob/main/krr_mirte_skills/krr_mirte_skills/get_object_info.py
+        :raises TimeoutError: if the service does not become available or times out.
         """
-        if cli.wait_for_service(timeout_sec=5.0) is False:
-            self.get_logger().error(
-                'service not available {}'.format(cli.srv_name))
-            return None
+        if not cli.wait_for_service(timeout_sec=5.0):
+            raise TimeoutError('service not available {}'.format(cli.srv_name))
         future = cli.call_async(request)
         self.executor.spin_until_future_complete(future, timeout_sec=5.0)
-        if future.done() is False:
-            self.get_logger().error(
-                'Future not completed {}'.format(cli.srv_name))
-            return None
+        if not future.done():
+            raise TimeoutError('Future not completed {}'.format(cli.srv_name))
         return future.result()
 
 
