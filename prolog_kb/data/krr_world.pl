@@ -32,6 +32,7 @@ object(obj_12_wood_cube).
 object(obj_13_candle).
 
 % Object Types
+:- dynamic object_type/1.
 object_type(cup).
 object_type(fidget_spinner).
 object_type(book).
@@ -43,6 +44,7 @@ object_type(wood_cube).
 object_type(candle).
 
 % Attributes
+:- dynamic attribute/1.
 attribute(clean).
 attribute(dirty).
 attribute(empty).
@@ -162,6 +164,7 @@ has_drop_type(O, trash) :-
   has_type(O, beer).
 
 % Objects have an object_type
+:- dynamic has_type/2.
 has_type(obj_0_cup_clean, cup).
 has_type(obj_1_cup_dirty, cup).
 has_type(obj_3_fidget_spinner, fidget_spinner).
