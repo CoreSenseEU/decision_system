@@ -60,7 +60,7 @@ class AggregateMultiValueUtilityNode(Node):
             case 'dawes':
                 ...
             case _:
-                self.get_logger().warn("Policy not recognized. Defaulting to 'weighted_sum'")
+                self.get_logger().warning("Policy not recognized. Defaulting to 'weighted_sum'")
 
         # # Assume all assessments use the same alternatives
         # judgments_map = {p.alternative.id : Judgment(alternative=p.alternative) for p in msg.assessments[0].preferences}
