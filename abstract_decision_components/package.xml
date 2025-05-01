@@ -16,7 +16,7 @@
   <test_depend>python3-pytest</test_depend>
 
   <depend>decision_msgs</depend>
-  <depend>rcl_interfaces</depend>
+  <!-- <depend>rcl_interfaces</depend> -->
 
   <export>
     <build_type>ament_python</build_type>
