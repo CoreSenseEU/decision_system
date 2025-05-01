@@ -21,11 +21,12 @@ setup(
     entry_points={
         'console_scripts': [
             'prolog_server = prolog_kb.prolog_server_node:main',
-            'get_drop_locations_adapter = prolog_kb.get_drop_locations_prolog_adapter_node:main',
-            # 'get_object_info_prolog_adapter_node = prolog_kb.get_object_info_prolog_adapter_node:main',
-            # 'get_objects_in_room_prolog_adapter_node = prolog_kb.get_objects_in_room_prolog_adapter_node:main',
-            # 'pick_object_prolog_adapter_node = prolog_kb.pick_object_prolog_adapter_node:main',
-            # 'place_object_prolog_adapter_node = prolog_kb.place_object_prolog_adapter_node:main',
+            'prolog_pose_factory = prolog_kb.prolog_pose_factory_node:main',
+            'get_drop_locations_prolog_adapter = prolog_kb.get_drop_locations_prolog_adapter_node:main',
+            # 'get_object_info_prolog_adapter = prolog_kb.get_object_info_prolog_adapter_node:main',
+            'get_objects_in_room_prolog_adapter = prolog_kb.get_objects_in_room_prolog_adapter_node:main',
+            'pick_object_prolog_adapter = prolog_kb.pick_object_prolog_adapter_node:main',
+            'place_object_prolog_adapter = prolog_kb.place_object_prolog_adapter_node:main',
         ],
     },
 )

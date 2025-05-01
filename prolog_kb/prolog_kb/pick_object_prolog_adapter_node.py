@@ -15,93 +15,49 @@
 import sys
 
 import rclpy
-from rclpy.node import Node
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
 from krr_mirte_skills_msgs.srv import PickObject
-from decision_msgs.msg import PrologClause
-from decision_msgs.srv import PrologQuery
+
+from prolog_kb.prolog_interface import PrologInterface
 
 
-class PickObjectPrologAdapter(Node):
+class PickObjectPrologAdapter(PrologInterface):
     """
     An adapter that intercepts the /pick_object service, and publishes the
     results of the service call into a prolog knowledge base.
     """
     def __init__(self):
-        super().__init__('pick_object_prolog_adapter')
-        self.get_logger().info('Starting prolog knowledge base adapter for service: /pick_object')
+        super().__init__('pick_object')
 
         self.srv_pick_object_ = self.create_service(
                 PickObject,
                 'pick_object',
-                self.get_objects_in_room_cb,
+                self.pick_object_cb,
                 callback_group=MutuallyExclusiveCallbackGroup())
 
-        self.client_get_objects_in_room_ = self.create_client(
+        self.client_pick_object_ = self.create_client(
                 PickObject,
                 'shadow/pick_object',
                 callback_group=MutuallyExclusiveCallbackGroup())
 
-        self.client_query_ = self.create_client(
-                PrologQuery,
-                'query',
-                callback_group=MutuallyExclusiveCallbackGroup())
-
-        self.pub_assert_ = self.create_publisher(
-                PrologClause,
-                'assert',
-                self.assert_cb,
-                10)
-
-        self.pub_retract_ = self.create_publisher(
-                PrologClause,
-                'retract',
-                self.retract_cb,
-                10)
-
     def pick_object_cb(self, request, result):
-        result = self.call_service(self.client_pick_object_, request)
+        self.get_logger().info('Forwarding service request to krr_mirte_skills: /pick_object')
+        result = self.call_service_or(self.client_pick_object_, request, result)
         if not result.success:
+            self.get_logger().warning('Service request to /pick_object failed, no information to capture.')
             return result
         object_id = result.error.split()[-1]
 
-        self._assert(f"is_held({object_id})")
-        self._retract(f"has_pose({object_id},_)")
+        # TODO: Should this also be responsible for retracting the old pose of
+        #   the previously unknown object that is picked up?
+
+        self.assertz(f"object({object_id})")
+        self.assertz(f"is_held({object_id})")
+        self.retract(f"has_pose({object_id},_)")
+
+        self.get_logger().info('Captured information from service request: /pick_object')
         return result
-
-    def _query(self, clause, maxresult=-1):
-        request = PrologQuery.Request()
-        request.query.clause = clause
-        request.maxresult = maxresult
-        result = self.call_service(self.client_query_, request)
-
-        answers = []
-        for answer in result.answers:
-            answers.append({binding.key: binding.value for binding in answer.bindings})
-        return answers
-
-    def _assert(self, clause):
-        self.pub_assert_.publish(PrologClause(clause=clause))
-
-    def _retract(self, clause):
-        self.pub_retract_.publish(PrologClause(clause=clause))
-
-    def call_service(self, cli, request):
-        """
-        Adopted from https://github.com/kas-lab/krr_mirte_skills/blob/main/krr_mirte_skills/krr_mirte_skills/get_object_info.py
-        """
-        if cli.wait_for_service(timeout_sec=5.0) is False:
-            self.get_logger().error(
-                'service not available {}'.format(cli.srv_name))
-            return None
-        future = cli.call_async(request)
-        self.executor.spin_until_future_complete(future, timeout_sec=5.0)
-        if future.done() is False:
-            self.get_logger().error(
-                'Future not completed {}'.format(cli.srv_name))
-            return None
-        return future.result()
 
 
 def main(args=None):

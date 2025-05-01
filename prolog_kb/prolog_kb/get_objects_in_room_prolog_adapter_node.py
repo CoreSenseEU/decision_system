@@ -15,24 +15,21 @@
 import sys
 
 import rclpy
-from rclpy.node import Node
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
 from krr_mirte_skills_msgs.srv import GetObjectsInRoom
-from decision_msgs.msg import PrologClause
-from decision_msgs.srv import PrologQuery
+from decision_msgs.srv import CreatePose
 
-from prolog_kb.pose import Pose
+from prolog_kb.prolog_interface import PrologInterface
 
 
-class GetObjectsInRoomPrologAdapter(Node):
+class GetObjectsInRoomPrologAdapter(PrologInterface):
     """
     An adapter that intercepts the /get_objects_in_room service, and publishes the
     results of the service call into a prolog knowledge base.
     """
     def __init__(self):
-        super().__init__('get_objects_in_room_adapter')
-        self.get_logger().info('Starting prolog knowledge base adapter for service: /get_objects_in_room')
+        super().__init__('get_objects_in_room')
 
         self.srv_get_objects_in_room_ = self.create_service(
                 GetObjectsInRoom,
@@ -45,117 +42,70 @@ class GetObjectsInRoomPrologAdapter(Node):
                 'shadow/get_objects_in_room',
                 callback_group=MutuallyExclusiveCallbackGroup())
 
-        self.client_query_ = self.create_client(
-                PrologQuery,
-                'query',
+        self.client_create_pose_ = self.create_client(
+                CreatePose,
+                'create_pose',
                 callback_group=MutuallyExclusiveCallbackGroup())
 
-        self.pub_assert_ = self.create_publisher(
-                PrologClause,
-                'assert',
-                self.assert_cb,
-                10)
-
-        self.pub_retract_ = self.create_publisher(
-                PrologClause,
-                'retract',
-                self.retract_cb,
-                10)
-
     def get_objects_in_room_cb(self, request, result):
-        result = self.call_service(self.client_get_objects_in_room_, request)
+        self.get_logger().info('Forwarding service request to krr_mirte_skills: /get_objects_in_room')
+        result = self.call_service_or(self.client_get_objects_in_room_, request, result)
         if not result.success:
+            self.get_logger().warning('Service request to /get_objects_in_room failed, no information to capture.')
             return result
         
+        assertions = []
         for pose in result.room_object_poses:
-            self._create_new_anonymous_pose(pose)
+            pose_id = self._create_pose(pose)
+            if pose_id is None or len(self._find_objects_with_pose(pose_id)) > 1:
+                result.success = False
+                return result
+            assertions.append(f"has_pose('', {pose_id})")
 
         for door in result.doorway_object_poses:
             for pose in door.objects_in_doorway:
-                pose_id = self._create_new_anonymous_pose(pose)
-                self._assert(f"in_doorway({door.which_doorway}, {pose_id})")
+                pose_id = self._create_pose(pose)
+                if pose_id is None:
+                    result.success = False
+                    return result
+                matching_objects = self._find_objects_with_pose(pose_id)
+                if len(matching_objects) > 1:
+                    result.success = False
+                    return result
 
+                if len(matching_objects) == 1:
+                    assertions.append(f"in_doorway({door.which_doorway}, {matching_objects[0]})")
+                else:
+                    assertions.append(f"in_doorway({door.which_doorway}, '')")
+                    assertions.append(f"has_pose('', {pose_id})")
+
+        for assertion in assertions:
+            self.assertz(assertion)
+
+        self.get_logger().info('Captured information from service request: /get_objects_in_room')
         return result
 
-    def _create_new_anonymous_pose(self, pose):
-        duplicate_id = self._find_duplicate_pose(pose)
-        if duplicate_id is not None:
-            self.get_logger().info(f'A matching pose ({duplicate_id}) already exists: {pose}')
-            pose_id = duplicate_id
-        else:
-            pose_id = Pose.get_next()
-            # Create new pose
-            self._assert(f"pose({pose_id})")
-            self._assert(f"has_coordinates_7d({pose_id}, "
-                         f"{pose.position.x}, "
-                         f"{pose.position.y}, "
-                         f"{pose.position.z}, "
-                         f"{pose.orientation.x}, "
-                         f"{pose.orientation.y}, "
-                         f"{pose.orientation.z}, "
-                         f"{pose.orientation.w}, "
-                         ")")
-
-        # An unknown object exists with this pose
-        if not self._exists_object_with_pose(pose_id):
-            self._assert(f"has_pose('', {pose_id})")
-        return pose_id
-
-    def _find_duplicate_pose(self, pose):
-        # TODO: evaluate within some tolerance for floating point errors
-        answers = self._query(f"has_coordinates_7d(P, "
-                             f"{pose.position.x}, "
-                             f"{pose.position.y}, "
-                             f"{pose.position.z}, "
-                             f"{pose.orientation.x}, "
-                             f"{pose.orientation.y}, "
-                             f"{pose.orientation.z}, "
-                             f"{pose.orientation.w}, "
-                             "), pose(P)", maxresult=1)
-        if len(answers) == 1:
-            return answers[0]["P"]
-        return None
-
-    def _exists_object_with_pose(self, pose_id):
-        answers = self._query(f'object(O), has_pose(O, {pose_id})')
-        if len(answers) > 0:
-            for answer in answers:
-                self.get_logger().info(f"Detected object '{answer["O"]}' with pose {pose_id} again.")
-            return True
-        return False
-
-    def _query(self, clause, maxresult=-1):
-        request = PrologQuery.Request()
-        request.query.clause = clause
-        request.maxresult = maxresult
-        result = self.call_service(self.client_query_, request)
-
-        answers = []
-        for answer in result.answers:
-            answers.append({binding.key: binding.value for binding in answer.bindings})
-        return answers
-
-    def _assert(self, clause):
-        self.pub_assert_.publish(PrologClause(clause=clause))
-
-    def _retract(self, clause):
-        self.pub_retract_.publish(PrologClause(clause=clause))
-
-    def call_service(self, cli, request):
-        """
-        Adopted from https://github.com/kas-lab/krr_mirte_skills/blob/main/krr_mirte_skills/krr_mirte_skills/get_object_info.py
-        """
-        if cli.wait_for_service(timeout_sec=5.0) is False:
-            self.get_logger().error(
-                'service not available {}'.format(cli.srv_name))
+    def _create_pose(self, pose):
+        new_pose_result = self.call_service_or(
+                self.client_create_pose_, 
+                CreatePose.Request(pose=pose), 
+                CreatePose.Response())
+        if not new_pose_result.success:
+            self.get_logger().error(f'Failed to create a new pose for object with pose {pose}')
             return None
-        future = cli.call_async(request)
-        self.executor.spin_until_future_complete(future, timeout_sec=5.0)
-        if future.done() is False:
+        return new_pose_result.id
+
+    def _find_objects_with_pose(self, pose_id):
+        answers = self.query(f'object(O), has_pose(O, {pose_id})')
+        matching_objects = []
+        for answer in answers:
+            matching_objects.append(answer["O"])
+            self.get_logger().warning(f'Detected object \'{answer["O"]}\' with pose {pose_id} again.')
+        if len(matching_objects) > 1:
             self.get_logger().error(
-                'Future not completed {}'.format(cli.srv_name))
-            return None
-        return future.result()
+                    f'Found multiple objects: {matching_objects} '
+                    f'with the same pose: {pose_id}')
+        return matching_objects
 
 
 def main(args=None):

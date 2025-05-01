@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(decision_msgs)
 
 find_package(rosidl_default_generators REQUIRED)
-# find_package(geometry_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Alternative.msg"
@@ -25,8 +25,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/WeakOrdering.msg"
 
   "srv/AssessAlternatives.srv"
+  "srv/CreatePose.srv"
   "srv/PrologQuery.srv"
-  # DEPENDENCIES geometry_msgs
+
+  DEPENDENCIES geometry_msgs
 )
 
 ament_export_dependencies(rosidl_default_runtime)

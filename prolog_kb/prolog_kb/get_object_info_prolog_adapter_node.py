@@ -19,9 +19,10 @@ from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
 from krr_mirte_skills_msgs.srv import GetObjectInfo
 
-from prolog_kb.prolog_adapter import PrologAdapter
+from prolog_kb.prolog_interface import PrologInterface
 
-class GetObjectInfoPrologAdapter(PrologAdapter):
+
+class GetObjectInfoPrologAdapter(PrologInterface):
     """
     An adapter that intercepts the /get_object_info service, and publishes the
     results of the service call into a prolog knowledge base.
@@ -41,21 +42,18 @@ class GetObjectInfoPrologAdapter(PrologAdapter):
                 callback_group=MutuallyExclusiveCallbackGroup())
 
     def get_object_info_cb(self, request, result):
-        result = self.call_service(self.client_get_object_info_, request)
-        if result is None:
-            result = GetObjectInfo.Response()
-            return result
+        self.get_logger().info('Forwarding service request to krr_mirte_skills: /get_object_info')
+        result = self.call_service_or(self.client_get_object_info_, request, result) 
         if not result.success:
+            self.get_logger().warning('Service request to /get_object_info failed, no information to capture.')
             return result
 
-        try:
-            object_id = self.query("is_held(O)", maxresult=1)[0]["O"]
-        except Exception as e:
-            self.get_logger().error(
-                    "Recieved the following error while attempting to"
-                    f" retrieve the held object id:\n{str(e)}")
+
+        answers = self.query("is_held(O)", maxresult=1)
+        if len(answers) != 1:
             result.success = False
             return result
+        object_id = answers[0]["O"]
 
         # Object type and attribute exist
         self.assertz(f"object_type({result.object_type})")
@@ -66,6 +64,7 @@ class GetObjectInfoPrologAdapter(PrologAdapter):
         if result.attribute != '':
             self.assertz(f"has_attribute({object_id}, {result.attribute})")
 
+        self.get_logger().info('Captured information from service request: /get_object_info')
         return result
 
 

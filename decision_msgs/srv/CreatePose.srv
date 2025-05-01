@@ -1,0 +1,7 @@
+# Request
+geometry_msgs/Pose pose
+
+---
+# Response
+bool success
+string id

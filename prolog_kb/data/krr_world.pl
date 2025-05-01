@@ -127,7 +127,11 @@ point_2d(point_2d_4_office_to_living).
 :- dynamic is_held/1.
 
 % Objects cannot have a pose if they are also held
-has_pose(O,_) :- object(O), \+is_held(O), !.
+% :- (
+%     object(O), is_held(O) 
+%     -> 
+%     \+ has_pose(O,_)
+%     ).
 
 
 % Object have a drop type
