@@ -71,7 +71,7 @@ class PrologServer(Node):
         try:
             answers = list(self.prolog.query(request.query.clause,
                                              maxresult=request.maxresult,
-                                             catcherrors=False))
+                                             catcherrors=True))
         except PrologError as e:
             self.get_logger().error(str(e))
             return result
@@ -97,7 +97,7 @@ class PrologServer(Node):
             self.get_logger().error('Recieved empty clause.')
 
         try:
-            self.prolog.assertz(msg.clause, catcherrors=False)
+            self.prolog.assertz(msg.clause, catcherrors=True)
             self.get_logger().info(f'Added clause to end of knowledge base: "{msg.clause}"')
         except PrologError as e:
             self.get_logger().error(str(e))
@@ -107,7 +107,7 @@ class PrologServer(Node):
             self.get_logger().error('Recieved empty clause.')
 
         try:
-            self.prolog.retractall(msg.clause, catcherrors=False)
+            self.prolog.retractall(msg.clause, catcherrors=True)
             self.get_logger().info(f'Retracted clause(s) from knowledge base: "{msg.clause}"')
         except PrologError as e:
             self.get_logger().error(str(e))
