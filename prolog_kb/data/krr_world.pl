@@ -1,53 +1,55 @@
 % Drop locations
 :- dynamic drop/1.
-drop(drop_1_dishwasher).
-drop(drop_2_tableware).
-drop(drop_3_livingroom).
-drop(drop_4_toys).
-drop(drop_5_general).
-drop(drop_6_bedroom).
-drop(drop_7_trash).
+% drop(drop_1_dishwasher).
+% drop(drop_2_tableware).
+% drop(drop_3_livingroom).
+% drop(drop_4_toys).
+% drop(drop_5_general).
+% drop(drop_6_bedroom).
+% drop(drop_7_trash).
 
 % Drop types
-drop_type(dishwasher).
-drop_type(tableware).
-drop_type(livingroom).
-drop_type(toys).
-drop_type(general).
-drop_type(bedroom).
-drop_type(trash).
+:- dynamic drop_type/1.
+% drop_type(dishwasher).
+% drop_type(tableware).
+% drop_type(livingroom).
+% drop_type(toys).
+% drop_type(general).
+% drop_type(bedroom).
+% drop_type(trash).
 
 % Objects
-object(obj_0_cup_clean).
-object(obj_1_cup_dirty).
-object(obj_3_fidget_spinner).
-object(obj_4_book).
-object(obj_7_bread).
-object(obj_8_spoon_clean).
-object(obj_9_spoon_dirty).
-object(obj_10_tissue_box).
-object(obj_11_beer).
-object(obj_11_beer_empty).
-object(obj_12_wood_cube).
-object(obj_13_candle).
+:- dynamic object/1.
+% object(obj_0_cup_clean).
+% object(obj_1_cup_dirty).
+% object(obj_3_fidget_spinner).
+% object(obj_4_book).
+% object(obj_7_bread).
+% object(obj_8_spoon_clean).
+% object(obj_9_spoon_dirty).
+% object(obj_10_tissue_box).
+% object(obj_11_beer).
+% object(obj_11_beer_empty).
+% object(obj_12_wood_cube).
+% object(obj_13_candle).
 
 % Object Types
 :- dynamic object_type/1.
-object_type(cup).
-object_type(fidget_spinner).
-object_type(book).
-object_type(bread).
-object_type(spoon).
-object_type(tissue_box).
-object_type(beer).
-object_type(wood_cube).
-object_type(candle).
+% object_type(cup).
+% object_type(fidget_spinner).
+% object_type(book).
+% object_type(bread).
+% object_type(spoon).
+% object_type(tissue_box).
+% object_type(beer).
+% object_type(wood_cube).
+% object_type(candle).
 
 % Attributes
 :- dynamic attribute/1.
-attribute(clean).
-attribute(dirty).
-attribute(empty).
+% attribute(clean).
+% attribute(dirty).
+% attribute(empty).
 
 % Rooms
 room(kitchen).
@@ -63,13 +65,13 @@ doorway(office_to_living).
 
 % Poses
 :- dynamic pose/1.
-pose(pose_drop_1_dishwasher).
-pose(pose_drop_2_tableware).
-pose(pose_drop_3_livingroom).
-pose(pose_drop_4_toys).
-pose(pose_drop_5_general).
-pose(pose_drop_6_bedroom).
-pose(pose_drop_7_trash).
+% pose(pose_drop_1_dishwasher).
+% pose(pose_drop_2_tableware).
+% pose(pose_drop_3_livingroom).
+% pose(pose_drop_4_toys).
+% pose(pose_drop_5_general).
+% pose(pose_drop_6_bedroom).
+% pose(pose_drop_7_trash).
 
 % Extents
 extent(extent_drop).
@@ -135,20 +137,19 @@ point_2d(point_2d_4_office_to_living).
 
 
 % Object have a drop type
-% TODO: when a new object is found, how do we tell which one it is ... ?
+:- dynamic has_drop_type/2.
 % has_drop_type(obj_0_cup_clean, tableware).    %% Covered by logic
 % has_drop_type(obj_1_cup_dirty, dishwasher).   %% Covered by logic
-:- dynamic has_drop_type/2.
-has_drop_type(obj_3_fidget_spinner, toys).
-has_drop_type(obj_4_book, bedroom).
-has_drop_type(obj_7_bread, trash).
+% has_drop_type(obj_3_fidget_spinner, toys).
+% has_drop_type(obj_4_book, bedroom).
+% has_drop_type(obj_7_bread, trash).
 % has_drop_type(obj_8_spoon_clean, tableware).  %% Covered by logic
 % has_drop_type(obj_9_spoon_dirty, dishwasher). %% Covered by logic
-has_drop_type(obj_10_tissue_box, livingroom).
-has_drop_type(obj_11_beer, tableware).
+% has_drop_type(obj_10_tissue_box, livingroom).
+% has_drop_type(obj_11_beer, tableware).
 % has_drop_type(obj_11_beer_empty, trash).      %% Covered by logic
-has_drop_type(obj_12_wood_cube, bedroom).
-has_drop_type(obj_13_candle, livingroom).
+% has_drop_type(obj_12_wood_cube, bedroom).
+% has_drop_type(obj_13_candle, livingroom).
 
 % Clean tableware goes on the table
 has_drop_type(O, tableware) :- 
@@ -169,22 +170,23 @@ has_drop_type(O, trash) :-
 
 % Objects have an object_type
 :- dynamic has_type/2.
-has_type(obj_0_cup_clean, cup).
-has_type(obj_1_cup_dirty, cup).
-has_type(obj_3_fidget_spinner, fidget_spinner).
-has_type(obj_4_book, book).
-has_type(obj_7_bread, bread).
-has_type(obj_8_spoon_clean, spoon).
-has_type(obj_9_spoon_dirty, spoon).
-has_type(obj_10_tissue_box, tissue_box).
-has_type(obj_11_beer, beer).
-has_type(obj_11_beer_empty, beer).
-has_type(obj_12_wood_cube, wood_cube).
-has_type(obj_13_candle, candle).
+% has_type(obj_0_cup_clean, cup).
+% has_type(obj_1_cup_dirty, cup).
+% has_type(obj_3_fidget_spinner, fidget_spinner).
+% has_type(obj_4_book, book).
+% has_type(obj_7_bread, bread).
+% has_type(obj_8_spoon_clean, spoon).
+% has_type(obj_9_spoon_dirty, spoon).
+% has_type(obj_10_tissue_box, tissue_box).
+% has_type(obj_11_beer, beer).
+% has_type(obj_11_beer_empty, beer).
+% has_type(obj_12_wood_cube, wood_cube).
+% has_type(obj_13_candle, candle).
 
 % Some objecs are slow to drop
-slow_drop(obj_3_fidget_spinner).
-slow_drop(obj_3_candle).
+% slow_drop( <object_type> )
+slow_drop(O) :- object(O), has_type(O, fidget_spinner)
+slow_drop(O) :- object(O), has_type(O, candle)
 
 
 % --------------------------------

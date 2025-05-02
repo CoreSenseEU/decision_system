@@ -77,6 +77,7 @@ class GetDropLocationsPrologAdapter(PrologInterface):
             drop_id = GetDropLocationsPrologAdapter._get_next_drop()
 
             assertions.append(f"drop({drop_id})")
+            assertions.append(f"drop_type({drop.type.data})")
             assertions.append(f"has_drop_type({drop_id}, {drop.type.data})")
             assertions.append(f"has_pose({drop_id}, {new_pose_result.id})")
 

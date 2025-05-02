@@ -29,7 +29,6 @@ class PlaceObjectPrologAdapter(PrologInterface):
     """
     def __init__(self):
         super().__init__('place_object_prolog_adapter')
-        self.get_logger().info('Starting prolog knowledge base adapter for service: /place_object')
 
         self.srv_place_object_ = self.create_service(
                 PlaceObject,

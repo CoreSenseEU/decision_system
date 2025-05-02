@@ -53,6 +53,7 @@ class PickObjectPrologAdapter(PrologInterface):
         #   the previously unknown object that is picked up?
 
         self.assertz(f"object({object_id})")
+        self.assertz(f"was_picked({object_id})")
         self.assertz(f"is_held({object_id})")
         self.retract(f"has_pose({object_id},_)")
 
