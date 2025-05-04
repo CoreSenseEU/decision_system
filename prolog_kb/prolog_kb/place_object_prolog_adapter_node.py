@@ -28,7 +28,7 @@ class PlaceObjectPrologAdapter(PrologInterface):
     results of the service call into a prolog knowledge base.
     """
     def __init__(self):
-        super().__init__('place_object_prolog_adapter')
+        super().__init__('place_object')
 
         self.srv_place_object_ = self.create_service(
                 PlaceObject,

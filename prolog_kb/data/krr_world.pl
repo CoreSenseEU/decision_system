@@ -185,8 +185,8 @@ has_drop_type(O, trash) :-
 
 % Some objecs are slow to drop
 % slow_drop( <object_type> )
-slow_drop(O) :- object(O), has_type(O, fidget_spinner)
-slow_drop(O) :- object(O), has_type(O, candle)
+slow_drop(O) :- object(O), has_type(O, fidget_spinner).
+slow_drop(O) :- object(O), has_type(O, candle).
 
 
 % --------------------------------

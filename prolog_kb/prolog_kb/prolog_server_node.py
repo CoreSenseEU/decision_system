@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import sys
 import re
 
@@ -19,6 +20,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.parameter import Parameter
 from rcl_interfaces.msg import SetParametersResult
+from ament_index_python.packages import get_package_share_directory
 
 from decision_msgs.msg import PrologClause, PrologAnswer, PrologBinding
 from decision_msgs.srv import PrologQuery
@@ -113,14 +115,29 @@ class PrologServer(Node):
             self.get_logger().error(str(e))
 
     def _reload_kb(self, parameters):
+        kb_param = None
         for p in parameters:
             if p.name == 'knowledge_base':
-                self.kb_ = str(p.value)
-                self.get_logger().info(f'Reloading knowledge base with {self.kb_}')
-                self.prolog = Prolog()
-                self.prolog.consult(self.kb_, relative_to=__file__)
-                return SetParametersResult(successful=True)
+                kb_param = str(p.value)
+                break
+        if kb_param is None:
+            return SetParametersResult(successful=True)
+
+        self.get_logger().info(f'Reloading knowledge base with {kb_param}')
+        new_prolog = Prolog()
+        try:
+            new_prolog.consult(
+                kb_param, 
+                relative_to=os.path.join(get_package_share_directory('prolog_kb'), 'data')
+            )
+        except PrologError as e:
+            self.get_logger().error(str(e))
+            return SetParametersResult(successful=False, reason=str(e))
+
+        self.prolog = new_prolog
+        self.kb_ = kb_param
         return SetParametersResult(successful=True)
+
 
     def _get_indicators(self, clause):
         matches = re.findall(r'\s?(\w+?)\((.*?)\)', clause)
