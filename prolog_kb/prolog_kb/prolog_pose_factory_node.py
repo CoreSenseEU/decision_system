@@ -33,6 +33,8 @@ class PrologPoseFactoryNode(PrologInterface):
                 CreatePose,
                 'create_pose',
                 self.create_pose_cb)
+        self.position_tolerance = 0.02 # [m]
+        self.orientation_tolerance = 0.1 # [rad]
 
     @classmethod
     def _get_next_pose(cls):
@@ -51,8 +53,8 @@ class PrologPoseFactoryNode(PrologInterface):
                 f"{request.pose.orientation.w}"
                 )
 
-        # TODO: Be smarter about this, and compare using a float threshold
-        answers = self.query("has_coordinates_7d(P, " + coordinates + "), pose(P)", maxresult=1)
+        answers = self.query("approximately_equals(P, " + coordinates + 
+                            f"{self.position_tolerance}, {self.orientation_tolerance})", maxresult=1)
         if len(answers) > 1:
             self.get_logger().error(f'Found duplicate poses: {[ans["P"] for ans in answers]}')
             return result

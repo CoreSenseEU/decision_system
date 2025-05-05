@@ -65,13 +65,13 @@ doorway(office_to_living).
 
 % Poses
 :- dynamic pose/1.
-% pose(pose_drop_1_dishwasher).
-% pose(pose_drop_2_tableware).
-% pose(pose_drop_3_livingroom).
-% pose(pose_drop_4_toys).
-% pose(pose_drop_5_general).
-% pose(pose_drop_6_bedroom).
-% pose(pose_drop_7_trash).
+pose(pose_drop_1_dishwasher).
+pose(pose_drop_2_tableware).
+pose(pose_drop_3_livingroom).
+pose(pose_drop_4_toys).
+pose(pose_drop_5_general).
+pose(pose_drop_6_bedroom).
+pose(pose_drop_7_trash).
 
 % Extents
 extent(extent_drop).
@@ -264,14 +264,56 @@ has_drop_type(drop_7_trash, trash).
 
 % Poses have 7D coordinates X,Y,Z, quaterion    [meters, _]
 :- dynamic has_coordinates_7d/8.
-has_coordinates_7d(pose_drop_1_dishwasher, 1.5, 0, 0, 0, 0, 0, 0).
-has_coordinates_7d(pose_drop_2_tableware, 0.356888, -1.47612, 0, 0, 0, 0, 0).
-has_coordinates_7d(pose_drop_3_livingroom, -4, -3, 0, 0, 0, 0, 0).
-has_coordinates_7d(pose_drop_4_toys, -8, 3, 0, 0, 0, 0, 0).
-has_coordinates_7d(pose_drop_5_general, -2.5096, 6.78965, 0, 0, 0, 0, 0).
-has_coordinates_7d(pose_drop_6_bedroom, 2.15269, 6.51919, 0, 0, 0, 0, 0).
-has_coordinates_7d(pose_drop_7_trash, -8.64577, 1.30639, 0, 0, 0, 0, 0).
+has_coordinates_7d(pose_drop_1_dishwasher, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0).
+has_coordinates_7d(pose_drop_2_tableware, 0.356888, -1.47612, 0.0, 0.0, 0.0, 0.0, 0.0).
+has_coordinates_7d(pose_drop_3_livingroom, -4, -3, 0.0, 0.0, 0.0, 0.0, 0.0).
+has_coordinates_7d(pose_drop_4_toys, -8, 3, 0.0, 0.0, 0.0, 0.0, 0.0).
+has_coordinates_7d(pose_drop_5_general, -2.5096, 6.78965, 0.0, 0.0, 0.0, 0.0, 0.0).
+has_coordinates_7d(pose_drop_6_bedroom, 2.15269, 6.51919, 0.0, 0.0, 0.0, 0.0, 0.0).
+has_coordinates_7d(pose_drop_7_trash, -8.64577, 1.30639, 0.0, 0.0, 0.0, 0.0, 0.0).
 
+% Poses with zero quaternions are only equal to other poses with zero quaternions.
+approximately_equals(P1, X2, Y2, Z2, 0.0, 0.0, 0.0, 0.0, PosTol, _) :- 
+  !, % RED cut!!!
+  pose(P1),
+  has_coordinates_7d(P1, X1, Y1, Z1, 0.0, 0.0, 0.0, 0.0),
+  % Position
+  sqrt((X1 - X2)**2 + (Y1 - Y2)**2 + (Z1 - Z2)**2) < PosTol.
+
+approximately_equals(P1, X2, Y2, Z2, XX2, YY2, ZZ2, WW2, PosTol, OriTol) :- 
+  pose(P1),
+  has_coordinates_7d(P1, X1, Y1, Z1, XX1, YY1, ZZ1, WW1), 
+  % Poses with unit quaternions are never equal to other poses with zero quaternions.
+  (
+    XX1 \= 0.0 
+  ; YY1 \= 0.0 
+  ; ZZ1 \= 0.0
+  ; WW1 \= 0.0
+  ),
+
+  % Position
+  sqrt((X1 - X2)**2 + (Y1 - Y2)**2 + (Z1 - Z2)**2) < PosTol,
+
+  % Orientation
+  % NOTE: this assumes that orientations are unit quaternions.
+  Dx = WW1*XX2 - XX1*WW2 + YY1*ZZ2 - ZZ1*YY2,
+  Dy = WW1*YY2 - YY1*WW2 - XX1*ZZ2 + ZZ1*XX2,
+  Dz = WW1*ZZ2 - ZZ1*WW2 + XX1*YY2 - YY1*XX2,
+  Dw = WW1*WW2 + XX1*XX2 + YY1*YY2 + ZZ1*ZZ2,
+  abs(atan2(sqrt(Dx**2 + Dy**2 + Dz**2), Dw)) < OriTol.
+
+% Poses are approximately equal to themselves
+approximately_equals(P1, P2, _, _) :- 
+  pose(P1),
+  pose(P2),
+  P1 = P2.
+
+% Compares poses for quality up to a position and orientation tolerance.
+approximately_equals(P1, P2, PosTol, OriTol) :- 
+  pose(P1),
+  pose(P2),
+  has_coordinates_7d(P2, X2, Y2, Z2, XX2, YY2, ZZ2, WW2), 
+  approximately_equals(P1, X2, Y2, Z2, XX2, YY2, ZZ2, WW2, PosTol, OriTol).
 
 
 % --------------------------------
