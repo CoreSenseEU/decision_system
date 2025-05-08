@@ -56,9 +56,6 @@ class AggregatePreferencesNode(Node):
 
         alternatives = judgments_map.keys()
         self.get_logger().info(f'Aggregating assessments of {axes} on {alternatives} with policy: aggregate_preferences')
-
-        print(list(judgments_map.values()))
-
         self.pub_.publish(Evaluation(judgments=list(judgments_map.values())))
 
 
