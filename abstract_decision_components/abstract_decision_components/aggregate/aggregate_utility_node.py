@@ -17,16 +17,11 @@ import sys
 import rclpy
 from rclpy.node import Node
 
-from decision_msgs.msg import Evaluation, AssessmentArray, CueWeights, Judgment, Feature
-from abstract_decision_components.aggregate import aggregate
+from decision_msgs.msg import Evaluation, AssessmentArray, Judgment, Feature
 
 
 class AggregateUtilityNode(Node):
-    # TODO: consider splitting this into three different nodes: 
-    #   - tallying/dawes
-    #   - weighted/unweighted
-    #   - boolean
-    """Compute a single utility score for each alternative.
+    """An abstract class to compute a single utility score for each alternative.
 
     :param policy: A policy to use for computing utility. Valid options are:
         - `'unweighted_sum'`: add assessment scores directly.
@@ -46,20 +41,12 @@ class AggregateUtilityNode(Node):
         operator to combine assessments. Valid options are `'or'` or `'and'`,
         defaults to 'and'
     """
-    def __init__(self):
-        super().__init__('aggregate_utility_node')
-        self.get_logger().info('Starting AGGREGATE node with policy: aggregate_utility')
+    def __init__(self, policy):
+        self.policy_ = f'aggregate_utility_{policy}'
+        self.policy_str = self.policy_ # mutable by children
 
-        self.declare_parameter('boolean_operator', 'and')
-        self.declare_parameter('policy', 'unweighted_sum')
-        self.declare_parameter('normalize', False)
-
-        self.sub_weights_ = self.create_subscription(
-                CueWeights,
-                'cue_weights',
-                self.update_weights_cb,
-                10)
-        self.weights_ = {}
+        super().__init__(f'{self.policy_}_node')
+        self.get_logger().info(f'Starting AGGREGATE node with policy: {self.policy_}')
 
         self.sub_assesments_ = self.create_subscription(
                 AssessmentArray,
@@ -77,74 +64,12 @@ class AggregateUtilityNode(Node):
             self.get_logger().error('Recieved empty list of assessments')
             return
 
-        policy = self.get_parameter('policy').value
-
-        policy_str = policy
-
         try:
-            match policy:
-                case 'weighted_sum':
-                    policy_str += f' weights={self.weights_}'
-                    utilities = self.weighted_sum(msg, self.weights_)
-                case 'unweighted_sum':
-                    weights = {a.cue.id : 1 for a in msg.assessments}
-                    utilities = self.weighted_sum(msg, weights)
-                case 'boolean':
-                    operator = self.get_parameter('boolean_operator').value
-                    policy_str += f' operator={operator}'
-                    utilities = self.boolean_combination(msg, operator)
-                case 'tallying':
-                    utilities = self.tallying(msg)
-                case 'dawes':
-                    utilities = self.dawes_rule(msg)
-                case _:
-                    raise ValueError(f"Policy '{policy}' invalid. Valid options are" \
-                                    + "[weighted_sum, unweighted_sum, tallying, boolean, dawes]")
+            utilities = self.aggregate_assessments(msg.assessments) # implemented by children
         except ValueError as e:
             self.get_logger().error(str(e))
             return
 
-        judgments_map = self._assemble_judgment_map(msg, utilities)
-        alternatives = judgments_map.keys()
-        axes = [a.cue.id for a in msg.assessments]
-        self.get_logger().info(f'Aggregating assessments of {axes} on {alternatives} with policy: aggregate_utility "{policy_str}"')
-        self.pub_.publish(Evaluation(judgments=list(judgments_map.values())))
-
-    def boolean_combination(self, msg, operator):
-        return aggregate.boolean_combination(msg.assessments, operator)
-
-    def update_weights_cb(self, msg):
-        if len(msg.weights) != len(msg.cues):
-            self.weights_ = {}
-            for cue, weight in zip(msg.cues, msg.weights):
-                self.weights_[cue.id] = weight
-            self.get_logger().info(f'Recieved new weights: {self.weights_}')
-        else:
-            self.get_logger().error(
-                    f"Mismatch between the number of cues ({len(msg.cues)})"\
-                  + f" and weights ({len(msg.weights)})")
-
-    def weighted_sum(self, msg, weights):
-        """
-        :raises ValueError: if there is a mismatch between the cue weights
-            and assessed cues
-        """
-        cues = sorted([a.cue.id for a in msg.assessments])
-        weight_keys = sorted(weights.keys())
-        if len(weight_keys) != len(cues) and weight_keys != cues:
-            raise ValueError(f"Mismatch between the cue weights {weight_keys}" \
-                           + f" and assessments {cues}")
-
-        normalize = self.get_parameter('normalize').value
-        return aggregate.weighted_sum(msg.assessments, weights, normalize=normalize)
-
-    def dawes_rule(self, msg):
-        return aggregate.dawes_rule(msg.assessments)
-
-    def tallying(self, msg):
-        return aggregate.tallying(msg.assessments)
-
-    def _assemble_judgment_map(self, msg, utilities):
         # Assemble judgments
         alternatives = [p.alternative for p in msg.assessments[0].preferences]
         judgments_map = {}
@@ -154,7 +79,14 @@ class AggregateUtilityNode(Node):
                                            features=[Feature(axis='utility',
                                                              score=u)])
                                   })
-        return judgments_map
+
+        axes = [a.cue.id for a in msg.assessments]
+        self.get_logger().info(f'Aggregating assessments of {axes} on {alternatives} with policy: {self.policy_str}')
+        self.pub_.publish(Evaluation(judgments=list(judgments_map.values())))
+
+    # To be overridden by children
+    def aggregate(self, assessments):
+        raise NotImplementedError
         
 
 def main(args=None):
