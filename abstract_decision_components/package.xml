@@ -3,7 +3,7 @@
 <package format="3">
   <name>abstract_decision_components</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Abstract decision components for assembling decision-making heuristics</description>
   <maintainer email="t.k.olson@student.tudelft.nl">Tyler Olson</maintainer>
   <author email="t.k.olson@student.tudelft.nl">Tyler Olson</author>
   <license>Apache-2.0</license>
