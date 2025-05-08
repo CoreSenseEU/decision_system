@@ -64,6 +64,7 @@ class AggregateMultiValueUtilityNode(Node):
         new_judgments = {}
 
         # Combine into a single evaluation and publish
+        axes = []
         judgments = []
         for child in self.children_:
             judgments += self.evaluations_buffer_[child].pop(0).judgments
@@ -75,6 +76,11 @@ class AggregateMultiValueUtilityNode(Node):
             else:
                 new_judgments[key].features += judgment.features
 
+            axes += [f.axis for f in judgment.features]
+
+        self.get_logger().info(f'Aggregating assessments of {set(axes)} on'
+                               f'alternatives {new_judgments.keys()} with '
+                               'policy: aggregate_multi_value_utility')
         self.pub_evaluation_.publish(Evaluation(judgments=new_judgments.values()))
 
     def _update_children(self, parameters):

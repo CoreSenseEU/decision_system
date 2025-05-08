@@ -22,25 +22,8 @@ from decision_msgs.msg import Evaluation, AssessmentArray, Judgment, Feature
 
 class AggregateUtilityNode(Node):
     """An abstract class to compute a single utility score for each alternative.
-
-    :param policy: A policy to use for computing utility. Valid options are:
-        - `'unweighted_sum'`: add assessment scores directly.
-        - `'weighted_sum'`: add assessment scores based on `cue_weights`.
-        - `'tallying'`: add the number of cue values greater than 0.
-        - `'dawes'`: Use dawes rule: calculate the difference between the number of
-            positive and negative cue values (0 is assumed to be negative).
-        - `'boolean'`: interpret scores as booleans and combine using a boolean
-            operator set with the ``boolean_operator`` parameter. Assumes scores
-            `> 0` are `True` and `True` values are always preferred.
-        Defaults to 'unweighted_sum'
-    :param normalize: If ``policy`` is either ``unweighted_sum`` or
-        ``weighted_sum`` and this is True, linearly transform each assessment
-        over its to the range `[0,1]`. Defaults to False
-
-    :param boolean_operator: If ``policy`` is `boolean`, use this logical
-        operator to combine assessments. Valid options are `'or'` or `'and'`,
-        defaults to 'and'
     """
+
     def __init__(self, policy):
         self.policy_ = f'aggregate_utility_{policy}'
         self.policy_str = self.policy_ # mutable by children
@@ -76,7 +59,7 @@ class AggregateUtilityNode(Node):
         for a, u in zip(alternatives, utilities):
             judgments_map.update({a.id : 
                                   Judgment(alternative=a,
-                                           features=[Feature(axis='utility',
+                                           features=[Feature(axis=f'"{self.policy_str}"',
                                                              score=u)])
                                   })
 
