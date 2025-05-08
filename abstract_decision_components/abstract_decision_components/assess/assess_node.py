@@ -16,37 +16,35 @@ import sys
 
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
+from rcl_interfaces.msg import SetParametersResult
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
 
-from decision_msgs.msg import AssessmentArray, AlternativeArray, CueArray, Assessment
+from decision_msgs.msg import AssessmentArray, AlternativeArray, Assessment, Cue
 from decision_msgs.srv import AssessAlternatives
 
 
 class AssessNode(Node):
     """
     Assesses alternatives based on cues.
+
+    :param cues: Namespaces of each of the cues that this assesses. Each of
+        these cues are assumed to be unique ROS services.
+    :param timeout: The total time (in seconds) to wait to assess all cues.
     """
 
-    def __init__(self, srv_timeout=5.0):
-        """
-        Assesses alternatives based on cues.
-
-        :param srv_timeout: The total time (in seconds) to wait to assess all cues.
-        """
+    def __init__(self):
         super().__init__('assess_node')
         self.get_logger().info('Starting ASSESS node')
 
-        self.srv_timeout_ = srv_timeout # seconds
-
-        self.sub_cues_ = self.create_subscription(
-                CueArray,
-                'cues',
-                self.update_cues_cb,
-                10)
         self.cues_ = {}
-        self.cue_clients_ = {}
+        self.clients_ = {}
         self.cue_cb_group_ = ReentrantCallbackGroup()
+
+        self.add_on_set_parameters_callback(self._update_cues)
+        self.declare_parameter('cues', Parameter.Type.STRING_ARRAY)
+        self.declare_parameter('timeout', 5.0)
 
         self.sub_alternatives_ = self.create_subscription(
                 AlternativeArray,
@@ -67,21 +65,24 @@ class AssessNode(Node):
 
         # start each cue
         futures = []
-        for cue_id, client in self.cue_clients_.items():
+        for cue, client in self.clients_.items():
             request = AssessAlternatives.Request(alternatives=msg.alternatives)
-            futures.append((self.cues_[cue_id], client, client.call_async(request)))
+            futures.append((cue, client, client.call_async(request)))
 
         # wait for each cue to finish
+        timeout = self.get_parameter('timeout').value()
         assessments = []
         then = self.get_clock().now().nanoseconds
         for cue, client, future in futures:
-            timeout_sec = self.srv_timeout_ - (self.get_clock().now().nanoseconds - then) / 10**9
+            timeout_sec = timeout - (self.get_clock().now().nanoseconds - then) / 10**9
             if timeout_sec > 0:
                 self.executor.spin_until_future_complete(future, timeout_sec=timeout_sec)
 
             if future.done():
                 result = future.result()
-                assessments.append(Assessment(cue=cue, preferences=result.preferences))
+                # TODO: do we even need ids anymore since seach service is unique?
+                #   Keeping for now in case we want to switch cues to topics instead of services
+                assessments.append(Assessment(cue=Cue(id=cue[1:], service=cue), preferences=result.preferences))
             else:
                 client.remove_pending_request(future)
                 self.get_logger().error(f'Cue {cue} failed or timed out')
@@ -93,57 +94,32 @@ class AssessNode(Node):
 
         self.pub_.publish(AssessmentArray(assessments=assessments))
 
-    def update_cues_cb(self, msg):
-        if len(msg.cues) < 1:
-            self.get_logger().error('Recieved empty list of cues')
-            return
+    def _update_cues(self, parameters):
+        cues = None
+        for p in parameters:
+            if p.name == 'cues':
+                cues = p.value
+                break
+        if cues is None:
+            return SetParametersResult(successful=True)
 
-        for client in self.cue_clients_:
-            self.destroy_client(client)
+        # destroy old clients
+        for client in self.clients_:
+            while not self.destroy_client(client):
+                self.executor.spin_once()
 
-        self.cues_ = {cue.id : cue for cue in msg.cues}
-        self.cues_clients_ = {}
-        for cue in msg.cues:
+        # Create a new client for each cue
+        self.get_logger().info(f'Updating cues: {cues}')
+        self.cues_ = cues
+        self.clients_ = []
+        for cue in cues:
             client = self.create_client(
                     AssessAlternatives,
-                    cue.service,
+                    cue,
                     callback_group=self.cue_cb_group_)
-            self.cue_clients_.update({cue.id: client})
-        self.get_logger().info(f'Updating cues: {self.cues_}')
+            self.clients_.update({cue: client})
 
-    # def assess(self, cue, alternatives):
-    #     """Adapted from https://github.com/kas-lab/krr_mirte_skills/blob/main/krr_mirte_skills/krr_mirte_skills/get_object_info.py
-    #     """
-    #     request = AssessAlternatives.Request()
-    #     request.alternatives = alternatives
-    #
-    #     # wait for service to be ready
-    #     client = self.cue_clients_[cue.id]
-    #     then = self.get_clock().now()
-    #     if client.wait_for_service(timeout_sec=self.srv_timeout_) is False:
-    #         self.get_logger().error(f'Service {cue.service} not available for cue {cue.id}')
-    #         return None
-    #
-    #     # wait for service to complete
-    #     future = client.call_async(request)
-    #     time_waited = self.get_clock().now() - then
-    #     self.executor.spin_until_future_complete(future, timeout_sec=(time_waited.nanoseconds / 10**9))
-    #     if future.done() is False:
-    #         self.get_logger().error(f'Service not completed or timed out for cue {cue.id}')
-    #         return None
-    #     result = future.result()
-    #
-    #     assessment = Assessment(cue=cue, preference=result.preferences)
-    #     return assessment
-    #
-    # def start_assessment_async(self, client, alternatives):
-    #     """Start an asyncronous assessment.
-    #     """
-    #     request = AssessAlternatives.Request()
-    #     request.alternatives = alternatives
-    #
-    #     future = client.call_async(AssessAlternatives.Request(alternatives=alternatives))
-    #     return future
+        return SetParametersResult(successful=True)
 
 
 def main(args=None):

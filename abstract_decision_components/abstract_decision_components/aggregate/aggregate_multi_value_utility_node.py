@@ -29,8 +29,10 @@ class AggregateMultiValueUtilityNode(Node):
         this multi-value utility agregator combines. Each of these children
         must publish its `evaluations` topic under its own namespace.
     """
+    # TODO: if we switch from topics to services, then this behavior looks very
+    #    similar to AssessNode and doesn't require buffering
 
-    def __init__(self, children):
+    def __init__(self):
         super().__init__('aggregate_multi_value_utility_node')
         self.get_logger().info(f'Starting AGGREGATE node with policy: {self.policy_}')
 
