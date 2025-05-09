@@ -14,6 +14,8 @@
 
 import sys
 
+import numpy as np
+
 import rclpy
 
 from decision_msgs.msg import CueWeights
@@ -46,7 +48,7 @@ class AggregateUtilitySumNode(AggregateUtilityNode):
                 10)
         self.weights_ = {}
 
-    def aggregate(self, assessments):
+    def aggregate(self, msg):
         """
         :raises ValueError: if there is a mismatch between the cue weights
             and assessed cues
@@ -55,22 +57,20 @@ class AggregateUtilitySumNode(AggregateUtilityNode):
 
         match policy:
             case 'weighted_sum':
+                # TODO: move this to parameter update function
                 self.policy_str = f'sum, weights={self.weights_}'
-                weights = self.weights_
+
+                weights = [self.weights_[cue] for cue in msg.cues]
             case 'unweighted_sum':
                 self.policy_str = 'sum, unweighted'
-                weights = {a.cue.id : 1 for a in assessments}
+                weights = [1] * len(msg.cues)
             case _:
+                # TODO: move this to parameter update function
                 raise ValueError(f"Policy '{policy}' invalid. Valid options are" \
                                 + "[weighted_sum, unweighted_sum, tallying, boolean, dawes]")
 
-        cues = sorted([a.cue.id for a in assessments])
-        weight_keys = sorted(weights.keys())
-        if len(weight_keys) != len(cues) and weight_keys != cues:
-            raise ValueError(f"Mismatch between the cue weights {weight_keys}" \
-                           + f" and assessments {cues}")
-
         normalize = self.get_parameter('normalize').value
+        assessments = np.array(msg.scores).reshape((len(msg.alternatives), []))
         utilities = weighted_sum(assessments, weights, normalize=normalize)
         return utilities
 

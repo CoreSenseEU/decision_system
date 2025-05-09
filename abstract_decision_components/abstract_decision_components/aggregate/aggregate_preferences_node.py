@@ -17,7 +17,9 @@ import sys
 import rclpy
 from rclpy.node import Node
 
-from decision_msgs.msg import Evaluation, AssessmentArray, Judgment, Feature
+from decision_msgs.msg import Evaluation, AssessmentMatrix
+
+from abstract_decision_components.util import validate_matrix
 
 
 class AggregatePreferencesNode(Node):
@@ -29,7 +31,7 @@ class AggregatePreferencesNode(Node):
         self.get_logger().info('Starting AGGREGATE node with policy: aggregate_preferences')
 
         self.sub_ = self.create_subscription(
-                AssessmentArray,
+                AssessmentMatrix,
                 'assessments',
                 self.assessments_cb,
                 10)
@@ -40,23 +42,17 @@ class AggregatePreferencesNode(Node):
                 10)
 
     def assessments_cb(self, msg):
-        if len(msg.assessments) < 1:
-            self.get_logger().error('Recieved empty list of assessments')
+        self.get_logger().info(f'Aggregating assessments of {msg.cues} on {msg.alternatives} with policy: aggregate_preferences')
+
+        try:
+            validate_matrix(len(msg.alternatives), len(msg.cues), len(msg.scores))
+        except ValueError as e:
+            self.get_logger().error(str(e))
             return
 
-        # Assume all assessments use the same alternatives
-        judgments_map = {p.alternative.id : Judgment(alternative=p.alternative) for p in msg.assessments[0].preferences}
-        axes = []
-
-        for assessment in msg.assessments:
-            axis = assessment.cue.id
-            axes.append(axis)
-            for preference in assessment.preferences:
-                judgments_map[preference.alternative.id].features.append(Feature(axis=axis, score=preference.score))
-
-        alternatives = judgments_map.keys()
-        self.get_logger().info(f'Aggregating assessments of {axes} on {alternatives} with policy: aggregate_preferences')
-        self.pub_.publish(Evaluation(judgments=list(judgments_map.values())))
+        self.pub_.publish(Evaluation(alternatives=msg.alternatives,
+                                     axes=[c.id for c in msg.cues],
+                                     scores=msg.scores))
 
 
 def main(args=None):

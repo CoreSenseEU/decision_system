@@ -14,6 +14,8 @@
 
 import sys
 
+import numpy as np
+
 import rclpy
 from rclpy.node import Node
 from rclpy.parameter import Parameter
@@ -21,7 +23,7 @@ from rcl_interfaces.msg import SetParametersResult
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
 
-from decision_msgs.msg import AssessmentArray, AlternativeArray, Assessment, Cue
+from decision_msgs.msg import AssessmentMatrix, AlternativeArray, Cue
 from decision_msgs.srv import AssessAlternatives
 
 
@@ -53,7 +55,7 @@ class AssessNode(Node):
                 10)
         
         self.pub_ = self.create_publisher(
-                AssessmentArray,
+                AssessmentMatrix,
                 'assessments',
                 10)
 
@@ -67,32 +69,37 @@ class AssessNode(Node):
         futures = []
         for cue, client in self.clients_.items():
             request = AssessAlternatives.Request(alternatives=msg.alternatives)
-            futures.append((cue, client, client.call_async(request)))
+            futures.append((client, client.call_async(request)))
 
         # wait for each cue to finish
         timeout = self.get_parameter('timeout').value()
-        assessments = []
+        scores = np.zeros((len(msg.alternatives), len(self.cues_)))
+        success = True
         then = self.get_clock().now().nanoseconds
-        for cue, client, future in futures:
+        for i, (client, future) in enumerate(futures):
+            if not success:
+                client.remove_pending_request(future)
+                continue
+
             timeout_sec = timeout - (self.get_clock().now().nanoseconds - then) / 10**9
             if timeout_sec > 0:
                 self.executor.spin_until_future_complete(future, timeout_sec=timeout_sec)
 
             if future.done():
                 result = future.result()
-                # TODO: do we even need ids anymore since seach service is unique?
-                #   Keeping for now in case we want to switch cues to topics instead of services
-                assessments.append(Assessment(cue=Cue(id=cue[1:], service=cue), preferences=result.preferences))
+                scores[:,i] = [p.score for p in result.preferences]
             else:
                 client.remove_pending_request(future)
                 self.get_logger().error(f'Cue {cue} failed or timed out')
 
-        if len(assessments) != len(self.cues_):
+        if not success:
             #  Kirsch says that all cues must be processed.
             self.get_logger().error("Failed to assess all cues")
             return
 
-        self.pub_.publish(AssessmentArray(assessments=assessments))
+        self.pub_.publish(AssessmentMatrix(cues=[Cue(id=c) for c in self.cues_], 
+                                         alternatives=msg.alternatives,
+                                         scores=scores.flatten().tolist()))
 
     def _update_cues(self, parameters):
         cues = None

@@ -14,6 +14,8 @@
 
 import sys
 
+import numpy as np
+
 import rclpy
 
 from abstract_decision_components.aggregate.aggregate import dawes_rule, tallying
@@ -35,14 +37,16 @@ class AggregateUtilitySignedNode(AggregateUtilityNode):
         super().__init__('signed')
         self.declare_parameter('policy', 'tallying')
 
-    def aggregate(self, assessments):
+    def aggregate(self, msg):
         policy = self.get_parameter('policy').value
+        assessments = np.array(msg.scores).reshape((len(msg.alternatives), []))
         match policy:
             case 'tallying':
                 utilities = dawes_rule(assessments)
             case 'dawes':
                 utilities = tallying(assessments)
             case _:
+                # TODO: move this to the parameter update function...
                 raise ValueError(f"Policy '{policy}' invalid. Valid options are" \
                                 + "[tallying, dawes]")
         return utilities

@@ -18,6 +18,7 @@ from rclpy.node import Node
 
 from decision_msgs.msg import Evaluation, OrderedEvaluation, WeakOrdering
 from abstract_decision_components.order import order
+from abstract_decision_components.util import validate_matrix
 
 
 class OrderCondorcetExtensionNode(Node):
@@ -52,29 +53,31 @@ class OrderCondorcetExtensionNode(Node):
                 10)
 
     def evaluation_cb(self, msg):
-        if len(msg.judgments) < 1:
-            self.get_logger().error('Recieved empty list of judgments')
+        try:
+            validate_matrix(len(msg.alternatives), len(msg.axes), len(msg.scores))
+        except ValueError as e:
+            self.get_logger().error(str(e))
             return
 
         policy = self.get_parameter('policy').value
         match policy:
             case 'copeland':
-                alternatives, ranks = order.copeland_method(msg.judgments)
+                ranks = order.copeland_method(msg.scores)
             case 'sequential_majority_comparison':
-                alternatives, ranks = order.sequential_majority_comparison(msg.judgments)
+                ranks = order.sequential_majority_comparison(msg.scores)
             case 'majority_of_confirming_dimensions':
-                raise NotImplementedError("Not yet tested")
-                alternatives, ranks = order.sequential_majority_comparison(msg.judgments, confirming=True)
+                ranks = order.sequential_majority_comparison(msg.scores, confirming=True)
             case _:
+                # TODO: move to parameter update validation
                 self.get_logger().error(
                         f"Policy '{policy}' invalid. Valid options are " \
                          "[copeland, sequential_majority_comparison, majority_of_confirming_dimensions]")
                 return
 
-        ordering = WeakOrdering(alternatives=alternatives, ranks=ranks)
-        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg.judgments)
+        ordering = WeakOrdering(alternatives=msg.alternatives, ranks=ranks)
+        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg)
 
-        self.get_logger().info(f'{alternatives} ordered {ranks} with policy: order_{policy}')
+        self.get_logger().info(f'{msg.alternatives} ordered {ranks} with policy: order_{policy}')
         self.pub_.publish(ordered_eval)
 
 

@@ -17,7 +17,9 @@ import sys
 import rclpy
 from rclpy.node import Node
 
-from decision_msgs.msg import Evaluation, AssessmentArray, Judgment, Feature
+from decision_msgs.msg import Evaluation, AssessmentArray
+
+from abstract_decision_components.util import validate_matrix
 
 
 class AggregateUtilityNode(Node):
@@ -43,29 +45,23 @@ class AggregateUtilityNode(Node):
                 10)
 
     def assessments_cb(self, msg):
-        if len(msg.assessments) < 1:
-            self.get_logger().error('Recieved empty list of assessments')
-            return
+        self.get_logger().info(f'Aggregating assessments of {msg.cues} on {msg.alternatives} with policy: {self.policy_str}')
 
         try:
-            utilities = self.aggregate_assessments(msg.assessments) # implemented by children
+            validate_matrix(len(msg.alternatives), len(msg.cues), len(msg.scores))
         except ValueError as e:
             self.get_logger().error(str(e))
             return
 
-        # Assemble judgments
-        alternatives = [p.alternative for p in msg.assessments[0].preferences]
-        judgments_map = {}
-        for a, u in zip(alternatives, utilities):
-            judgments_map.update({a.id : 
-                                  Judgment(alternative=a,
-                                           features=[Feature(axis=f'"{self.policy_str}"',
-                                                             score=u)])
-                                  })
+        try:
+            utilities = self.aggregate_assessments(msg) # implemented by children
+        except ValueError as e:
+            self.get_logger().error(str(e))
+            return
 
-        axes = [a.cue.id for a in msg.assessments]
-        self.get_logger().info(f'Aggregating assessments of {axes} on {alternatives} with policy: {self.policy_str}')
-        self.pub_.publish(Evaluation(judgments=list(judgments_map.values())))
+        self.pub_.publish(Evaluation(alternatives=msg.alternatives,
+                                     axes=f'"{self.policy_str}"',
+                                     scores=utilities))
 
     # To be overridden by children
     def aggregate(self, assessments):

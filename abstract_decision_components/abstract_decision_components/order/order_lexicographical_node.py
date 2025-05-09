@@ -13,12 +13,16 @@
 # limitations under the License.
 import sys
 
+import numpy as np
+
 import rclpy
 from rclpy.node import Node
 from rclpy.parameter import Parameter
 
 from decision_msgs.msg import Evaluation, OrderedEvaluation, WeakOrdering
+
 from abstract_decision_components.order import order
+from abstract_decision_components.util import validate_matrix
 
 
 class OrderLexicographicalNode(Node):
@@ -45,25 +49,29 @@ class OrderLexicographicalNode(Node):
                 10)
 
     def evaluation_cb(self, msg):
-        if len(msg.judgments) < 1:
-            self.get_logger.error('Recieved empty list of judgments')
+        try:
+            validate_matrix(len(msg.alternatives), len(msg.axes), len(msg.scores))
+        except ValueError as e:
+            self.get_logger().error(str(e))
             return
 
         axes = self.get_parameter('axis_ordering').value
         try:
-            alternatives, ranks = order.lexicographical(msg.judgments, axes)
+            index_array = np.argsort([axes.index(axis) for axis in msg.axes])
         except ValueError as e:
             self.get_logger().error(str(e))
             return
+
+        ranks = order.lexicographical(msg.scores, index_array)
 
         if len(axes) == 1:
             policy = 'maximize'
         else:
             policy = 'lexicographical'
-        self.get_logger().info(f'{alternatives} ordered {ranks} with policy: order_{policy} "{axes}"')
+        self.get_logger().info(f'{msg.alternatives} ordered {ranks} with policy: order_{policy} "{axes}"')
 
-        ordering = WeakOrdering(alternatives=alternatives, ranks=ranks)
-        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg.judgments)
+        ordering = WeakOrdering(alternatives=msg.alternatives, ranks=ranks)
+        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg)
         self.pub_.publish(ordered_eval)
 
 
