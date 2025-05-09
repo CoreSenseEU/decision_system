@@ -20,7 +20,7 @@ import rclpy
 
 from decision_msgs.msg import CueWeights
 from abstract_decision_components.aggregate.aggregate import weighted_sum
-from abstract_decision_components.aggregate_utility_node import AggregateUtilityNode
+from abstract_decision_components.aggregate.aggregate_utility_node import AggregateUtilityNode
 
 
 class AggregateUtilitySumNode(AggregateUtilityNode):

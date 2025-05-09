@@ -19,7 +19,7 @@ import numpy as np
 import rclpy
 
 from abstract_decision_components.aggregate.aggregate import boolean_combination
-from abstract_decision_components.aggregate_utility_node import AggregateUtilityNode
+from abstract_decision_components.aggregate.aggregate_utility_node import AggregateUtilityNode
 
 
 class AggregateUtilityBooleanNode(AggregateUtilityNode):
