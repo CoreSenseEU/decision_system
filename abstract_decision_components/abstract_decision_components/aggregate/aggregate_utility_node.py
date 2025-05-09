@@ -51,7 +51,7 @@ class AggregateUtilityNode(Node):
             return
 
         try:
-            utilities = self.aggregate_assessments(msg) # implemented by children
+            utilities = self.aggregate(msg) # implemented by children
         except ValueError as e:
             self.get_logger().error(str(e))
             return
@@ -61,6 +61,6 @@ class AggregateUtilityNode(Node):
                                      scores=utilities))
 
     # To be overridden by children
-    def aggregate(self, assessments):
+    def aggregate(self, msg):
         raise NotImplementedError
         
