@@ -14,14 +14,12 @@
 import sys
 
 import rclpy
-from rclpy.node import Node
 
-from decision_msgs.msg import Evaluation, OrderedEvaluation, WeakOrdering
 from abstract_decision_components.order import order
-from abstract_decision_components.util import validate_matrix
+from abstract_decision_components.order.order_node import OrderNode
 
 
-class OrderCondorcetExtensionNode(Node):
+class OrderCondorcetExtensionNode(OrderNode):
     """Orders alternatives based on how many others they dominate. Highest score is better.
 
     :param policy: A policy to use to compare dominators.
@@ -37,28 +35,10 @@ class OrderCondorcetExtensionNode(Node):
 
     """
     def __init__(self):
-        super().__init__('order_condorcet_extension_node')
-        self.get_logger().info('Starting ORDER node with policy: order_condorcet_extension')
-
+        super().__init__('condorcet_extension')
         self.declare_parameter('policy', 'copeland')
 
-        self.sub_ = self.create_subscription(
-                Evaluation,
-                'evaluation',
-                self.evaluation_cb,
-                10)
-        self.pub_ = self.create_publisher(
-                OrderedEvaluation,
-                'ordered_evaluation',
-                10)
-
-    def evaluation_cb(self, msg):
-        try:
-            validate_matrix(len(msg.alternatives), len(msg.axes), len(msg.scores))
-        except ValueError as e:
-            self.get_logger().error(str(e))
-            return
-
+    def order(self, msg):
         policy = self.get_parameter('policy').value
         match policy:
             case 'copeland':
@@ -74,11 +54,8 @@ class OrderCondorcetExtensionNode(Node):
                          "[copeland, sequential_majority_comparison, majority_of_confirming_dimensions]")
                 return
 
-        ordering = WeakOrdering(alternatives=msg.alternatives, ranks=ranks)
-        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg)
-
-        self.get_logger().info(f'{msg.alternatives} ordered {ranks} with policy: order_{policy}')
-        self.pub_.publish(ordered_eval)
+        self.policy_str = policy
+        return ranks
 
 
 def main(args=None):

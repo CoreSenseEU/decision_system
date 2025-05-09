@@ -14,14 +14,12 @@
 import sys
 
 import rclpy
-from rclpy.node import Node
 
-from decision_msgs.msg import Evaluation, OrderedEvaluation, WeakOrdering
 from abstract_decision_components.order import order
-from abstract_decision_components.util import validate_matrix
+from abstract_decision_components.order.order_node import OrderNode
 
 
-class OrderDominatingNode(Node):
+class OrderDominatingNode(OrderNode):
     """Orders alternatives based on how many others they dominate. Highest score is better.
 
     :param strict: If true, assume axis features must be strictly greater 
@@ -33,29 +31,11 @@ class OrderDominatingNode(Node):
 
     """
     def __init__(self):
-        super().__init__('order_dominating_node')
-        self.get_logger().info('Starting ORDER node with policy: order_dominating')
-
+        super().__init__('dominating')
         self.declare_parameter('strict', False)
         self.declare_parameter('policy', 'majority_rule')
 
-        self.sub_ = self.create_subscription(
-                Evaluation,
-                'evaluation',
-                self.evaluation_cb,
-                10)
-        self.pub_ = self.create_publisher(
-                OrderedEvaluation,
-                'ordered_evaluation',
-                10)
-
-    def evaluation_cb(self, msg):
-        try:
-            validate_matrix(len(msg.alternatives), len(msg.axes), len(msg.scores))
-        except ValueError as e:
-            self.get_logger().error(str(e))
-            return
-
+    def order(self, msg):
         strict = self.get_parameter('strict').value
         policy = self.get_parameter('policy').value
         match policy:
@@ -70,11 +50,12 @@ class OrderDominatingNode(Node):
                          "[majority_rule, pareto_fronts]")
                 return
 
-        ordering = WeakOrdering(alternatives=msg.alternatives, ranks=ranks)
-        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg)
+        if strict:
+            self.policy_str = f'{policy}, strict'
+        else:
+            self.policy_str = policy
 
-        self.get_logger().info(f'{msg.alternatives} ordered {ranks} with policy: order_{policy}')
-        self.pub_.publish(ordered_eval)
+        return ranks
 
 
 def main(args=None):

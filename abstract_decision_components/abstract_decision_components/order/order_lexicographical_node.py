@@ -16,16 +16,13 @@ import sys
 import numpy as np
 
 import rclpy
-from rclpy.node import Node
 from rclpy.parameter import Parameter
 
-from decision_msgs.msg import Evaluation, OrderedEvaluation, WeakOrdering
-
 from abstract_decision_components.order import order
-from abstract_decision_components.util import validate_matrix
+from abstract_decision_components.order.order_node import OrderNode
 
 
-class OrderLexicographicalNode(Node):
+class OrderLexicographicalNode(OrderNode):
     """Orders alternatives lexicographically by score, breaking ties in order
     of axes. Highest score is better.
 
@@ -33,28 +30,11 @@ class OrderLexicographicalNode(Node):
         judgments must contain exactly these axes.
     """
     def __init__(self):
-        super().__init__('order_lexicographical_node')
-        self.get_logger().info('Starting ORDER node with policy: order_lexicographical')
+        super().__init__('lexicographical')
 
         self.declare_parameter('axis_ordering', Parameter.Type.STRING_ARRAY)
 
-        self.sub_ = self.create_subscription(
-                Evaluation,
-                'evaluation',
-                self.evaluation_cb,
-                10)
-        self.pub_ = self.create_publisher(
-                OrderedEvaluation,
-                'ordered_evaluation',
-                10)
-
-    def evaluation_cb(self, msg):
-        try:
-            validate_matrix(len(msg.alternatives), len(msg.axes), len(msg.scores))
-        except ValueError as e:
-            self.get_logger().error(str(e))
-            return
-
+    def order(self, msg):
         axes = self.get_parameter('axis_ordering').value
         try:
             index_array = np.argsort([axes.index(axis) for axis in msg.axes])
@@ -62,17 +42,12 @@ class OrderLexicographicalNode(Node):
             self.get_logger().error(str(e))
             return
 
-        ranks = order.lexicographical(msg.scores, index_array)
-
         if len(axes) == 1:
-            policy = 'maximize'
+            self.policy_str = 'maximize'
         else:
-            policy = 'lexicographical'
-        self.get_logger().info(f'{msg.alternatives} ordered {ranks} with policy: order_{policy} "{axes}"')
+            self.policy_str = 'lexicographical'
 
-        ordering = WeakOrdering(alternatives=msg.alternatives, ranks=ranks)
-        ordered_eval = OrderedEvaluation(ordering=ordering, evaluation=msg)
-        self.pub_.publish(ordered_eval)
+        return order.lexicographical(msg.scores, index_array)
 
 
 def main(args=None):
