@@ -15,33 +15,19 @@
 import sys
 
 import rclpy
-from rclpy.node import Node
 
-from decision_msgs.msg import Choice, Decision
+from abstract_decision_components.accept.accept_node import AcceptNode
 
 
-class AcceptAlwaysNode(Node):
+class AcceptAlwaysNode(AcceptNode):
     """
     Always accepts the choice no matter what it is.
     """
     def __init__(self):
-        super().__init__('accept_always_node')
-        self.get_logger().info('Starting ACCEPT node with policy: accept_always')
+        super().__init__('always')
 
-        self.sub_ = self.create_subscription(
-                Choice,
-                'choice',
-                self.choice_cb,
-                10)
-        
-        self.pub_ = self.create_publisher(
-                Decision,
-                'decision',
-                10)
-
-    def choice_cb(self, msg):
-        self.get_logger().info(f'Accepting choice {msg.chosen} with policy: accept_always')
-        self.pub_.publish(Decision(choice=msg.chosen, success=True, reason='Always accepted'))
+    def accept(self, msg):
+        return True, 'Always accepted'
 
 
 def main(args=None):

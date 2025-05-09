@@ -15,14 +15,13 @@
 import sys
 
 import rclpy
-from rclpy.node import Node
 from rclpy.parameter import Parameter
 
-from decision_msgs.msg import Choice, Decision
-from abstract_decision_components.accept import accept
+from abstract_decision_components.accept.accept import dominating
+from abstract_decision_components.accept.accept_node import AcceptNode
 
 
-class AcceptDominatingNode(Node):
+class AcceptDominatingNode(AcceptNode):
     """
     Accepts a choice if the scores of all chosen alternatives are strictly
     greater than the best unchosen alternative for each requested axis.
@@ -30,36 +29,12 @@ class AcceptDominatingNode(Node):
     :param axes: A list of strings of axes to check for dominance.
     """
     def __init__(self):
-        super().__init__('accept_dominating_node')
-        self.get_logger().info('Starting ACCEPT node with policy: accept_dominating')
-        
+        super().__init__('dominating')
         self.declare_parameter('axes', Parameter.Type.STRING_ARRAY)
 
-        self.sub_ = self.create_subscription(
-                Choice,
-                'choice',
-                self.choice_cb,
-                10)
-        self.pub_ = self.create_publisher(
-                Decision,
-                'decision',
-                10)
-
-    def choice_cb(self, msg):
-        decision = Decision(choice=msg.chosen)
+    def accept(self, msg):
         axes = self.get_parameter('axes').value
-        try:
-            decision.success, decision.reason = accept.dominating(msg.chosen, msg.evaluation, axes=axes)
-        except ValueError as e:
-            self.get_logger().error(str(e))
-            return
-
-        if decision.success:
-            verb = 'Accepting'
-        else:
-            verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {decision.choice} with policy: accept_dominating, "{axes}"')
-        self.pub_.publish(decision)
+        return dominating(msg.chosen, msg.evaluation, axes=axes)
  
 
 def main(args=None):

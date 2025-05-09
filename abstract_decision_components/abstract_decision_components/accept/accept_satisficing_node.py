@@ -15,15 +15,14 @@
 import sys
 
 import rclpy
-from rclpy.node import Node
 from rclpy.parameter import Parameter
 from rclpy.exceptions import ParameterException
 
-from decision_msgs.msg import Choice, Decision, Feature
-from abstract_decision_components.accept import accept
+from abstract_decision_components.accept.accept_node import AcceptNode
+from abstract_decision_components.accept.accept import satisficing
 
 
-class AcceptSatisficingNode(Node):
+class AcceptSatisficingNode(AcceptNode):
     """Accepts a choice if the scores of all chosen alternatives are
     greater than or equal to the threshold values of each requested axis.
 
@@ -33,42 +32,18 @@ class AcceptSatisficingNode(Node):
         the same length as ``axes``.
     """
     def __init__(self):
-        super().__init__('accept_satisficing_node')
-        self.get_logger().info('Starting ACCEPT node with policy: accept_satisficing')
-
+        super().__init__('satisficing')
         self.declare_parameter('axes', Parameter.Type.STRING_ARRAY) 
         self.declare_parameter('thresholds', Parameter.Type.DOUBLE_ARRAY)
 
-        self.sub_ = self.create_subscription(
-                Choice,
-                'choice',
-                self.choice_cb,
-                10)
-        self.pub_ = self.create_publisher(
-                Decision,
-                'decision',
-                10)
-
-    def choice_cb(self, msg):
-        decision = Decision(choice=msg.chosen)
+    def accept(self, msg):
         axes = self.get_parameter('axes').value
         thresholds = self.get_parameter('thresholds').value
         self._check_params(axes, thresholds)
-
         features = list(zip(axes, thresholds))
-        try:
-            decision.success, decision.reason = accept.satisficing(msg.chosen, msg.evaluation, features)
-        except ValueError as e:
-            self.get_logger().error(str(e))
-            return
 
-        if decision.success:
-            verb = 'Accepting'
-        else:
-            verb = 'Rejecting'
-        self.get_logger().info(f'{verb} choice {msg.chosen} with policy:' \
-                             + f' accept_satisficing, "{features}"')
-        self.pub_.publish(decision)
+        self.policy_str = f'satisficing, "{features}"'
+        return satisficing(msg.chosen, msg.evaluation, features)
 
     def _check_params(self, axes, thresholds):
         if len(axes) != len(thresholds):
