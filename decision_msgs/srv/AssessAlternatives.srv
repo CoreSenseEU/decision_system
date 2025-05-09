@@ -1,6 +1,8 @@
 # Request
+# A choice set of alternatives to assess
 Alternative[] alternatives
 
 ---
 # Response
+# A set of preferences on those alternatives.
 Preference[] preferences

@@ -1,2 +1,6 @@
+# An alternative that was assessed as part of a choice set.
 Alternative alternative
-float32 score   # Assume higher values are always better
+
+# The score this alternative recieved in the context of the choice set. Assume
+# higher values are always better.
+float32 score

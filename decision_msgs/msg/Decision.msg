@@ -1,3 +1,8 @@
+# A set of chosen alternatives.
 Alternative[] choice
-bool success
+
+# A status indicated if the decision was accepted (True) or not (False).
+bool accepted
+
+# Optionally provide a plain text reason for the decision.
 string reason

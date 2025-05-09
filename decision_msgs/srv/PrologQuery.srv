@@ -1,8 +1,14 @@
 # Request
+# A query to submit to the Prolog knowledge base, without the terminating "."
 PrologClause query
+
+# The maximum number of desired results, or -1 to collect all results.
 int8 maxresult -1
 
 ---
 # Response
+# A set of answers from the Prolog knowledge base.
 PrologAnswer[] answers
+
+# True if the query was successful, False otherwise.
 bool success

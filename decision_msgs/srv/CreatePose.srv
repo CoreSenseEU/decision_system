@@ -1,7 +1,12 @@
 # Request
+# A pose that was percieved by the robot and is to be added to the knowledge base.
 geometry_msgs/Pose pose
 
 ---
 # Response
+# If True, a new pose was created and added to the knowledge base.
 bool success
+
+# If a new pose was added, the ID of that pose, if an approximately equal pose already existed,
+# then the ID of that pose. Upon failure this is the empty string.
 string id

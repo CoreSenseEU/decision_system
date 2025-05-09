@@ -1,0 +1,11 @@
+# Request
+# A Prolog predicate used to assign the type of the atom to be created.
+string type_predicate
+
+---
+# Response
+# If True, a new unique atom of the requested type was created and added to the knowledge base.
+bool success
+
+# If a new atom was added, the ID of that atom. Upon failure this is the empty string.
+string id
