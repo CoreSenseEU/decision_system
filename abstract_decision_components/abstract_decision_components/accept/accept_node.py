@@ -41,7 +41,8 @@ class AcceptNode(Node):
     def choice_cb(self, msg):
         decision = Decision(choice=msg.chosen)
         try:
-            decision.success, decision.reason = self.accept(msg)
+            # TODO: Validate msg.evaluation matrix?
+            decision.success = self.accept(msg)
         except ValueError as e:
             self.get_logger().error(str(e))
             return

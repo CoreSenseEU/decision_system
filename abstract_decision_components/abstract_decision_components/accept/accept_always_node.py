@@ -27,7 +27,7 @@ class AcceptAlwaysNode(AcceptNode):
         super().__init__('always')
 
     def accept(self, msg):
-        return True, 'Always accepted'
+        return True
 
 
 def main(args=None):

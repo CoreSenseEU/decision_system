@@ -14,6 +14,8 @@
 
 import sys
 
+import numpy as np
+
 import rclpy
 from rclpy.parameter import Parameter
 from rclpy.exceptions import ParameterException
@@ -40,14 +42,18 @@ class AcceptSatisficingNode(AcceptNode):
         axes = self.get_parameter('axes').value
         thresholds = self.get_parameter('thresholds').value
         self._check_params(axes, thresholds)
-        features = list(zip(axes, thresholds))
 
-        self.policy_str = f'satisficing, "{features}"'
-        return satisficing(msg.chosen, msg.evaluation, features)
+        chosen_indices = [msg.evaluation.alternatives.index(c) for c in msg.chosen] 
+        axis_indices = [msg.evaluation.axes.index(a) for a in axes] 
+
+        scores = np.array(msg.evaluation.scores).reshape(
+                (len(msg.evaluation.alternatives), len(msg.evaluation.axes)))
+        return satisficing(scores[chosen_indices, axis_indices], np.array(thresholds))
 
     def _check_params(self, axes, thresholds):
         if len(axes) != len(thresholds):
             raise ParameterException('Parameters have unequal lengths', ['axes', 'thresholds'])
+        self.policy_str = f'satisficing, "{list(zip(axes, thresholds))}"'
 
 
 def main(args=None):

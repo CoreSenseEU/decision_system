@@ -14,6 +14,8 @@
 
 import sys
 
+import numpy as np
+
 import rclpy
 from rclpy.parameter import Parameter
 
@@ -34,7 +36,12 @@ class AcceptDominatingNode(AcceptNode):
 
     def accept(self, msg):
         axes = self.get_parameter('axes').value
-        return dominating(msg.chosen, msg.evaluation, axes=axes)
+        
+        chosen_indices = [msg.evaluation.alternatives.index(c) for c in msg.chosen] 
+        axis_indices = [msg.evaluation.axes.index(a) for a in axes] 
+        scores = np.array(msg.evaluation.scores).reshape(
+                (len(msg.evaluation.alternatives), len(msg.evaluation.axes)))
+        return dominating(chosen_indices, scores[:, axis_indices])
  
 
 def main(args=None):
