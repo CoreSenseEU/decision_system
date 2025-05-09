@@ -15,7 +15,7 @@ import sys
 
 import rclpy
 
-from abstract_decision_components.order import order
+from abstract_decision_components.order.order import copeland_method, sequential_majority_comparison
 from abstract_decision_components.order.order_node import OrderNode
 
 
@@ -42,11 +42,11 @@ class OrderCondorcetExtensionNode(OrderNode):
         policy = self.get_parameter('policy').value
         match policy:
             case 'copeland':
-                ranks = order.copeland_method(msg.scores)
+                ranks = copeland_method(msg.scores)
             case 'sequential_majority_comparison':
-                ranks = order.sequential_majority_comparison(msg.scores)
+                ranks = sequential_majority_comparison(msg.scores)
             case 'majority_of_confirming_dimensions':
-                ranks = order.sequential_majority_comparison(msg.scores, confirming=True)
+                ranks = sequential_majority_comparison(msg.scores, confirming=True)
             case _:
                 # TODO: move to parameter update validation
                 self.get_logger().error(

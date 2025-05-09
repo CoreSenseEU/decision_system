@@ -15,7 +15,6 @@
 from rclpy.node import Node
 
 from decision_msgs.msg import Evaluation, OrderedEvaluation, WeakOrdering
-from abstract_decision_components.order import order
 from abstract_decision_components.util import validate_matrix
 
 
@@ -58,4 +57,8 @@ class OrderNode(Node):
 
         ordering = WeakOrdering(alternatives=msg.alternatives, ranks=ranks)
         self.pub_.publish(OrderedEvaluation(ordering=ordering, evaluation=msg))
+
+    # To be overridden by children
+    def order(self, msg):
+        raise NotImplementedError
 

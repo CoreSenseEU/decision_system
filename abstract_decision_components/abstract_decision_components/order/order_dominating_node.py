@@ -15,7 +15,7 @@ import sys
 
 import rclpy
 
-from abstract_decision_components.order import order
+from abstract_decision_components.order.order import pareto_fronts, majority_rule
 from abstract_decision_components.order.order_node import OrderNode
 
 
@@ -40,9 +40,9 @@ class OrderDominatingNode(OrderNode):
         policy = self.get_parameter('policy').value
         match policy:
             case 'pareto_fronts':
-                ranks = order.pareto_fronts(msg.scores, strict=strict)
+                ranks = pareto_fronts(msg.scores, strict=strict)
             case 'majority_rule':
-                ranks = order.majority_rule(msg.scores, strict=strict)
+                ranks = majority_rule(msg.scores, strict=strict)
             case _:
                 # TODO: move to parameter update validation
                 self.get_logger().error(

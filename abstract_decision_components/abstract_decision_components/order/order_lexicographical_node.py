@@ -18,7 +18,7 @@ import numpy as np
 import rclpy
 from rclpy.parameter import Parameter
 
-from abstract_decision_components.order import order
+from abstract_decision_components.order.order import lexicographical
 from abstract_decision_components.order.order_node import OrderNode
 
 
@@ -47,7 +47,7 @@ class OrderLexicographicalNode(OrderNode):
         else:
             self.policy_str = 'lexicographical'
 
-        return order.lexicographical(msg.scores, index_array)
+        return lexicographical(msg.scores, index_array)
 
 
 def main(args=None):
