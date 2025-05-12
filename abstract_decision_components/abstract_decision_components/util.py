@@ -30,7 +30,7 @@ def validate_matrix(rows, cols, items):
         raise ValueError('Recieved empty list of row headers')
     if cols * rows != items:
         raise ValueError('Incompatible matrix. '
-                         f'Expected shape ({rows} x {cols}) '
+                         f'Expected shape ({rows} x {cols})'
                          f' = {cols * rows} items), but got {items} items.')
 
 
