@@ -72,7 +72,7 @@ class AssessNode(Node):
             futures.append((client, client.call_async(request)))
 
         # wait for each cue to finish
-        timeout = self.get_parameter('timeout').value()
+        timeout = self.get_parameter('timeout').value
         scores = np.zeros((len(msg.alternatives), len(self.cues_)))
         success = True
         then = self.get_clock().now().nanoseconds
@@ -91,6 +91,7 @@ class AssessNode(Node):
             else:
                 client.remove_pending_request(future)
                 self.get_logger().error(f'Cue {cue} failed or timed out')
+                success = False
 
         if not success:
             #  Kirsch says that all cues must be processed.
@@ -111,14 +112,14 @@ class AssessNode(Node):
             return SetParametersResult(successful=True)
 
         # destroy old clients
-        for client in self.clients_:
+        for client in self.clients_.values():
             while not self.destroy_client(client):
                 self.executor.spin_once()
 
         # Create a new client for each cue
         self.get_logger().info(f'Updating cues: {cues}')
         self.cues_ = cues
-        self.clients_ = []
+        self.clients_ = {}
         for cue in cues:
             client = self.create_client(
                     AssessAlternatives,
