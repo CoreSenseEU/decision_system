@@ -1,32 +1,18 @@
-judgments:
-  - alternative:
-      id: red
-    features:
-      - 
-        axis: hue
-        score: 0
-  - alternative:
-      id: green
-    features:
-      - 
-        axis: hue
-        score: 120
-  - alternative:
-      id: blue
-    features:
-      - 
-        axis: hue
-        score: 240
-  - alternative:
-      id: "#808006"
-    features:
-      - 
-        axis: hue
-        score: 60
-  - 
-    alternative:
-      id: "#c247eb"
-    features:
-      - 
-        axis: hue
-        score: 285
+
+alternatives:
+  - id: red
+  - id: green
+  - id: blue
+  - id: "#808006"
+  - id: "#c247eb"
+
+axes:
+  - hue
+  - saturation
+  - lightness
+
+scores: [  0,
+         120,
+         240,
+          60,
+         285]

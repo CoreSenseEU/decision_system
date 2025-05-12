@@ -1,0 +1,17 @@
+alternatives:
+  - id: red
+  - id: blue
+  - id: green
+  - id: "#808006"
+  - id: "#c247eb"
+
+cues:
+  - id: R
+  - id: G
+  - id: B
+
+scores: [255,   0,   0,
+           0, 255,   0,
+           0,   0, 255,
+         128, 128,   6,
+         199,  71, 235]

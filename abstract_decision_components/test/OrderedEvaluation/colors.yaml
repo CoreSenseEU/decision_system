@@ -11,65 +11,22 @@ ordering:
     - 1
     - 0
     - 1
+
 evaluation:
-  - alternative:
-      id: red
-    features:
-      - 
-        axis: hue
-        score: 0
-      - 
-        axis: saturation
-        score: 100
-      - 
-        axis: lightness
-        score: 50
-  - alternative:
-      id: green
-    features:
-      - 
-        axis: hue
-        score: 120
-      - 
-        axis: saturation
-        score: 100
-      - 
-        axis: lightness
-        score: 50
-  - alternative:
-      id: blue
-    features:
-      - 
-        axis: hue
-        score: 240
-      - 
-        axis: saturation
-        score: 100
-      - 
-        axis: lightness
-        score: 50
-  - alternative:
-      id: "#808006"
-    features:
-      - 
-        axis: hue
-        score: 60
-      - 
-        axis: saturation
-        score: 91
-      - 
-        axis: lightness
-        score: 26
-  - 
-    alternative:
-      id: "#c247eb"
-    features:
-      - 
-        axis: hue
-        score: 285
-      - 
-        axis: saturation
-        score: 80
-      - 
-        axis: lightness
-        score: 60
+  alternatives:
+    - id: red
+    - id: green
+    - id: blue
+    - id: "#808006"
+    - id: "#c247eb"
+
+  axes:
+    - hue
+    - saturation
+    - lightness
+
+  scores: [  0, 100, 50,
+           120, 100, 50,
+           240, 100, 50,
+            60,  91, 26,
+           285,  80, 60]

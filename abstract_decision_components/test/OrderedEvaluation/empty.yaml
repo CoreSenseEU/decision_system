@@ -1,4 +1,8 @@
 ordering:
   alternatives: []
   ranks: []
-evaluation: []
+
+evaluation:
+  alternatives: []
+  axes: []
+  scores: []

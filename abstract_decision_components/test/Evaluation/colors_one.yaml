@@ -1,13 +1,9 @@
-judgments:
-  - alternative:
-      id: red
-    features:
-      - 
-        axis: hue
-        score: 0
-      - 
-        axis: saturation
-        score: 100
-      - 
-        axis: lightness
-        score: 50
+alternatives:
+  - id: red
+
+axes:
+  - hue
+  - saturation
+  - lightness
+
+scores: [0, 100, 50]
