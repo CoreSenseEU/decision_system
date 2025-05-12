@@ -1,5 +1,5 @@
 # Each alternative that was assessed.
-Alterntive[] alternatives
+Alternative[] alternatives
 
 # An array of cues that was used to assess each alternative.
 Cue[] cues
