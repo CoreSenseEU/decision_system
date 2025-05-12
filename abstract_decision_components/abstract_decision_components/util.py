@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import numpy as np
+
 
 def validate_matrix(rows, cols, items):
     """Assert that the recieved sizes of matrix data are valid.
@@ -34,3 +36,5 @@ def validate_matrix(rows, cols, items):
                          f' = {cols * rows} items), but got {items} items.')
 
 
+def scores_to_np_array(scores, n_alternatives):
+    return np.array(scores).reshape((n_alternatives, -1))

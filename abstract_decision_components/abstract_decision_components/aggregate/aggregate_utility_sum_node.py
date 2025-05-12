@@ -14,13 +14,12 @@
 
 import sys
 
-import numpy as np
-
 import rclpy
 
 from decision_msgs.msg import CueWeights
 from abstract_decision_components.aggregate.aggregate import weighted_sum
 from abstract_decision_components.aggregate.aggregate_utility_node import AggregateUtilityNode
+from abstract_decision_components.util import scores_to_np_array
 
 
 class AggregateUtilitySumNode(AggregateUtilityNode):
@@ -78,7 +77,7 @@ class AggregateUtilitySumNode(AggregateUtilityNode):
                                 + "[weighted_sum, unweighted_sum]")
 
         normalize = self.get_parameter('normalize').value
-        assessments = np.array(msg.scores).reshape((len(msg.alternatives), -1))
+        assessments = scores_to_np_array(msg.scores, len(msg.alternatives))
         utilities = weighted_sum(assessments[:,used_indices], weights, normalize=normalize)
         return utilities
 

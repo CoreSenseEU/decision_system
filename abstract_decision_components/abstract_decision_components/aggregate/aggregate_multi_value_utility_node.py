@@ -23,6 +23,7 @@ from rclpy.parameter import Parameter
 from rcl_interfaces.msg import SetParametersResult
 
 from decision_msgs.msg import Evaluation, AssessmentMatrix
+from abstract_decision_components.util import scores_to_np_array
 
 
 class AggregateMultiValueUtilityNode(Node):
@@ -74,7 +75,7 @@ class AggregateMultiValueUtilityNode(Node):
         scores = []
         for child in self.children_:
             msg = self.evaluations_buffer_[child].pop(0)
-            scores.append(np.array(msg.scores).reshape((len(alternatives), -1)))
+            scores.append(scores_to_np_array(msg.scores, len(alternatives)))
             axes += msg.axes
 
         self.get_logger().info(f'Aggregating assessments of {axes} on'

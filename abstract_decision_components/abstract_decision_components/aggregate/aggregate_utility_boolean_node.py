@@ -20,6 +20,7 @@ import rclpy
 
 from abstract_decision_components.aggregate.aggregate import boolean_combination
 from abstract_decision_components.aggregate.aggregate_utility_node import AggregateUtilityNode
+from abstract_decision_components.util import scores_to_np_array
 
 
 class AggregateUtilityBooleanNode(AggregateUtilityNode):
@@ -40,7 +41,7 @@ class AggregateUtilityBooleanNode(AggregateUtilityNode):
         operator = self.get_parameter('boolean_operator').value
         self.policy_str = f'boolean, operator={operator}'
         
-        assessments = np.array(msg.scores).reshape((len(msg.alternatives), -1))
+        assessments = scores_to_np_array(msg.scores, len(msg.alternatives))
         return boolean_combination(assessments, operator)
         
 
