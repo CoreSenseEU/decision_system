@@ -17,6 +17,7 @@ import rclpy
 
 from abstract_decision_components.order.order import copeland_method, sequential_majority_comparison
 from abstract_decision_components.order.order_node import OrderNode
+from abstract_decision_components.util import scores_to_np_array
 
 
 class OrderCondorcetExtensionNode(OrderNode):
@@ -39,20 +40,24 @@ class OrderCondorcetExtensionNode(OrderNode):
         self.declare_parameter('policy', 'copeland')
 
     def order(self, msg):
+        """
+        :raises ValueError: if the ``policy`` parameter is invalid.
+        """
         policy = self.get_parameter('policy').value
+
+        feature_matrix = scores_to_np_array(msg.scores, len(msg.alternatives))
         match policy:
             case 'copeland':
-                ranks = copeland_method(msg.scores)
+                ranks = copeland_method(feature_matrix)
             case 'sequential_majority_comparison':
-                ranks = sequential_majority_comparison(msg.scores)
+                ranks = sequential_majority_comparison(feature_matrix)
             case 'majority_of_confirming_dimensions':
-                ranks = sequential_majority_comparison(msg.scores, confirming=True)
+                ranks = sequential_majority_comparison(feature_matrix, confirming=True)
             case _:
                 # TODO: move to parameter update validation
-                self.get_logger().error(
+                raise ValueError(
                         f"Policy '{policy}' invalid. Valid options are " \
                          "[copeland, sequential_majority_comparison, majority_of_confirming_dimensions]")
-                return
 
         self.policy_str = policy
         return ranks

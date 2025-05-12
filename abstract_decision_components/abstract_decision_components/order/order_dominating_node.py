@@ -17,6 +17,7 @@ import rclpy
 
 from abstract_decision_components.order.order import pareto_fronts, majority_rule
 from abstract_decision_components.order.order_node import OrderNode
+from abstract_decision_components.util import scores_to_np_array
 
 
 class OrderDominatingNode(OrderNode):
@@ -36,19 +37,23 @@ class OrderDominatingNode(OrderNode):
         self.declare_parameter('policy', 'majority_rule')
 
     def order(self, msg):
+        """
+        :raises ValueError: if the ``policy`` parameter is invalid.
+        """
         strict = self.get_parameter('strict').value
         policy = self.get_parameter('policy').value
+
+        feature_matrix = scores_to_np_array(msg.scores, len(msg.alternatives))
         match policy:
             case 'pareto_fronts':
-                ranks = pareto_fronts(msg.scores, strict=strict)
+                ranks = pareto_fronts(feature_matrix, strict=strict)
             case 'majority_rule':
-                ranks = majority_rule(msg.scores, strict=strict)
+                ranks = majority_rule(feature_matrix, strict=strict)
             case _:
                 # TODO: move to parameter update validation
-                self.get_logger().error(
+                raise ValueError(
                         f"Policy '{policy}' invalid. Valid options are "
                          "[majority_rule, pareto_fronts]")
-                return
 
         if strict:
             self.policy_str = f'{policy}, strict'
