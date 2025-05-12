@@ -40,7 +40,7 @@ class AggregateUtilityBooleanNode(AggregateUtilityNode):
         operator = self.get_parameter('boolean_operator').value
         self.policy_str = f'boolean, operator={operator}'
         
-        assessments = np.array(msg.scores).reshape((len(msg.alternatives), []))
+        assessments = np.array(msg.scores).reshape((len(msg.alternatives), -1))
         return boolean_combination(assessments, operator)
         
 

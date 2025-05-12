@@ -39,11 +39,11 @@ class AggregateUtilitySignedNode(AggregateUtilityNode):
 
     def aggregate(self, msg):
         policy = self.get_parameter('policy').value
-        assessments = np.array(msg.scores).reshape((len(msg.alternatives), []))
+        assessments = np.array(msg.scores).reshape((len(msg.alternatives), -1))
         match policy:
-            case 'tallying':
-                utilities = dawes_rule(assessments)
             case 'dawes':
+                utilities = dawes_rule(assessments)
+            case 'tallying':
                 utilities = tallying(assessments)
             case _:
                 # TODO: move this to the parameter update function...

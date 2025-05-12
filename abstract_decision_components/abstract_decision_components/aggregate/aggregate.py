@@ -31,13 +31,8 @@ def weighted_sum(assessments, weights, normalize=False):
         maxs = np.max(assessments, axis=0)
         assessments = (assessments - mins) / (maxs - mins)
 
-    # Assemble weight vector in same order
-    weight_vector = np.zeros(len(assessments))
-    for i, assessment in enumerate(assessments):
-        weight_vector[i] = weights[assessment.cue.id]
-
     # calculate utilities
-    utilities = assessments @ weight_vector
+    utilities = assessments @ weights
     return utilities.tolist()
 
 

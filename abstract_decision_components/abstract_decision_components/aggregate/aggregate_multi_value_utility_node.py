@@ -13,13 +13,16 @@
 # limitations under the License.
 
 import sys
+import functools
+
+import numpy as np
 
 import rclpy
 from rclpy.node import Node
 from rclpy.parameter import Parameter
 from rcl_interfaces.msg import SetParametersResult
 
-from decision_msgs.msg import Evaluation, AssessmentArray
+from decision_msgs.msg import Evaluation, AssessmentMatrix
 
 
 class AggregateMultiValueUtilityNode(Node):
@@ -34,7 +37,7 @@ class AggregateMultiValueUtilityNode(Node):
 
     def __init__(self):
         super().__init__('aggregate_multi_value_utility_node')
-        self.get_logger().info(f'Starting AGGREGATE node with policy: {self.policy_}')
+        self.get_logger().info('Starting AGGREGATE node with policy: aggregate_multi_value_utility')
 
         self.subs_ = []
         self.evaluations_buffer_ = None
@@ -48,42 +51,40 @@ class AggregateMultiValueUtilityNode(Node):
                 10)
 
         self.pub_assessments_ = self.create_publisher(
-                    AssessmentArray,
+                    AssessmentMatrix,
                     '~/assessments',
                     10)
 
-    def evaluations_cb(self, msg, child):
+    def evaluations_cb(self, child, msg):
         # Collect evaluations from each
         if len(self.evaluations_buffer_[child]) == 0:
             self.recieved_ += 1
         self.evaluations_buffer_[child].append(msg)
 
+        self.get_logger().info(f'Recieved evaluation from {child}. Total recieved: {self.recieved_} / {len(self.children_)}')
         if self.recieved_ == len(self.children_):
-            self.publish_evaluations_()
+            # TODO: validate that all evaluations contain the same alternatives
+            #  Currently this just uses the list from the last evaluation recieved.
+            self.publish_evaluations_(msg.alternatives)
             self.recieved_ = 0
 
-    def publish_evaluations_(self):
-        new_judgments = {}
-
+    def publish_evaluations_(self, alternatives):
         # Combine into a single evaluation and publish
         axes = []
-        judgments = []
+        scores = []
         for child in self.children_:
-            judgments += self.evaluations_buffer_[child].pop(0).judgments
+            msg = self.evaluations_buffer_[child].pop(0)
+            scores.append(np.array(msg.scores).reshape((len(alternatives), -1)))
+            axes += msg.axes
 
-        for judgment in judgments:
-            key = judgment.alternative.id
-            if key not in new_judgments:
-                new_judgments.update({key : judgment})
-            else:
-                new_judgments[key].features += judgment.features
-
-            axes += [f.axis for f in judgment.features]
-
-        self.get_logger().info(f'Aggregating assessments of {set(axes)} on'
-                               f'alternatives {new_judgments.keys()} with '
+        self.get_logger().info(f'Aggregating assessments of {axes} on'
+                               f'alternatives {alternatives} with '
                                'policy: aggregate_multi_value_utility')
-        self.pub_evaluation_.publish(Evaluation(judgments=new_judgments.values()))
+        self.pub_evaluation_.publish(
+            Evaluation(alternatives=alternatives,
+                       axes=axes,
+                       scores=np.concatenate(scores, axis=1).flatten().tolist())
+        )
 
     def _update_children(self, parameters):
         children = None
@@ -102,21 +103,26 @@ class AggregateMultiValueUtilityNode(Node):
         # Subscribe to each child
         self.get_logger().info(f'Creating subscriptions to children: {children}')
         self.children_ = children
-        self.subs_ = []
-        for child in self.children_:
-            def cb(self, msg):
-                return self.evaluations_cb(msg, child)
 
-            sub = self.create_subscription(
+        self.subs_ = [
+                self.create_subscription(
                     Evaluation,
-                    f'{child}/evaluations/',
-                    cb,
-                    10) 
-            self.subs_.append(sub)
+                    f'{child}/evaluation',
+                    functools.partial(self.evaluations_cb, child),
+                    10
+                )
+                for child in self.children_
+        ]
+
 
         # Reset accumulator
         self.evaluations_buffer_ = {c : [] for c in children}
         self.recieved_ = 0
+
+        print(self.children_)
+        print(self.evaluations_buffer_)
+        print(self.subs_)
+        print(self.recieved_)
 
         return SetParametersResult(successful=True)
 

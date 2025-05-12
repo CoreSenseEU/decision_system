@@ -14,7 +14,7 @@
 
 from rclpy.node import Node
 
-from decision_msgs.msg import Evaluation, AssessmentArray
+from decision_msgs.msg import Evaluation, AssessmentMatrix
 
 from abstract_decision_components.util import validate_matrix
 
@@ -31,7 +31,7 @@ class AggregateUtilityNode(Node):
         self.get_logger().info(f'Starting AGGREGATE node with policy: {self.policy_}')
 
         self.sub_assesments_ = self.create_subscription(
-                AssessmentArray,
+                AssessmentMatrix,
                 'assessments',
                 self.assessments_cb,
                 10)
@@ -57,7 +57,7 @@ class AggregateUtilityNode(Node):
             return
 
         self.pub_.publish(Evaluation(alternatives=msg.alternatives,
-                                     axes=f'"{self.policy_str}"',
+                                     axes=[f'"{self.policy_str}"'],
                                      scores=utilities))
 
     # To be overridden by children

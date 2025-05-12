@@ -38,7 +38,7 @@ class AggregateUtilitySumNode(AggregateUtilityNode):
     def __init__(self):
         super().__init__('sum')
 
-        self.declare_parameter('policy', 'unweighted')
+        self.declare_parameter('policy', 'unweighted_sum')
         self.declare_parameter('normalize', False)
 
         self.sub_weights_ = self.create_subscription(
@@ -60,18 +60,26 @@ class AggregateUtilitySumNode(AggregateUtilityNode):
                 # TODO: move this to parameter update function
                 self.policy_str = f'sum, weights={self.weights_}'
 
-                weights = [self.weights_[cue] for cue in msg.cues]
+                weights = []
+                used_indices = []
+                for i, cue in enumerate(msg.cues):
+                    if cue.id in self.weights_:
+                        weights.append(self.weights_[cue.id])
+                        used_indices.append(i)
+                    else:
+                        self.get_logger().warn(f'Failed to assign weight to cue: {cue.id}. Ignoring cue.')
             case 'unweighted_sum':
                 self.policy_str = 'sum, unweighted'
                 weights = [1] * len(msg.cues)
+                used_indices = list(range(len(msg.cues)))
             case _:
                 # TODO: move this to parameter update function
                 raise ValueError(f"Policy '{policy}' invalid. Valid options are" \
-                                + "[weighted_sum, unweighted_sum, tallying, boolean, dawes]")
+                                + "[weighted_sum, unweighted_sum]")
 
         normalize = self.get_parameter('normalize').value
-        assessments = np.array(msg.scores).reshape((len(msg.alternatives), []))
-        utilities = weighted_sum(assessments, weights, normalize=normalize)
+        assessments = np.array(msg.scores).reshape((len(msg.alternatives), -1))
+        utilities = weighted_sum(assessments[:,used_indices], weights, normalize=normalize)
         return utilities
 
     def update_weights_cb(self, msg):
