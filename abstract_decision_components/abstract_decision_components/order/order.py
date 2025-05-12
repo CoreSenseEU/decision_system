@@ -22,11 +22,19 @@ def lexicographical(feature_matrix, index_array):
     :param feature_matrix: An (N x M) numpy array of judgments where N is the
         number of alternatives and M is the number of features of each alternative.
     :param index_array: A numpy array of ranks of each feature in the feature matrix.
+        missing features are considered to have equal value for all alternatives.
 
     :return: A list of integer ranks corresponding to the rows of the feature matrix.
     """
-    args_sorted = np.argsort(feature_matrix[:, index_array], axis=0, kind='stable')[::-1,0]
-    return [args_sorted.tolist().index(i) for i in range(feature_matrix.shape[0])]
+    # mark ties
+    n_alternatives = feature_matrix.shape[0]
+    considered = feature_matrix[:, index_array]
+    ties = [np.argmax(np.all(considered == considered[i,:], axis=1)) 
+            for i in range(n_alternatives)]
+
+    # sort
+    args_sorted = np.argsort(considered, axis=0, kind='stable')[::-1,0]
+    return [np.argmax(args_sorted == ties[i]) for i in range(n_alternatives)]
 
 
 # def inverse_borda(judgments):

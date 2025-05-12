@@ -11,15 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import sys
 
-import numpy as np
+import sys
 
 import rclpy
 from rclpy.parameter import Parameter
 
 from abstract_decision_components.order.order import lexicographical
 from abstract_decision_components.order.order_node import OrderNode
+from abstract_decision_components.util import scores_to_np_array
 
 
 class OrderLexicographicalNode(OrderNode):
@@ -35,19 +35,19 @@ class OrderLexicographicalNode(OrderNode):
         self.declare_parameter('axis_ordering', Parameter.Type.STRING_ARRAY)
 
     def order(self, msg):
+        """
+        :raises ValueError: if an axis is present in the recieved evaluation
+            but not in the ``axis_ordering`` parameter.
+        """
         axes = self.get_parameter('axis_ordering').value
-        try:
-            index_array = np.argsort([axes.index(axis) for axis in msg.axes])
-        except ValueError as e:
-            self.get_logger().error(str(e))
-            return
+        index_array = [msg.axes.index(axis) for axis in axes if axis in msg.axes]
 
-        if len(axes) == 1:
+        if len(index_array) == 1:
             self.policy_str = 'maximize'
         else:
             self.policy_str = 'lexicographical'
 
-        return lexicographical(msg.scores, index_array)
+        return lexicographical(scores_to_np_array(msg.scores, len(msg.alternatives)), index_array)
 
 
 def main(args=None):
