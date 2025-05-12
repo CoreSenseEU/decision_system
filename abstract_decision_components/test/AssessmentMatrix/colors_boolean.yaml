@@ -7,7 +7,7 @@ alternatives:
 
 cues:
   - id: "R>127"
-  - id: "G<50"
+  - id: "G>50"
   - id: "B==0"
 
 scores: [1, 0, 1,
