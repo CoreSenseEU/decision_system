@@ -1,2 +1,5 @@
 chosen: []
-evaluation: []
+evaluation:
+  alternatives: []
+  axes: []
+  scores: []
