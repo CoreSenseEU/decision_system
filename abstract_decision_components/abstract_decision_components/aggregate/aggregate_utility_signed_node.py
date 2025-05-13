@@ -14,12 +14,11 @@
 
 import sys
 
-import numpy as np
-
 import rclpy
 
 from abstract_decision_components.aggregate.aggregate import dawes_rule, tallying
 from abstract_decision_components.aggregate.aggregate_utility_node import AggregateUtilityNode
+from abstract_decision_components.util import scores_to_np_array
 
 
 class AggregateUtilitySignedNode(AggregateUtilityNode):
@@ -39,7 +38,7 @@ class AggregateUtilitySignedNode(AggregateUtilityNode):
 
     def aggregate(self, msg):
         policy = self.get_parameter('policy').value
-        assessments = np.array(msg.scores).reshape((len(msg.alternatives), -1))
+        assessments = scores_to_np_array(msg.scores, len(msg.alternatives))
         match policy:
             case 'dawes':
                 utilities = dawes_rule(assessments)

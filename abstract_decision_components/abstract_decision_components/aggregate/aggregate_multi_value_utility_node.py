@@ -115,16 +115,9 @@ class AggregateMultiValueUtilityNode(Node):
                 for child in self.children_
         ]
 
-
         # Reset accumulator
         self.evaluations_buffer_ = {c : [] for c in children}
         self.recieved_ = 0
-
-        print(self.children_)
-        print(self.evaluations_buffer_)
-        print(self.subs_)
-        print(self.recieved_)
-
         return SetParametersResult(successful=True)
 
 

@@ -57,7 +57,7 @@ class AggregateUtilityNode(Node):
             return
 
         self.pub_.publish(Evaluation(alternatives=msg.alternatives,
-                                     axes=[f'"{self.policy_str}"'],
+                                     axes=[self.policy_str],
                                      scores=utilities))
 
     # To be overridden by children

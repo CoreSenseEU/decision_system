@@ -14,8 +14,6 @@
 
 import sys
 
-import numpy as np
-
 import rclpy
 
 from abstract_decision_components.aggregate.aggregate import boolean_combination
