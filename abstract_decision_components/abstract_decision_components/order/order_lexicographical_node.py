@@ -35,12 +35,17 @@ class OrderLexicographicalNode(OrderNode):
         self.declare_parameter('axis_ordering', Parameter.Type.STRING_ARRAY)
 
     def order(self, msg):
-        """
-        :raises ValueError: if an axis is present in the recieved evaluation
-            but not in the ``axis_ordering`` parameter.
-        """
         axes = self.get_parameter('axis_ordering').value
-        index_array = [msg.axes.index(axis) for axis in axes if axis in msg.axes]
+        index_array = []
+        for axis in axes:
+            if axis in msg.axes:
+                index_array.append(msg.axes.index(axis))
+            else:
+                self.get_logger().warn(f'Evaluation axes {msg.axes} does not contain axis: {axis}')
+
+        if len(index_array) == 0:
+            self.get_logger().warn(f'No axes in the evaluation {msg.axes} match ordering parameters: {axes}')
+            return [0] * len(msg.alternatives)
 
         if len(index_array) == 1:
             self.policy_str = 'maximize'
