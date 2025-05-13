@@ -34,7 +34,7 @@ class AcceptSizeNode(AcceptNode):
         self.declare_parameter('n', 1)
         self.declare_parameter('relation', '=')
 
-    def choice_cb(self, msg):
+    def accept(self, msg):
         n = self.get_parameter('n').value
         relation = self.get_parameter('relation').value
         return compare_size(msg.chosen, n, relation=relation)

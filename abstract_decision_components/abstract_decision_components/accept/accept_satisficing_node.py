@@ -18,7 +18,7 @@ import numpy as np
 
 import rclpy
 from rclpy.parameter import Parameter
-from rclpy.exceptions import ParameterException
+from rcl_interfaces.msg import SetParametersResult
 
 from abstract_decision_components.accept.accept_node import AcceptNode
 from abstract_decision_components.accept.accept import satisficing
@@ -35,25 +35,54 @@ class AcceptSatisficingNode(AcceptNode):
     """
     def __init__(self):
         super().__init__('satisficing')
+        self.add_on_set_parameters_callback(self._check_params)
         self.declare_parameter('axes', Parameter.Type.STRING_ARRAY) 
         self.declare_parameter('thresholds', Parameter.Type.DOUBLE_ARRAY)
 
     def accept(self, msg):
         axes = self.get_parameter('axes').value
         thresholds = self.get_parameter('thresholds').value
-        self._check_params(axes, thresholds)
 
+        # TODO: explicilty handle missing axes
         chosen_indices = [msg.evaluation.alternatives.index(c) for c in msg.chosen] 
         axis_indices = [msg.evaluation.axes.index(a) for a in axes] 
 
         scores = np.array(msg.evaluation.scores).reshape(
                 (len(msg.evaluation.alternatives), len(msg.evaluation.axes)))
-        return satisficing(scores[chosen_indices, axis_indices], np.array(thresholds))
+        return satisficing(scores[np.ix_(chosen_indices, axis_indices)], np.array(thresholds))
 
-    def _check_params(self, axes, thresholds):
+    def _check_params(self, parameters):
+        # TODO: currently these cannot be changed simultaneously from the command line which
+        #   also means that the lengths cannot be modified, once set.
+
+        axes = None
+        thresholds = None
+        for p in parameters:
+            if p.name == 'axes':
+                axes = p.value
+            elif p.name == 'thresholds':
+                thresholds = p.value
+
+        if axes is None and thresholds is None:
+            return SetParametersResult(successful=True)
+
+        if axes is None:
+            if self.has_parameter('axes'):
+                axes = self.get_parameter('axes').value
+            else:
+                return SetParametersResult(successful=True)
+        if thresholds is None:
+            if self.has_parameter('thresholds'):
+                thresholds = self.get_parameter('thresholds').value
+            else:
+                return SetParametersResult(successful=True)
+
         if len(axes) != len(thresholds):
-            raise ParameterException('Parameters have unequal lengths', ['axes', 'thresholds'])
+            return SetParametersResult(successful=False,
+                                       reason=f'Unequal lengths of axes ({len(axes)}) and thresholds ({len(thresholds)})')
+
         self.policy_str = f'satisficing, "{list(zip(axes, thresholds))}"'
+        return SetParametersResult(successful=True)
 
 
 def main(args=None):

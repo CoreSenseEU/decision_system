@@ -61,7 +61,7 @@ def satisficing(scores, features):
 
     :return: A :class:`boolean` indicating success or failure.
     """
-    return np.all(scores > features)
+    return bool(np.all(scores > features))
 
 
 def dominating(chosen_indices, scores):
@@ -80,8 +80,12 @@ def dominating(chosen_indices, scores):
     :return: A :class:`boolean` indicating success or failure and a :class:`string`
         message indicating the reason (left blank upon success).
     """
-    chosen_scores = scores[np.array(chosen_indices),:]
-    best_scores = np.max(np.delete(np.arange(scores.shape[0]), np.array(chosen_scores)), axis=0)
+    # Everything was chosen
+    if scores.shape[0] == len(chosen_indices):
+        return True
 
-    return np.all(chosen_scores > best_scores)
+    chosen_scores = scores[np.array(chosen_indices),:]
+    best_unchosen_scores = np.max(np.delete(scores, chosen_indices, axis=0), axis=0)
+
+    return bool(np.all(chosen_scores > best_unchosen_scores))
 

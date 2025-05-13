@@ -37,6 +37,7 @@ class AcceptDominatingNode(AcceptNode):
     def accept(self, msg):
         axes = self.get_parameter('axes').value
         
+        # TODO: explicilty handle missing axes
         chosen_indices = [msg.evaluation.alternatives.index(c) for c in msg.chosen] 
         axis_indices = [msg.evaluation.axes.index(a) for a in axes] 
         scores = np.array(msg.evaluation.scores).reshape(

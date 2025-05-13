@@ -42,12 +42,12 @@ class AcceptNode(Node):
         decision = Decision(choice=msg.chosen)
         try:
             # TODO: Validate msg.evaluation matrix?
-            decision.success = self.accept(msg)
+            decision.accepted = self.accept(msg)
         except ValueError as e:
             self.get_logger().error(str(e))
             return
 
-        if decision.success:
+        if decision.accepted:
             verb = 'Accepting'
         else:
             verb = 'Rejecting'
