@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+    <include path="tidy_held_object_in_current_room.xml"/>
+    <!-- equivalent to: <include ros_pkg="krr_btcpp_ros2" path="behavior_trees/tidy_held_object_in_current_room.xml"> -->
+    <include path="navigate_to_target_room.xml"/>
+
+    <BehaviorTree ID="TidyRemainingDoorObjects">
+        <Fallback>
+            <PrologCondition name="check_if_any_untidied_door_objects_are_known" query="must_tidy(O), !"/>
+            <Sequence>
+                <SubTree ID="DecideOnNextTargetDoorwayObject" choice="{doorway_object}"/>
+                <!-- TODO: convert prolog query to ROS Pose message
+                    def get_object_pose(doorway_object):
+                        query = f"pose(P), has_pose({doorway_object}, P), has_coordinates_7d(P, X, Y, _, _, _, _, _)"
+                        bindings = prolog.query(query, maxanswers=1)
+                        pose = geometry_msgs.msg.Pose()
+                        pose.position.x = bindings["X"]
+                        pose.position.y = bindings["Y"]
+
+                        doorway_object_pose = string(pose)
+                        return doorway_object_pose
+
+
+                    // In somehow in blackboard...
+                    setOutput("doorway_object_pose") = get_object_pose(doorway_object)
+                    -->
+                <PrologToROSInterface name="get_untidied_doorway_object_pose" 
+                                      query="pose(P), has_pose({doorway_object}, P), has_coordinates_7d(P, X, Y, _, _, _, _, _)"
+                                      interface="nav2_msgs::action::NavigateToPose"
+                                      mapping="[('X', 'pose.position.x'), ('Y', 'pose.position.y')]"
+                                      output="doorway_object_pose"
+                />
+                <NavigateToPose name="navigate_to_target_untidied_doorway_object" goal="{doorway_object_pose}"/>
+                <PickObject name="pick_target_untidied_doorway_object"/> <!-- TODO: Pass in object_id if it is known? -->
+                <!-- TODO: convert prolog query to string
+                    def get_object_drop_room(doorway_object):
+                        query = f"room(R), has_drop({doorway_object}, D), has_room(D, R)"
+                        bindings = prolog.query(query, maxanswers=1)
+                        
+                        room = bindings["R"]
+                        return room
+
+                    // In somehow in blackboard...
+                    setOutput("doorway_object_room") = get_object_drop_room(doorway_object)
+                    -->
+                <PrologToString name="get_untidied_doorway_object_drop_room" 
+                                query="room(R), has_drop({doorway_object}, D), has_room(D, R)" 
+                                mapping="R" 
+                                output="doorway_object_room"/>
+                <SubTree ID="NavigateToTargetRoom" target_room="{doorway_object_room}"/>
+                <SubTree ID="TidyHeldObjectInCurrentRoom"/>
+                <SubTree ID="TidyRemainingDoorObjects"/>                
+            </Sequence>
+        </Fallback>
+    </BehaviorTree>
+
+    <!-- Decide on next target doorway object-->
+    <BehaviorTree ID="DecideOnNextTargetDoorwayObject">
+        <Sequence>
+            <GetAlternativesQuery query="must_tidy(_A)"/>
+            <GetCuesFixed cues="[distance_to, travelling_salesman, avoid_unknown_doors]"/>
+            <AssessAlternatives name="action_assess" alternatives="{alternatives}" cues="{cues}"/>
+            <AggregatePassAssessments name="action_aggregate_pass"/>
+            <OrderCondorcetExtension name="action_order_condorcet_extension" policy="???"/>
+            <TakeN name="action_take_n" n="1"/>
+            <!-- In a behavior tree, AcceptAlways can be omitted and keep the 
+                 same behavior, as long as the typing is correct. -->
+            <AcceptAlways name="action_accept_always"/>
+        </Sequence>
+    </BehaviorTree>
+
+    <!-- Used by Groot (not the BT executor) -->
+    <TreeNodeModel>
+        <Action ID="PrologCondition">
+            <input_port name="query" type="std::string"/>
+        </Action>
+        <Action ID="NavigateToObjectPose">
+            <input_port name="goal" type="geometry_msgs::msg::PoseStamped"/>
+        </Action>
+        <Action ID="AssessAlternatives"/>
+        <Action ID="AggregatePassAssessments"/>
+        <Action ID="GetAlternativesQuery"/>
+        <Action ID="OrderCondorcetExtension">
+            <input_port name="policy" type="std::string"/>
+        </Action>
+        <Action ID="TakeN">
+            <input_port name="n" type="std::uint"/>
+        </Action>
+        <Action ID="AcceptAlways"/>
+    </TreeNodeModel>
+</root>

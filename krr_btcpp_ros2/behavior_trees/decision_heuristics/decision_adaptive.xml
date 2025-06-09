@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <include path="decision_core.xml">
+  <BehaviorTree ID="DecisionAdaptive">
+    <Sequence>
+      <ParallelAll>
+        <GetCues cues="{cues}"
+                 _skipIf="cues != []"/>
+        <GetAlternatives alternatives="{alternatives}"
+                         _skipIf="alternatives != []"/>
+      </ParallelAll>
+      <Fallback>
+        <KeepRunningUntilFailure> <!-- This must fail eventually -->
+          <Sequence>
+            <SubTree ID="DecisionCore" 
+                     _autoremap="true"/>
+            <Sequence _failureIf="accepted">
+              <UpdateStrategy />
+              <ParallelAll>
+                <UpdateCues />
+                <UpdateAlternatives />
+              </ParallelAll>
+            </Sequence>
+          </Sequence>
+        </KeepRunningUntilFailure>
+        <Script code="accepted" /> <!-- If accepted, disregard failures. -->
+      </Fallback>
+    </Sequence>
+  </BehaviorTree>
+
+  <TreeNodesModel>
+    <SubTree ID="DecisionIterative">
+      <input_port name="alternatives"/>
+      <input_port name="cues"/>
+      <output_port name="choice"/>
+      <output_port name="accepted"/>
+    </SubTree>
+  </TreeNodesModel>
+</root>

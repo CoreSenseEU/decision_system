@@ -23,6 +23,7 @@ setup(
             'cue_prolog = abstract_decision_components.cue.cue_prolog_node:main',
 
             'assess = abstract_decision_components.assess.assess_node:main',
+            'assess_action_server = abstract_decision_components.assess.assess_action_server:main',
 
             'aggregate_preferences = abstract_decision_components.aggregate.aggregate_preferences_node:main',
             'aggregate_utility_boolean = abstract_decision_components.aggregate.aggregate_utility_boolean_node:main',

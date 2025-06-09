@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" project_name="KRR_task3">
+    <include path="navigate_to_target_room.xml"/>
+    <include path="tidy_remaining_door_objects.xml"/>
+    <!-- Description of Node Models (used by Groot) -->
+    <TreeNodesModel>
+        <Action ID="AcceptAlways" editable="true"/>
+        <Action ID="AcceptN" editable="true">
+            <input_port name="n"/>
+        </Action>
+        <Action ID="AggregatePassAssessments" editable="true">
+            <input_port name="assessments"/>
+        </Action>
+        <Action ID="AggregateUtilitySigned" editable="true">
+            <input_port name="policy"/>
+            <output_port name="assessments"/>
+        </Action>
+        <Action ID="AssessAlternatives" editable="true">
+            <input_port name="alternatives"/>
+            <input_port name="cues"/>
+        </Action>
+        <Action ID="GetAlternativesFixed" editable="true">
+            <input_port name="alternatives"/>
+        </Action>
+        <Action ID="GetAlternativesQuery" editable="true">
+            <input_port name="query"/>
+        </Action>
+        <Action ID="GetCuesFixed" editable="true">
+            <input_port name="cues"/>
+        </Action>
+        <Action ID="NavigateThroughWaypoints" editable="true">
+            <input_port name="waypoints"/>
+        </Action>
+        <Action ID="NavigateToPose" editable="true">
+            <input_port name="goal"/>
+        </Action>
+        <Action ID="OrderCondorcetExtension" editable="true">
+            <input_port name="policy"/>
+        </Action>
+        <Action ID="OrderLexicographical" editable="true"/>
+        <Action ID="PickObject" editable="true"/>
+        <Condition ID="PrologCondition" editable="true">
+            <input_port name="query"/>
+        </Condition>
+        <Action ID="PrologToROSInterface" editable="true">
+            <input_port name="query"/>
+            <input_port name="interface"/>
+            <input_port name="mapping"/>
+            <output_port name="output"/>
+        </Action>
+        <Action ID="PrologToString" editable="true">
+            <input_port name="query"/>
+            <input_port name="mapping"/>
+            <output_port name="output"/>
+        </Action>
+        <Action ID="TakeBest" editable="true"/>
+        <Action ID="TakeN" editable="true">
+            <input_port name="n"/>
+        </Action>
+    </TreeNodesModel>
+</root>

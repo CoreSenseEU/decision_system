@@ -28,6 +28,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/CreatePose.srv"
   "srv/PrologQuery.srv"
 
+  "action/Assess.action"
+
   DEPENDENCIES geometry_msgs
 )
 
