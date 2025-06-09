@@ -168,6 +168,7 @@ has_drop_type(O, trash) :-
   has_attribute(O, empty),
   has_type(O, beer).
 
+
 % Objects have an object_type
 :- dynamic has_type/2.
 % has_type(obj_0_cup_clean, cup).
@@ -321,7 +322,7 @@ approximately_equals(P1, P2, PosTol, OriTol) :-
 % --------------------------------
 
 % Extents have 3D dimensions X,Y,Z [meters]
-has_dimensions(extent_door, 1, 1, 0.01).
+has_dimensions(extent_drop, 1, 1, 0.01).
 
 
 
