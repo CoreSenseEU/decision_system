@@ -69,14 +69,14 @@ class AssessNode(Node):
         futures = []
         for cue, client in self.clients_.items():
             request = AssessAlternatives.Request(alternatives=msg.alternatives)
-            futures.append((client, client.call_async(request)))
+            futures.append((cue, client, client.call_async(request)))
 
         # wait for each cue to finish
         timeout = self.get_parameter('timeout').value
         scores = np.zeros((len(msg.alternatives), len(self.cues_)))
         success = True
         then = self.get_clock().now().nanoseconds
-        for i, (client, future) in enumerate(futures):
+        for i, (cue, client, future) in enumerate(futures):
             if not success:
                 client.remove_pending_request(future)
                 continue
