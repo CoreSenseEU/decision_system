@@ -33,9 +33,13 @@ public:
   static BT::PortsList providedPorts()
   {    
     return providedBasicPorts({ 
-        BT::InputPort<decision_msgs::msg::AlternativeArray>("alternatives"),
-        BT::InputPort<decision_msgs::msg::CueArray>("cues"),
-        BT::OutputPort<decision_msgs::msg::AssessmentMatrix>("assessments")
+        BT::InputPort<decision_msgs::msg::AlternativeArray>(
+            "alternatives", "", "A choice set of alternatives to assess"),
+        BT::InputPort<decision_msgs::msg::CueArray>(
+            "cues", "", "A set of cues to use to make assessments"),
+        BT::OutputPort<decision_msgs::msg::AssessmentMatrix>(
+            "assessments", 
+            "A matrix of scores of each alternative by each cue.")
         });
   }
 
