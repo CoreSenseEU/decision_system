@@ -1,6 +1,6 @@
 bt_executor:
   ros__parameters:
-    action_name: "ExecuteBehaviorTree" # The ROS action name (defaults to `bt_action_server`)
+    action_name: "ExecuteBehaviorTree" # The ROS action name (defaults to `bt_execution`)
     tick_frequency: 100 # Frequency to tick the behavior tree at (defaults to 100 Hz)
     groot2_port: 1667 # Server port to publish Groot2 messages on (defaults to 1667)
     ros_plugins_timeout: 1000  # Timeout to wait for plugin action servers (defaults 1000 ms)
