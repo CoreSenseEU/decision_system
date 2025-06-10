@@ -10,22 +10,22 @@
 bool AssessAction::setGoal(Goal& goal)
 {
   // TODO: abstract away this call so that code isn't copied
-  if (!getInput<decision_msgs::msg::CueArray>("cues", this->cues_))
+  if (!getInput<decision_msgs::msg::CueArray>("cues", cues_))
   {
     RCLCPP_ERROR(logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
         name().c_str(), "cues");
     return false;
 
   }
-  if (!getInput<decision_msgs::msg::AlternativeArray>("alternatives", this->alternatives_))
+  if (!getInput<decision_msgs::msg::AlternativeArray>("alternatives", alternatives_))
   {
     RCLCPP_ERROR(logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
         name().c_str(), "alternatives");
     return false;
   }
 
-  goal.cues = this->cues_.cues;
-  goal.alternatives = this->alternatives_.alternatives;
+  goal.cues = cues_.cues;
+  goal.alternatives = alternatives_.alternatives;
 
   return true;
 }
@@ -34,7 +34,7 @@ bool AssessAction::setGoal(Goal& goal)
 BT::NodeStatus AssessAction::onResultReceived(const WrappedResult& wr)
 {
   decision_msgs::msg::AssessmentMatrix matrix;
-  matrix.cues= cues_.cues;
+  matrix.cues = cues_.cues;
   matrix.alternatives = alternatives_.alternatives;
   matrix.scores = wr.result->scores;
 
