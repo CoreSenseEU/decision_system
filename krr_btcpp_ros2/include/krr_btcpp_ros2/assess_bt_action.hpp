@@ -1,5 +1,5 @@
-#ifndef KRR_BT_CPP__ASSESS_HPP_
-#define KRR_BT_CPP__ASSESS_HPP_
+#ifndef KRR_BT_CPP__ASSESS_BT_ACTION_HPP_
+#define KRR_BT_CPP__ASSESS_BT_ACTION_HPP_
 
 #include <behaviortree_cpp/basic_types.h>
 #include <behaviortree_ros2/bt_action_node.hpp>

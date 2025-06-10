@@ -2,7 +2,7 @@
 #include <behaviortree_ros2/plugins.hpp>
 #include <rclcpp_action/client.hpp>
 
-#include "krr_btcpp_ros2/action_assess.hpp"
+#include "krr_btcpp_ros2/assess_bt_action.hpp"
 
 #include "decision_msgs/msg/assessment_matrix.hpp"
 
@@ -12,15 +12,15 @@ bool AssessAction::setGoal(Goal& goal)
   // TODO: abstract away this call so that code isn't copied
   if (!getInput<decision_msgs::msg::CueArray>("cues", this->cues_))
   {
-    RCLCPP_ERROR(this->logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
-        this->name().c_str(), "cues");
+    RCLCPP_ERROR(logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
+        name().c_str(), "cues");
     return false;
 
   }
   if (!getInput<decision_msgs::msg::AlternativeArray>("alternatives", this->alternatives_))
   {
-    RCLCPP_ERROR(this->logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
-        this->name().c_str(), "alternatives");
+    RCLCPP_ERROR(logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
+        name().c_str(), "alternatives");
     return false;
   }
 
@@ -34,8 +34,8 @@ bool AssessAction::setGoal(Goal& goal)
 BT::NodeStatus AssessAction::onResultReceived(const WrappedResult& wr)
 {
   decision_msgs::msg::AssessmentMatrix matrix;
-  matrix.cues= this->cues_.cues;
-  matrix.alternatives = this->alternatives_.alternatives;
+  matrix.cues= cues_.cues;
+  matrix.alternatives = alternatives_.alternatives;
   matrix.scores = wr.result->scores;
 
   setOutput<decision_msgs::msg::AssessmentMatrix>("assessments", matrix);
@@ -47,9 +47,9 @@ BT::NodeStatus AssessAction::onFeedback(const std::shared_ptr<const Feedback> fe
 {
   RCLCPP_INFO(logger(), "%s: onFeedback: goal is %.2f%% (%d/%lu) completed",
       name().c_str(), 
-      (float)feedback->num_assessed / (float)this->cues_.cues.size() * 100.0,
+      (float)feedback->num_assessed / (float)cues_.cues.size() * 100.0,
       feedback->num_assessed, 
-      this->cues_.cues.size());
+      cues_.cues.size());
   return BT::NodeStatus::RUNNING;
 }
 

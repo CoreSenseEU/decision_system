@@ -1,4 +1,4 @@
-bt_action_server:
+bt_executor:
   ros__parameters:
     action_name: "ExecuteBehaviorTree" # The ROS action name (defaults to `bt_action_server`)
     tick_frequency: 100 # Frequency to tick the behavior tree at (defaults to 100 Hz)

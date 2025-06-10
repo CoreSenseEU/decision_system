@@ -1,16 +1,18 @@
 #ifndef KRR_BT_CPP__BT_EXECUTOR_HPP_
 #define KRR_BT_CPP__BT_EXECUTOR_HPP_
 
+#include <rclcpp/rclcpp.hpp>
 #include <behaviortree_ros2/tree_execution_server.hpp>
 #include <string>
 #include <optional>
+#include <memory>
 
 
 class BTExecutor : public BT::TreeExecutionServer
 {
 public:
   explicit BTExecutor(const rclcpp::NodeOptions& options)
-    : TreeExecutionServer(options)
+    : TreeExecutionServer(std::make_unique<rclcpp::Node>("bt_executor", options))
   {}
 
 protected:

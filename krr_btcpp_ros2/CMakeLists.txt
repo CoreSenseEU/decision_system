@@ -39,8 +39,8 @@ set(DEPENDENCIES
 ################
 ### Add executables
 
-# AssessAlternatives action BT node (Plugin version)
-add_library(assess_plugin SHARED src/assess_action.cpp)
+# Assess BT::ActionNode (Plugin version)
+add_library(assess_plugin SHARED src/assess_bt_action.cpp)
 target_include_directories(assess_plugin PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
