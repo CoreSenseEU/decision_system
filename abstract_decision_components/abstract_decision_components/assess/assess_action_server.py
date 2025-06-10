@@ -102,7 +102,7 @@ class AssessActionServer(Node):
             #  Kirsch says that all cues must be processed.
             self.get_logger().error("Failed to assess all cues")
             goal_handle.abort()
-            return
+            return Assess.Result()
 
         # Also publish on the assessments topic
         # TODO: how much info should be published? Should this be a new "PartialDecision" message or something?
