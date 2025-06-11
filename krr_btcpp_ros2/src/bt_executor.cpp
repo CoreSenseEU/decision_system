@@ -23,7 +23,6 @@ int main(int argc, char* argv[])
   rclcpp::init(argc, argv);
 
   rclcpp::NodeOptions options;
-  // Note: Not using BTExecutor
   auto action_server = std::make_shared<BTExecutor>(options);
 
   // TODO: This workaround is for a bug in MultiThreadedExecutor where it can deadlock when spinning without a timeout.
