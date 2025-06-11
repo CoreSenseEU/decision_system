@@ -80,7 +80,7 @@ class CuePrologNode(Node):
         request.maxresult = 1
 
         response = self.call_service(self.prolog_client_, request)
-        if not response.success or len(response.answers) == 0:
+        if response is None or not response.success or len(response.answers) == 0:
             raise ValueError(f'Failed to answer query: "{request.query.clause}"')
 
         for answer in response.answers:
