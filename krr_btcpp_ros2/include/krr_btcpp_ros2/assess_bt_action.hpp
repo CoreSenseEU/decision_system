@@ -66,7 +66,7 @@ public:
    * It generally returns RUNNING, but the user can also use this callback to cancel the
    * current action and return SUCCESS or FAILURE.
    */
-  BT::NodeStatus onFeedback(const std::shared_ptr<const Feedback>) override;
+  BT::NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback) override;
 
   /**
    * @brief Optional callback invoked when something goes wrong. 

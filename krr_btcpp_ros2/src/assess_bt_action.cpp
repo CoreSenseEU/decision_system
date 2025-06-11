@@ -1,10 +1,6 @@
-#include <behaviortree_cpp/basic_types.h>
 #include <behaviortree_ros2/plugins.hpp>
-#include <rclcpp_action/client.hpp>
 
 #include "krr_btcpp_ros2/assess_bt_action.hpp"
-
-#include "decision_msgs/msg/assessment_matrix.hpp"
 
 
 bool AssessAction::setGoal(Goal& goal)
@@ -45,7 +41,7 @@ BT::NodeStatus AssessAction::onResultReceived(const WrappedResult& wr)
 
 BT::NodeStatus AssessAction::onFeedback(const std::shared_ptr<const Feedback> feedback)
 {
-  RCLCPP_INFO(logger(), "%s: onFeedback: goal is %.2f%% (%d/%lu) completed",
+  RCLCPP_INFO(logger(), "%s: onFeedback: goal is %.2f%% (%d/%lu cues) completed",
       name().c_str(), 
       (float)feedback->num_assessed / (float)cues_.cues.size() * 100.0,
       feedback->num_assessed, 

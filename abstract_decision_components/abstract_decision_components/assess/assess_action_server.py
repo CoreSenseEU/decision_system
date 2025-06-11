@@ -51,21 +51,21 @@ class AssessActionServer(Node):
                 self,
                 Assess,
                 'Assess',
-                self.execute_cb)
+                self.assess_cb)
 
         self.pub_ = self.create_publisher(
                 AssessmentMatrix,
                 'assessments',
                 10)
 
-    def execute_cb(self, goal_handle):
+    def assess_cb(self, goal_handle):
         self._update_cues(goal_handle.request.cues)
         self.alternatives_ = goal_handle.request.alternatives 
         
         if len(self.alternatives_) < 1:
             self.get_logger().error('Recieved empty list of alternatives')
             goal_handle.abort()
-            return
+            return Assess.Result()
         self.get_logger().info(f'Assessing alternatives {self.alternatives_} with cues {self.cues_}')
 
         # start each cue
@@ -74,6 +74,8 @@ class AssessActionServer(Node):
             request = AssessAlternatives.Request(alternatives=self.alternatives_)
             futures.append((cue, client, client.call_async(request)))
 
+        # TODO: switch to a spin-and-check model to fail eagerly
+        # TODO: abstract this behavior because ASSESS_MULTIVALUE uses the same logic
         # wait for each cue to finish
         timeout = self.get_parameter('timeout').value
         scores = np.zeros((len(self.alternatives_), len(self.cues_)))
@@ -88,14 +90,21 @@ class AssessActionServer(Node):
             timeout_sec = timeout - (self.get_clock().now().nanoseconds - then) / 10**9
             if timeout_sec > 0:
                 self.executor.spin_until_future_complete(future, timeout_sec=timeout_sec)
-
             if future.done():
-                result = future.result()
-                scores[:,i] = [p.score for p in result.preferences]
-                goal_handle.publish_feedback(Assess.Feedback(num_assessed=i+1))
+                if future.exception() is not None:
+                    self.get_logger().error(f'Cue {cue} failed with exception: {str(future.exception())}')
+                    success = False
+                else:
+                    result = future.result()
+                    if len(result.preferences) == 0:
+                        self.get_logger().error(f'Cue {cue} failed to assess alternatives')
+                        success = False
+                    else:
+                        scores[:,i] = [p.score for p in result.preferences]
+                        goal_handle.publish_feedback(Assess.Feedback(num_assessed=i+1))
             else:
                 client.remove_pending_request(future)
-                self.get_logger().error(f'Cue {cue} failed or timed out')
+                self.get_logger().error(f'Cue {cue} timed out')
                 success = False
 
         if not success:
@@ -119,6 +128,7 @@ class AssessActionServer(Node):
         cue_ids = [cue.id for cue in cues]
 
         # TODO: use an LRU cache instead of updating these each time?
+        # TODO: abstract this behavior because ASSESS_MULTIVALUE uses the same logic
         # keep old clients matching cues in the new goal
         clients = {cue: client for cue, client in self.clients_.items() if cue in cue_ids}
 
