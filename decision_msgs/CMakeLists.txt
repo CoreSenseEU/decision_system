@@ -29,6 +29,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/PrologQuery.srv"
 
   "action/Assess.action"
+  "action/Aggregate.action"
 
   DEPENDENCIES geometry_msgs
 )

@@ -17,4 +17,4 @@ float32[] scores
 ---
 # Feedback
 # Number of assessments completed so far
-int16 num_assessed
+uint16 num_assessed

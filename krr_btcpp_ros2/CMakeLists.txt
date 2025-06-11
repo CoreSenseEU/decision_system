@@ -37,7 +37,15 @@ set(DEPENDENCIES
 
 
 ################
-### Add executables
+### Add executables and plugins
+
+# Behavior Tree execution server
+add_executable(bt_executor src/bt_executor.cpp)
+target_include_directories(bt_executor PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+ament_target_dependencies(bt_executor ${DEPENDENCIES})
 
 # Assess BT::ActionNode (Plugin version)
 add_library(assess_plugin SHARED src/assess_bt_action.cpp)
@@ -48,20 +56,15 @@ target_include_directories(assess_plugin PUBLIC
 target_compile_definitions(assess_plugin PRIVATE BT_PLUGIN_EXPORT)
 ament_target_dependencies(assess_plugin ${DEPENDENCIES})
 
-# add_executable(action_assess src/assess_action.cpp)
-# target_include_directories(action_assess PUBLIC
-#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#   $<INSTALL_INTERFACE:include>
-# )
-# ament_target_dependencies(action_assess ${DEPENDENCIES})
-
-# Behavior Tree execution server
-add_executable(bt_executor src/bt_executor.cpp)
-target_include_directories(bt_executor PUBLIC
+# Aggregate BT::ActionNode (Plugin version)
+add_library(aggregate_plugin SHARED src/aggregate_bt_action.cpp)
+target_include_directories(aggregate_plugin PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(bt_executor ${DEPENDENCIES})
+target_compile_definitions(aggregate_plugin PRIVATE BT_PLUGIN_EXPORT)
+ament_target_dependencies(aggregate_plugin ${DEPENDENCIES})
+
 
 #
 # # Navigate action BT Node 
@@ -95,9 +98,9 @@ endif()
 ###############
 ### Install targets and directories
 install(TARGETS
-  assess_plugin
-  # action_assess
   bt_executor
+  assess_plugin
+  aggregate_plugin
   # action_navigate
   # action_pick
   # action_place
@@ -113,6 +116,7 @@ install(DIRECTORY
 # Install plugins for other packages to load
 install(TARGETS
   assess_plugin
+  aggregate_plugin
   LIBRARY DESTINATION share/${PROJECT_NAME}/bt_plugins
   ARCHIVE DESTINATION share/${PROJECT_NAME}/bt_plugins
   RUNTIME DESTINATION share/${PROJECT_NAME}/bt_plugins

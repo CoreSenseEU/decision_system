@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="TestAggregateBool">
+    <Sequence>
+      <Assess alternatives="blue;red;#808006"
+              cues="r;g"
+              assessments="{assessments}"
+              action_name="Assess"/>
+      <Aggregate assessments="{assessments}"
+                 evaluation="{evaluation}"
+        action_name="aggregate_utility_boolean_action_server/Aggregate"/>
+    </Sequence>
+  </BehaviorTree>
+</root>

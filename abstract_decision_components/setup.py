@@ -22,14 +22,20 @@ setup(
         'console_scripts': [
             'cue_prolog = abstract_decision_components.cue.cue_prolog_node:main',
 
-            'assess = abstract_decision_components.assess.assess_node:main',
+            # 'assess_node = abstract_decision_components.assess.assess_node:main',
             'assess_action_server = abstract_decision_components.assess.assess_action_server:main',
 
-            'aggregate_preferences = abstract_decision_components.aggregate.aggregate_preferences_node:main',
-            'aggregate_utility_boolean = abstract_decision_components.aggregate.aggregate_utility_boolean_node:main',
-            'aggregate_utility_signed = abstract_decision_components.aggregate.aggregate_utility_signed_node:main',
-            'aggregate_utility_sum = abstract_decision_components.aggregate.aggregate_utility_sum_node:main',
-            'aggregate_multi_value_utility = abstract_decision_components.aggregate.aggregate_multi_value_utility_node:main',
+            # 'aggregate_preferences_node = abstract_decision_components.aggregate.aggregate_preferences_node:main',
+            # 'aggregate_utility_boolean_node = abstract_decision_components.aggregate.aggregate_utility_boolean_node:main',
+            # 'aggregate_utility_signed_node = abstract_decision_components.aggregate.aggregate_utility_signed_node:main',
+            # 'aggregate_utility_sum_node = abstract_decision_components.aggregate.aggregate_utility_sum_node:main',
+            # 'aggregate_multi_value_utility_node = abstract_decision_components.aggregate.aggregate_multi_value_utility_node:main',
+
+            'aggregate_preferences_action_server = abstract_decision_components.aggregate.aggregate_preferences_action_server:main',
+            'aggregate_utility_boolean_action_server = abstract_decision_components.aggregate.aggregate_utility_boolean_action_server:main',
+            'aggregate_utility_signed_action_server = abstract_decision_components.aggregate.aggregate_utility_signed_action_server:main',
+            'aggregate_utility_sum_action_server = abstract_decision_components.aggregate.aggregate_utility_sum_action_server:main',
+            'aggregate_multi_value_utility_action_server = abstract_decision_components.aggregate.aggregate_multi_value_utility_action_server:main',
 
             'order_condorcet_extension = abstract_decision_components.order.order_condorcet_extension_node:main',
             'order_lexicographical = abstract_decision_components.order.order_lexicographical_node:main',
