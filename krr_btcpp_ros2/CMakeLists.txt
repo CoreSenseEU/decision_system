@@ -83,6 +83,15 @@ target_include_directories(take_plugin PUBLIC
 target_compile_definitions(take_plugin PRIVATE BT_PLUGIN_EXPORT)
 ament_target_dependencies(take_plugin ${DEPENDENCIES})
 
+# Accept BT::ActionNode (Plugin version)
+add_library(accept_plugin SHARED src/accept_bt_action.cpp)
+target_include_directories(accept_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_compile_definitions(accept_plugin PRIVATE BT_PLUGIN_EXPORT)
+ament_target_dependencies(accept_plugin ${DEPENDENCIES})
+
 
 #
 # # Navigate action BT Node 
@@ -121,6 +130,7 @@ install(TARGETS
   aggregate_plugin
   order_plugin
   take_plugin
+  accept_plugin
   # action_navigate
   # action_pick
   # action_place
@@ -139,6 +149,7 @@ install(TARGETS
   aggregate_plugin
   order_plugin
   take_plugin
+  accept_plugin
   LIBRARY DESTINATION share/${PROJECT_NAME}/bt_plugins
   ARCHIVE DESTINATION share/${PROJECT_NAME}/bt_plugins
   RUNTIME DESTINATION share/${PROJECT_NAME}/bt_plugins

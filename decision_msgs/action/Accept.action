@@ -1,0 +1,13 @@
+# Request
+# An evaluation and set of chosen alternatives based on that evaluation
+Choice choice
+
+---
+# Response
+# A status indicating if the decision was accepted (True) or not (False).
+bool accepted
+
+---
+# Feedback
+# Number of alterntives accepted so far
+uint16 num_accepted

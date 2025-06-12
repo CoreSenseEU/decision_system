@@ -48,10 +48,14 @@ setup(
             'take_best_action_server = abstract_decision_components.take.take_best_action_server:main',
             'eliminate_worst_action_server = abstract_decision_components.take.eliminate_worst_action_server:main',
 
-            'accept_always = abstract_decision_components.accept.accept_always_node:main',
-            'accept_size = abstract_decision_components.accept.accept_size_node:main',
-            'accept_satisficing = abstract_decision_components.accept.accept_satisficing_node:main',
-            'accept_dominating = abstract_decision_components.accept.accept_dominating_node:main',
+            # 'accept_always = abstract_decision_components.accept.accept_always_node:main',
+            # 'accept_size = abstract_decision_components.accept.accept_size_node:main',
+            # 'accept_satisficing = abstract_decision_components.accept.accept_satisficing_node:main',
+            # 'accept_dominating = abstract_decision_components.accept.accept_dominating_node:main',
+            'accept_always_action_server = abstract_decision_components.accept.accept_always_action_server:main',
+            'accept_size_action_server = abstract_decision_components.accept.accept_size_action_server:main',
+            'accept_satisficing_action_server = abstract_decision_components.accept.accept_satisficing_action_server:main',
+            'accept_dominating_action_server = abstract_decision_components.accept.accept_dominating_action_server:main',
         ],
     },
 )
