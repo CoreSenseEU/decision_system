@@ -30,16 +30,18 @@ setup(
             # 'aggregate_utility_signed_node = abstract_decision_components.aggregate.aggregate_utility_signed_node:main',
             # 'aggregate_utility_sum_node = abstract_decision_components.aggregate.aggregate_utility_sum_node:main',
             # 'aggregate_multi_value_utility_node = abstract_decision_components.aggregate.aggregate_multi_value_utility_node:main',
-
             'aggregate_preferences_action_server = abstract_decision_components.aggregate.aggregate_preferences_action_server:main',
             'aggregate_utility_boolean_action_server = abstract_decision_components.aggregate.aggregate_utility_boolean_action_server:main',
             'aggregate_utility_signed_action_server = abstract_decision_components.aggregate.aggregate_utility_signed_action_server:main',
             'aggregate_utility_sum_action_server = abstract_decision_components.aggregate.aggregate_utility_sum_action_server:main',
             'aggregate_multi_value_utility_action_server = abstract_decision_components.aggregate.aggregate_multi_value_utility_action_server:main',
 
-            'order_condorcet_extension = abstract_decision_components.order.order_condorcet_extension_node:main',
-            'order_lexicographical = abstract_decision_components.order.order_lexicographical_node:main',
-            'order_dominating = abstract_decision_components.order.order_dominating_node:main',
+            # 'order_condorcet_extension = abstract_decision_components.order.order_condorcet_extension_node:main',
+            # 'order_lexicographical = abstract_decision_components.order.order_lexicographical_node:main',
+            # 'order_dominating = abstract_decision_components.order.order_dominating_node:main',
+            'order_condorcet_extension_action_server = abstract_decision_components.order.order_condorcet_extension_action_server:main',
+            'order_lexicographical_action_server = abstract_decision_components.order.order_lexicographical_action_server:main',
+            'order_dominating_action_server = abstract_decision_components.order.order_dominating_action_server:main',
 
             'take_best = abstract_decision_components.take.take_best_node:main',
             'eliminate_worst = abstract_decision_components.take.eliminate_worst_node:main',

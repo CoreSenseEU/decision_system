@@ -1,0 +1,16 @@
+# Request
+# A matix of multi-dimensional values of each alternative.
+Evaluation evaluation
+
+---
+# Response
+# A list of integer ranks encoding a weak preference ordering on the set of
+# alteratives. Each rank corresponds to the alternative with the same index.
+# Assume that lower values are always better, and identical values are tied.
+# Consequently no cycles can exist.
+uint8[] ranks 
+
+---
+# Feedback
+# Number of judgments completed so far
+uint16 num_ordered
