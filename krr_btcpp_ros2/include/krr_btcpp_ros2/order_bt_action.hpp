@@ -2,7 +2,6 @@
 #define KRR_BT_CPP__ORDER_BT_ACTION_HPP_
 
 #include <behaviortree_ros2/bt_action_node.hpp>
-#include <decision_msgs/msg/detail/weak_ordering__struct.hpp>
 #include <string>
 
 #include "decision_msgs/action/order.hpp"
