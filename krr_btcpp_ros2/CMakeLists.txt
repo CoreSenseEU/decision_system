@@ -65,7 +65,6 @@ target_include_directories(aggregate_plugin PUBLIC
 target_compile_definitions(aggregate_plugin PRIVATE BT_PLUGIN_EXPORT)
 ament_target_dependencies(aggregate_plugin ${DEPENDENCIES})
 
-
 # Order BT::ActionNode (Plugin version)
 add_library(order_plugin SHARED src/order_bt_action.cpp)
 target_include_directories(order_plugin PUBLIC
@@ -74,6 +73,15 @@ target_include_directories(order_plugin PUBLIC
 )
 target_compile_definitions(order_plugin PRIVATE BT_PLUGIN_EXPORT)
 ament_target_dependencies(order_plugin ${DEPENDENCIES})
+
+# Take BT::ActionNode (Plugin version)
+add_library(take_plugin SHARED src/take_bt_action.cpp)
+target_include_directories(take_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_compile_definitions(take_plugin PRIVATE BT_PLUGIN_EXPORT)
+ament_target_dependencies(take_plugin ${DEPENDENCIES})
 
 
 #
@@ -112,6 +120,7 @@ install(TARGETS
   assess_plugin
   aggregate_plugin
   order_plugin
+  take_plugin
   # action_navigate
   # action_pick
   # action_place
@@ -129,6 +138,7 @@ install(TARGETS
   assess_plugin
   aggregate_plugin
   order_plugin
+  take_plugin
   LIBRARY DESTINATION share/${PROJECT_NAME}/bt_plugins
   ARCHIVE DESTINATION share/${PROJECT_NAME}/bt_plugins
   RUNTIME DESTINATION share/${PROJECT_NAME}/bt_plugins

@@ -31,6 +31,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/Assess.action"
   "action/Aggregate.action"
   "action/Order.action"
+  "action/Take.action"
 
   DEPENDENCIES geometry_msgs
 )

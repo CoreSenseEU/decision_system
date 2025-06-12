@@ -43,8 +43,10 @@ setup(
             'order_lexicographical_action_server = abstract_decision_components.order.order_lexicographical_action_server:main',
             'order_dominating_action_server = abstract_decision_components.order.order_dominating_action_server:main',
 
-            'take_best = abstract_decision_components.take.take_best_node:main',
-            'eliminate_worst = abstract_decision_components.take.eliminate_worst_node:main',
+            # 'take_best = abstract_decision_components.take.take_best_node:main',
+            # 'eliminate_worst = abstract_decision_components.take.eliminate_worst_node:main',
+            'take_best_action_server = abstract_decision_components.take.take_best_action_server:main',
+            'eliminate_worst_action_server = abstract_decision_components.take.eliminate_worst_action_server:main',
 
             'accept_always = abstract_decision_components.accept.accept_always_node:main',
             'accept_size = abstract_decision_components.accept.accept_size_node:main',

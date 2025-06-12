@@ -1,0 +1,14 @@
+# Request
+# An ordering of judged alternatives.
+WeakOrdering ordering
+
+---
+# Response
+
+# A set of chosen alternatives.
+Alternative[] chosen
+
+---
+# Feedback
+# Number of alterntives taken so far
+uint16 num_taken
