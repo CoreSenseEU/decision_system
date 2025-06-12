@@ -31,7 +31,7 @@ class TakeBestActionServer(Node):
     """
     def __init__(self):
         super().__init__('take_best_action_server')
-        self.get_logger().info('Starting TAKE action_server with policy: take_best')
+        self.get_logger().info('Starting TAKE action server with policy: take_best')
 
         self.declare_parameter('n', 0)
         self.declare_parameter('random_ties', False)

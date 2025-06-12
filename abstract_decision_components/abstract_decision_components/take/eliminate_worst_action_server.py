@@ -26,7 +26,7 @@ from abstract_decision_components.take import take
 class EliminateWorstActionServer(Node):
     def __init__(self):
         super().__init__('eliminate_worst_action_server')
-        self.get_logger().info('Starting TAKE action_server with policy: eliminate_worst')
+        self.get_logger().info('Starting TAKE action server with policy: eliminate_worst')
 
         self.declare_parameter('n', 0)
         self.declare_parameter('random_ties', False)
