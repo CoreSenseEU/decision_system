@@ -54,7 +54,7 @@ class OrderActionServer(Node):
         except ValueError as e:
             self.get_logger().error(str(e))
             goal_handle.abort()
-            return Order.Result
+            return Order.Result()
 
         ordering = WeakOrdering(alternatives=evaluation.alternatives, ranks=ranks)
         self.pub_.publish(OrderedEvaluation(ordering=ordering, evaluation=evaluation))
