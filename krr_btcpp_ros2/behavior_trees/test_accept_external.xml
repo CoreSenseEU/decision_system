@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="TestAcceptExternal">
+    <Sequence>
+      <Assess alternatives="blue;red;#808006"
+              cues="{@payload}"
+              assessments="{assessments}"
+              action_name="Assess"/>
+      <Aggregate assessments="{assessments}"
+                 evaluation="{evaluation}"
+                 action_name="Aggregate"/>
+      <Order evaluation="{evaluation}"
+             ordering="{ordering}"
+             action_name="order_lexicographical_action_server/Order"/>
+      <Take ordering="{ordering}"
+            choice="{choice}"
+            action_name="take_best_action_server/Take"/>
+      <Accept choice="{choice}"
+              evaluation="{evaluation}"
+              accepted="{accepted}"
+              action_name="accept_size_action_server/Accept"/>
+      <Script code="@return_message := 'Hello from TestAcceptExternal'"/>
+    </Sequence>
+  </BehaviorTree>
+</root>

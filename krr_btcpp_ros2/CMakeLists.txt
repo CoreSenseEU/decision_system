@@ -92,6 +92,15 @@ target_include_directories(accept_plugin PUBLIC
 target_compile_definitions(accept_plugin PRIVATE BT_PLUGIN_EXPORT)
 ament_target_dependencies(accept_plugin ${DEPENDENCIES})
 
+# TreeExecutionClient BT::ActionNode (Plugin version)
+add_library(tree_execution_client_plugin SHARED src/tree_execution_client_bt_action.cpp)
+target_include_directories(tree_execution_client_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_compile_definitions(tree_execution_client_plugin PRIVATE BT_PLUGIN_EXPORT)
+ament_target_dependencies(tree_execution_client_plugin ${DEPENDENCIES})
+
 
 #
 # # Navigate action BT Node 
@@ -131,6 +140,7 @@ install(TARGETS
   order_plugin
   take_plugin
   accept_plugin
+  tree_execution_client_plugin
   # action_navigate
   # action_pick
   # action_place
@@ -150,6 +160,7 @@ install(TARGETS
   order_plugin
   take_plugin
   accept_plugin
+  tree_execution_client_plugin
   LIBRARY DESTINATION share/${PROJECT_NAME}/bt_plugins
   ARCHIVE DESTINATION share/${PROJECT_NAME}/bt_plugins
   RUNTIME DESTINATION share/${PROJECT_NAME}/bt_plugins

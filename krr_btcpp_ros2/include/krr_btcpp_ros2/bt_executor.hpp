@@ -1,6 +1,7 @@
 #ifndef KRR_BT_CPP__BT_EXECUTOR_HPP_
 #define KRR_BT_CPP__BT_EXECUTOR_HPP_
 
+#include <behaviortree_cpp/basic_types.h>
 #include <rclcpp/rclcpp.hpp>
 #include <behaviortree_ros2/tree_execution_server.hpp>
 #include <string>
@@ -26,9 +27,9 @@ protected:
    * @brief Optional callback invoked after the tree is created.
    * It can be used, for instance, to initialize a logger or the global blackboard.
    *
-   * @param tree The tree that was created
+   * @param session The session resources specific to the goal
    */
-  void onTreeCreated(BT::Tree& tree) override;
+  void onTreeCreated(BT::GoalResources& session) override;
 
   /**
    * @brief Optional callback invoked after the plugins were registered into
@@ -57,7 +58,7 @@ protected:
    *
    * @return if not std::nullopt, the string will be sent as [return_message] to the Action Client.
    */
-  // std::optional<std::string> onTreeExecutionCompleted(BT::NodeStatus status, bool was_cancelled) override;
+  std::optional<std::string> onTreeExecutionCompleted(BT::NodeStatus status, bool was_cancelled, BT::GoalResources& session) override;
 
   /**
    * @brief onLoopFeedback is a callback invoked at each loop, after tree.tickOnce().
@@ -68,5 +69,24 @@ protected:
   // std::optional<std::string> onLoopFeedback() override;
 
 };
+
+
+inline const char* toStr(const BT::NodeStatus& status)
+{
+  switch(status)
+  {
+    case BT::NodeStatus::IDLE:
+      return "IDLE";
+    case BT::NodeStatus::RUNNING:
+      return "RUNNING";
+    case BT::NodeStatus::SUCCESS:
+      return "SUCCESS";
+    case BT::NodeStatus::FAILURE:
+      return "FAILURE";
+    case BT::NodeStatus::SKIPPED:
+      return "SKIPPED";
+  }
+  return nullptr;
+}
 
 #endif
