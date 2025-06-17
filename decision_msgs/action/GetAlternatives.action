@@ -1,0 +1,18 @@
+# Request
+# A gap containing templates to match alternatives to
+Gap gap
+
+# The maximum number of desired matches, or -1 to collect all matches.
+# Any other number or 0 has undefined behavior.
+# If there are more than 255, behavior is undefined.
+int16 maxresult -1
+
+---
+# Response
+# An array of unique alternatives matching one or more templates
+AlternativeArray alternatives
+
+---
+# Feedback
+# Number of unique alterntives matched so far
+uint16 num_matched

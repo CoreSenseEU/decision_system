@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="TestGetAlternatives">
+    <Sequence>
+      <SaySomething message="I like peanuts again"/>
+      <GetAlternatives gap="color(A)\;color(A)"
+              max_matches="10"
+              alternatives="{alternatives}"
+              action_name="GetAlternatives"/>
+    </Sequence>
+  </BehaviorTree>
+</root>

@@ -10,12 +10,14 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Assessment.msg"
   "msg/AssessmentMatrix.msg"
   "msg/Choice.msg"
+  "msg/CSTemplate.msg"
   "msg/Cue.msg"
   "msg/CueArray.msg"
   "msg/CueWeights.msg"
   "msg/Decision.msg"
   "msg/Evaluation.msg"
   "msg/Feature.msg"
+  "msg/Gap.msg"
   "msg/Judgment.msg"
   "msg/OrderedEvaluation.msg"
   "msg/Preference.msg"
@@ -28,11 +30,12 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/CreatePose.srv"
   "srv/PrologQuery.srv"
 
-  "action/Assess.action"
+  "action/Accept.action"
   "action/Aggregate.action"
+  "action/Assess.action"
+  "action/GetAlternatives.action"
   "action/Order.action"
   "action/Take.action"
-  "action/Accept.action"
 
   DEPENDENCIES geometry_msgs
 )

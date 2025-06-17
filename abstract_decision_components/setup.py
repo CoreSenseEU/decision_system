@@ -20,6 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'get_alternatives = abstract_decision_components.get_alternatives_prolog_action_server:main',
+
             'cue_prolog = abstract_decision_components.cue.cue_prolog_node:main',
 
             # 'assess_node = abstract_decision_components.assess.assess_node:main',
