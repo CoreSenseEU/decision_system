@@ -30,7 +30,6 @@ class CuePrologNode(Node):
 
     :param query: A prolog query to submit to the database where the variable `_A`
         is used for input alternatives and `V` is used for the desired value.
-    :param knowledge_base: A path to the prolog knowledge base.
     """
     def __init__(self):
         super().__init__('cue_prolog_service')
