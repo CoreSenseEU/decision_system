@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <!-- Assess Meta -->
+  <BehaviorTree ID="MakeSureAssessmentMatrixExists">
+    <!-- Assume an assessment matrix will never be up to date if this is ticked, so no need for a fallback -->
+    <Sequence>
+      <SubTree ID="MakeSureAlternativesUpdated" _autoremap="true" previous_choice="{choice}"/>
+      <SubTree ID="MakeSureCuesUpdated" _autoremap="true" previous_choice="{cues}"/>
+      <Assess alternatives="{choice_set}"
+              cues="{cues}"
+              assessments="{assessments}"
+              action_name="" />
+    </Sequence>
+  </BehaviorTree>
+</root>

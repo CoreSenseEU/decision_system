@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <!-- Structure for Adaptive decision making -->
+  <BehaviorTree ID="MakeAdaptiveDecision">
+    <Sequence>
+      <SubTree ID="MakeSureGapDefined" _autoremap="true" />
+      <SubTree ID="MakeSureHeuristicAssembled" _autoremap="true" heuristic="{_heuristic}" config="{_config}"/>
+
+      <!-- Setting ROS parameters may take a few tries, so give this a couple
+           attempts before giving up. 
+      -->
+      <RetryUntilSuccess num_attempts="3">
+        <AdaptDecisionComponents config="{_config}" 
+                                 gap="{gap}" 
+                                 action_name="AdaptDecisionComponents" />
+      </RetryUntilSuccess>
+
+      <RunExternalSubTree target_tree="{_heuristic}"
+                          payload="{gap}"
+                          return_message="{_choice_query}"
+                          action_name="ExecuteBehaviorTree"/>
+      <PrologQuery query="{_choice_query}" 
+                   target="{choice}" 
+                   maxresult="-1"
+                   service_name="{@prolog_query}" />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="MakeSureGapDefined">
+    <Fallback>
+      <!-- Check if the GAP exists
+              TODO: fail if gap="" (although this should be automatic anyway...)
+                  maybe specifically define gap() :- false.
+      -->
+      <CheckExistence gap="{gap}" 
+                      query="gap(_G)"
+                      service_name="{@prolog_query}" />
+
+      <!-- Automatically defining a gap is out of scope for now. 
+          This just copies the predefined one with a new uuid
+          TODO: define duplicates_gap/2
+
+          % duplicate_gap(-\-NewGap, ++OldGap)
+          duplicate_gap(Gnew, Gold) :-
+            gap(Gold), uuid(Gnew), assertz((gap(Gnew))), 
+            assertz((alternative_of(A, Gnew) :- alternative_of(A, Gold))),
+            assertz((cue_of(C, Gnew) :- cue_of(C, Gold))),
+            assertz((heuristic_of(Xml_file, Gnew) :- heuristic_of(Xml_file, Gold))),
+            assertz((config_of(Yaml_file, Gnew) :- config_of(Yaml_file, Gold))),
+      -->
+      <OpenGap copy="room_gap" gap="{gap}"/>
+    </Fallback>
+  </BehaviorTree>
+
+  <BehaviorTree ID="MakeSureHeuristicAssembled">
+    <Fallback>
+      <!-- NOTE: heuristic/config_of(_, room_gap) will not be predefined! 
+              But let it be reused in later iterations
+      -->
+      <Sequence>
+        <PrologFetchFromGap gap="{gap}" 
+                            query="heuristic_of(_T, _G)" 
+                            target="{heuristic}" 
+                            maxresult="1"
+                            service_name="{@prolog_query}" />
+        <PrologFetchFromGap gap="{gap}" 
+                            query="config_of(_T, _G)" 
+                            target="{config}" 
+                            maxresult="1"
+                            service_name="{@prolog_query}" />
+      </Sequence>
+
+      <AssembleHeuristic gap="{gap}" 
+                         xml="{heuristic}"
+                         yaml="{config}"
+                         action_name="AssembleDecisionHeuristic"
+    </Fallback>
+  </BehaviorTree>
+
+</root>

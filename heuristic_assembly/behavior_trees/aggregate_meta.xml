@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <!-- Aggregate Meta -->
+  <BehaviorTree ID="MakeSureEvaluationExists">
+    <!-- Assume an evaluation will never be up to date if this is ticked, so no need for a fallback -->
+    <Sequence>
+      <SubTree ID="MakeSureAssessmentMatrixExists" _autoremap="true" />
+      <Aggregate assessments="{assessments}"
+                 evaluation="{evaluation}"
+                 action_name=""/>
+    </Sequence>
+  </BehaviorTree>
+</root>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <!-- Decide Meta -->
+  <BehaviorTree ID="MakeSureGapClosed">
+    <Fallback>
+      <!-- Check if this gap has already been closed -->
+      <CheckExistence gap="{gap}" 
+                      query="is_closed(_G)"
+                      service_name="{@prolog_query}" />
+
+      <Sequence>
+        <RetryUntilSuccessful _while="!aborted" num_attempts="20">
+          <!-- Make sure done -->
+          <Sequence> 
+            <SubTree ID="MakeSureChoiceTaken" _autoremap="true" />
+            <SubTree ID="MakeSureChoiceAccepted" _autoremap="true" />
+          </Sequence>
+        </RetryUntilSucccessful>
+        <CloseGap _failureIf="aborted | !accepted" 
+                  gap="{gap}"
+                  choice="{choice}" 
+                  action_name="" />
+      </Sequence>
+    </Fallback>
+  </BehaviorTree>
+</root>

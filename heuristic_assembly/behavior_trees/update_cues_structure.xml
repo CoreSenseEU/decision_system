@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <!-- Update Cues Meta -->
+  <BehaviorTree ID="MakeSureCuesUpdated">
+    <Sequence>
+    <!-- Get Cues Structure
+          If Cues are not available, go get some
+    -->
+      <Fallback>
+        <!-- Check if all the cues have already been collected -->
+        <CheckExistence gap="{gap}" 
+                        query="\+ (cue_of(C, _G), \+ fetched_for(C, _G))"
+                        service_name="{@prolog_query}" />
+
+        <!-- Get up to 10 cues from the GAP
+              TODO: when creating the GAP, just assert definition for:
+                % cue_of(?Cue, ?Gap)
+                :- dynamic cue_of/2
+        -->
+        <PrologFetchFromGap gap="{gap}" 
+                            query="cue_of(_T, _G), \+ fetched_for(_T, _G), assertz((fetched_for(_T, _G)))" 
+                            target="{_available_cues}"
+                            maxresult="10"
+                            service_name="{@prolog_query}" />
+      </Fallback>
+      <!-- Update Cues (uses the same engine as UpdateAlternatives
+            ...because these are alternative cues to use... 
+            previous_choice is always the entire previous set of cues
+            choice_set is an input and output port
+
+            NOTE: without a new decision on cues (see reconfiguration), it is
+            only sensible to keep all or none of the cues each iteration.
+
+            Assume that the ordering of cues matches the order in which they
+            were discovered, but this ordering could be enforced by the 
+            definition of `cue_of/2`.
+      -->
+      <UpdateAlternatives previous_choice="{cues}"
+                          available="{_available_cues}"
+                          choice_set="{cues}"
+                          action_name="" />
+    </Sequence>
+  </BehaviorTree>
+</root>
