@@ -53,7 +53,7 @@ class AggregatePreferencesActionServer(Node):
                             len(assessments.scores))
         except ValueError as e:
             self.get_logger().error(str(e))
-            goal_handle.aborted()
+            goal_handle.abort()
             return Aggregate.Result()
 
         evaluation = Evaluation(alternatives=assessments.alternatives,
