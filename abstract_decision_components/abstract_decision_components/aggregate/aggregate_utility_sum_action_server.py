@@ -30,8 +30,8 @@ class AggregateUtilitySumActionServer(AggregateUtilityActionServer):
         - `'unweighted_sum'`: add assessment scores directly.
         - `'weighted_sum'`: add assessment scores based on `cue_weights`.
         Defaults to 'unweighted_sum'
-    :param normalize: If True, linearly transform each assessment over its to
-        the range `[0,1]`. Defaults to False
+    :param normalize: If True, linearly transform each assessment to the range
+        `[0,1]`. Defaults to False
 
     """
     def __init__(self):
