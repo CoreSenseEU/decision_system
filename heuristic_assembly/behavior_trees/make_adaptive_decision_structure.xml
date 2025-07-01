@@ -48,7 +48,9 @@
             assertz((heuristic_of(Xml_file, Gnew) :- heuristic_of(Xml_file, Gold))),
             assertz((config_of(Yaml_file, Gnew) :- config_of(Yaml_file, Gold))),
       -->
-      <OpenGap copy="room_gap" gap="{gap}"/>
+      <CopyGap parent="room_gap" 
+               child="{gap}" 
+               action_name="" />
     </Fallback>
   </BehaviorTree>
 
@@ -70,11 +72,10 @@
                             service_name="{@prolog_query}" />
       </Sequence>
 
-      <AssembleHeuristic gap="{gap}" 
-                         xml="{heuristic}"
-                         yaml="{config}"
-                         action_name="AssembleDecisionHeuristic"
+      <AssembleDecisionHeuristic gap="{gap}" 
+                                 xml="{heuristic}"
+                                 yaml="{config}"
+                                 action_name="AssembleDecisionHeuristic" />
     </Fallback>
   </BehaviorTree>
-
 </root>
