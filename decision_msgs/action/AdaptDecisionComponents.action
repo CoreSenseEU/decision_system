@@ -1,0 +1,25 @@
+# Request
+# A unique identifier for the decision actively being solved.
+# Gap gap
+string gap_id
+
+# An absolute path to the heuristic ROS config YAML file.
+string params_file
+
+---
+# Response
+# A boolean indicating success or failure
+bool success
+
+# An optional error message
+string reason
+
+---
+# Feedback
+
+# The number of components that have been adapted
+uint32 num_adapted
+
+# The total number of components to adapt
+uint32 num_to_adapt
+

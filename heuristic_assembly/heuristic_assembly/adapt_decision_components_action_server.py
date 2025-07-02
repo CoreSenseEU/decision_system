@@ -13,23 +13,38 @@
 # limitations under the License.
 
 import sys
+import os
 
 import rclpy
+from rclpy.parameter import Parameter
 from rclpy.node import Node
 from rclpy.action import ActionServer
-from rclpy.parameter import parameter_dict_from_yaml_file
+# from ros2param.api import call_get_parameters, call_set_parameters
 
-from rcl_interfaces.srv import SetParameters
+# TODO: backport this from ROS 2 rolling?
+# from rclpy.parameter import parameter_dict_from_yaml_file
+from rclpy_parameter_rolling import parameter_dict_from_yaml_file
+
+from rcl_interfaces.srv import SetParameters, GetParameters
 from decision_msgs.action import AdaptDecisionComponents
 
 
 class AdaptDecisionComponentsActionServer(Node):
     """
     An action to adapt decision components with new parameters.
+
+    :param heuristic_directory: The working directory where new heuristics and
+        parameter files are saved. Defaults to the current working directory.
+
+    :param bt_executor: The name of the node to execute behavior trees. Defaults to '/bt_executor'.
+
     """
     def __init__(self):
         super().__init__('adapt_decision_components_action_server')
         self.get_logger().info('Starting ADAPT_DECISION_COMPONENTS action server')
+
+        self.declare_parameter('bt_executor', '/bt_executor')
+        self.declare_parameter('working_directory', os.getcwd())
 
         self.action_server_ = ActionServer(
                 self,
@@ -38,44 +53,39 @@ class AdaptDecisionComponentsActionServer(Node):
                 self.adapt_cb)
 
     def adapt_cb(self, goal_handle):
-        # TODO: instead of custom messages use this!!
-        configurations = parameter_dict_from_yaml_file(goal_handle.request.file_path)
-
-        if len(configurations) < 1:
-            reason = 'Recieved empty list of configurations'
+        parameters = parameter_dict_from_yaml_file(goal_handle.request.file_path)
+        if len(parameters) < 1:
+            reason = 'Recieved empty list of parameters'
             self.get_logger().error(reason)
             goal_handle.abort()
             return AdaptDecisionComponents.Result(success=False, reason=reason)
-        self.get_logger().info(f'Adapting {[c.node_name for c in configurations]}')
+        self.get_logger().info(f'Adapting {[c.node_name for c in parameters]}')
+
+        self._add_executor(parameters)
 
         # TODO: switch to a parallel model instead of series?
         # Right now assume that the services return quickly so it's not too much of a difference
         success = True
-        for i, config in enumerate(configurations.items()):
+        for i, param in enumerate(parameters.items()):
             if success:
-                success, reason = self.adapt_decision_component(config[0], config[1])
-                goal_handle.publish_feedback(AdaptDecisionComponents.Feedback(num_configured=i))
+                success, reason = self.adapt_decision_component(param[0], param[1])
+                goal_handle.publish_feedback(AdaptDecisionComponents.Feedback(num_adapted=i, num_to_adapt=len(parameters)))
             else:
-                # TODO: should successful configurations be set back to how they started?
+                # TODO: should successful parameters be set back to how they started?
                 goal_handle.abort()
                 return AdaptDecisionComponents.Result(success=False, reason=reason)
 
         goal_handle.succeed()
-        return AdaptDecisionComponents.Result(success=success, reason=reason)
+        return AdaptDecisionComponents.Result(success=success)
 
     def adapt_decision_component(self, node_name, parameters):
         # TODO: maybe use this instead of hand-rolled clients?
         #    See: https://github.com/ros2/ros2cli/blob/e77104637de7b4b8f9fa0f02210554c789e465b6/ros2param/ros2param/api/__init__.py#L35
         # client = AsyncParameterClient(self, node_name)
 
-
         client = self.create_client(SetParameters, node_name + "/set_parameters")
-
         request = SetParameters.Request(parameters=parameters)
         response = self.call_service(client, request)
-
-        while not self.destroy_client(client):
-            self.executor.spin_once()
 
         if response is None:
             return False, f'Failed to set parameters for {node_name}'
@@ -91,6 +101,20 @@ class AdaptDecisionComponentsActionServer(Node):
         if not success:
             return False, f'Failed to set all parameters for {node_name}'
         return True, ''
+
+    def _add_executor(self, parameters, heuristic_dir):
+        # TODO: include a prolog entry for `engine(bt_executor), has_ros_node(???, bt_executor)`
+        bt_executor = self.get_parameter('bt_executor').value
+
+        client = self.create_client(GetParameters, bt_executor + "/get_parameters")
+        request = GetParameters.Request(parameters=parameters)
+        response = self.call_service(client, request)
+        if response is None:
+            raise RuntimeError(f'Failed to get parameters for {bt_executor}')
+
+        param_value = response.values[0]
+        param_value.string_array_value.append(heuristic_dir)
+        parameters.update({bt_executor: Parameter('behavior_trees', value=param_value)})
 
     def call_service(self, cli, request):
         """

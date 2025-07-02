@@ -1,0 +1,15 @@
+# Request
+# A unique identifier for the decision actively being solved.
+# Gap gap
+string gap_id
+
+---
+# Response
+# An absolute path to the heuristic behavior tree XML file.
+string heuristic_file
+
+# An absolute path to the heuristic ROS config YAML file.
+string params_file
+
+---
+# Feedback

@@ -1,4 +1,5 @@
 from setuptools import find_packages, setup
+from glob import glob
 
 package_name = 'heuristic_assembly'
 
@@ -10,7 +11,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name + '/behavior_trees/', ['behavior_trees']),
+        ('share/' + package_name + '/behavior_trees/', glob('behavior_trees/*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -21,6 +22,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'assemble_decision_heuristic = heuristic_assembly.assemble_decision_heuristic_action_server:main',
+            'adapt_decision_components = heuristic_assembly.adapt_decision_components_action_server:main',
         ],
     },
 )

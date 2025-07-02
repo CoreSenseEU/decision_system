@@ -32,6 +32,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 
   "action/Accept.action"
   "action/Aggregate.action"
+  "action/AssembleDecisionHeuristic.action"
+  "action/AdaptDecisionComponents.action"
   "action/Assess.action"
   "action/GetAlternatives.action"
   "action/Order.action"
