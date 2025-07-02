@@ -50,7 +50,7 @@
       -->
       <CopyGap parent="room_gap" 
                child="{gap}" 
-               action_name="" />
+               service_name="{@prolog_query}" />
     </Fallback>
   </BehaviorTree>
 
@@ -62,19 +62,19 @@
       <Sequence>
         <PrologFetchFromGap gap="{gap}" 
                             query="heuristic_of(_T, _G)" 
-                            target="{heuristic}" 
+                            target="{_heuristic}" 
                             maxresult="1"
                             service_name="{@prolog_query}" />
         <PrologFetchFromGap gap="{gap}" 
                             query="config_of(_T, _G)" 
-                            target="{config}" 
+                            target="{_config}" 
                             maxresult="1"
                             service_name="{@prolog_query}" />
       </Sequence>
 
       <AssembleDecisionHeuristic gap="{gap}" 
-                                 xml="{heuristic}"
-                                 yaml="{config}"
+                                 xml="{_heuristic}"
+                                 yaml="{_config}"
                                  action_name="AssembleDecisionHeuristic" />
     </Fallback>
   </BehaviorTree>
