@@ -11,6 +11,7 @@ void BTExecutor::onTreeCreated(BT::GoalResources& session)
       node()->get_name(), session.tree.rootNode()->name().c_str());
 
   globalBlackboard(session)->set("payload", goalPayload(session));
+  globalBlackboard(session)->set("prolog_query", node()->get_parameter("prolog_query_service").as_string());
   globalBlackboard(session)->createEntry("return_message", BT::TypeInfo::Create<std::string>());
 }
 

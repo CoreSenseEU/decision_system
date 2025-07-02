@@ -33,7 +33,7 @@ BT::NodeStatus TreeExecutionClient::onResultReceived(const WrappedResult& wr)
   } else {
     RCLCPP_ERROR(logger(), "%s: onResultRecieved exited with status {%s} and message: {%s}", 
         name().c_str(), toStr(wr.result->node_status.status), wr.result->return_message.c_str());
-    return BT::NodeStatus::SUCCESS;
+    return BT::NodeStatus::FAILURE;
   }
 }
 

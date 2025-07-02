@@ -14,7 +14,10 @@ class BTExecutor : public BT::TreeExecutionServer
 public:
   explicit BTExecutor(const rclcpp::NodeOptions& options)
     : TreeExecutionServer(std::make_unique<rclcpp::Node>("bt_executor", options))
-  {}
+  {
+    // TODO: remove this from the blackboard and just set the query service in AssembleDecisionHeuristic
+    this->node()->declare_parameter("prolog_query_service", "/query");
+  }
 
 protected:
   /**

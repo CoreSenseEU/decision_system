@@ -110,6 +110,23 @@ target_include_directories(tree_execution_client_plugin PUBLIC
 target_compile_definitions(tree_execution_client_plugin PRIVATE BT_PLUGIN_EXPORT)
 ament_target_dependencies(tree_execution_client_plugin ${DEPENDENCIES})
 
+# AssembleDecisionHeuristic BT::ActionNode (Plugin version)
+add_library(assemble_decision_heuristic_plugin SHARED src/assemble_decision_heuristic_bt_action.cpp)
+target_include_directories(assemble_decision_heuristic_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_compile_definitions(assemble_decision_heuristic_plugin PRIVATE BT_PLUGIN_EXPORT)
+ament_target_dependencies(assemble_decision_heuristic_plugin ${DEPENDENCIES})
+
+# AssembleDecisionHeuristic BT::ActionNode (Plugin version)
+add_library(adapt_decision_components_plugin SHARED src/adapt_decision_components_bt_action.cpp)
+target_include_directories(adapt_decision_components_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_compile_definitions(adapt_decision_components_plugin PRIVATE BT_PLUGIN_EXPORT)
+ament_target_dependencies(adapt_decision_components_plugin ${DEPENDENCIES})
 
 # # Navigate action BT Node 
 # add_executable(action_navigate src/action_navigate.cpp)
@@ -150,6 +167,8 @@ install(TARGETS
   take_plugin
   accept_plugin
   tree_execution_client_plugin
+  assemble_decision_heuristic_plugin
+  adapt_decision_components_plugin
   # action_navigate
   # action_pick
   # action_place
@@ -171,6 +190,8 @@ install(TARGETS
   take_plugin
   accept_plugin
   tree_execution_client_plugin
+  assemble_decision_heuristic_plugin
+  adapt_decision_components_plugin
   LIBRARY DESTINATION share/${PROJECT_NAME}/bt_plugins
   ARCHIVE DESTINATION share/${PROJECT_NAME}/bt_plugins
   RUNTIME DESTINATION share/${PROJECT_NAME}/bt_plugins

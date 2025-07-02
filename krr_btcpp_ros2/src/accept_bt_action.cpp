@@ -31,7 +31,7 @@ bool AcceptAction::setGoal(Goal& goal)
 BT::NodeStatus AcceptAction::onResultReceived(const WrappedResult& wr)
 {
   setOutput<bool>("accepted", wr.result->accepted);
-  return BT::NodeStatus::SUCCESS;
+  return wr.result->accepted ? BT::NodeStatus::SUCCESS : BT::NodeStatus::FAILURE;
 }
 
 
