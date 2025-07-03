@@ -30,6 +30,7 @@ class EliminateWorstActionServer(Node):
 
         self.declare_parameter('n', 0)
         self.declare_parameter('random_ties', False)
+        self.declare_parameter('force_take', True)
 
         self.action_server_ = ActionServer(
                 self,
@@ -54,12 +55,13 @@ class EliminateWorstActionServer(Node):
             goal_handle.abort()
             return Take.Result()
 
+        force_take = self.get_parameter('force_take').value
         if n == 0:
-            chosen = self.eliminate_worst(ranked_alternatives)
+            chosen = self.eliminate_worst(ranked_alternatives, force_take=force_take)
         elif self.get_parameter('random_ties').value:
-            chosen = self.eliminate_n_random(ranked_alternatives, n)
+            chosen = self.eliminate_n_random(ranked_alternatives, n, force_take)
         else:
-            chosen = self.eliminate_n(ranked_alternatives, n)
+            chosen = self.eliminate_n(ranked_alternatives, n, force_take)
 
         choice = AlternativeArray(alternatives=chosen)
         self.pub_.publish(choice)
