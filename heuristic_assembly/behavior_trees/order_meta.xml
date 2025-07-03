@@ -13,7 +13,7 @@
       -->
       <!-- 
       This may be necessary instead if BT.CPP does not do automatic type conversion from strings
-      <PrologFetch gap="{gap}" source="gap(G), ordering(O), has_static_ordering(G, O), ordering_data(O, T)" target="{_fetched_ordering}"/>
+      <PrologFetch gap="{gap}" source="gap(G), ordering(O), has_static_ordering(G, O), ordering_data(O, _T)" target="{_fetched_ordering}"/>
       <ConvertROSMessageFromYAML yaml="{_fetched_ordering}" ros_message_type="decision_msgs/msg/WeakOrdering" target="{ordering}" /> 
       -->
     <Sequence>

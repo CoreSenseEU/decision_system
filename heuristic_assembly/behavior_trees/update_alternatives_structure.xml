@@ -1,46 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
-  <!-- Update Alternatives Meta -->
+  <!-- Update Alternatives Structure 
+      NOTE: This could be a more complex behavior tree depending on the heuristic
+      or memory implementations.
+  -->
   <BehaviorTree ID="MakeSureAlternativesUpdated">
-    <Sequence>
-    <!-- Get Alternatives Structure
-          If Alternatives are not available, go get some
-    -->
-      <Fallback>
-        <!-- Check if all the alternatives have already been collected 
-                TODO: if target is "", just succeed or fail but don't write to it
-                      fail (abort?) if target is "" and query includes a "_T"?
-                TODO:
-                      fail loudly (abort?) if gap({gap}) fails.
-        -->
-        <CheckExistence gap="{gap}" 
-                        query="\+ (alternative_of(A, _G), \+ fetched_for(A, _G))"
-                        service_name="{@prolog_query}" />
-
-        <!-- Get up to 100 alternatives from the GAP as a Prolog string 
-        TODO: when creating the GAP, just assert definition for:
-                % alternative_of(?Alternative, ?Gap)
-                :- dynamic alternative_of/2
-        -->
-        <PrologFetchFromGap gap="{gap}" 
-                            query="alternative_of(_T, _G), \+ fetched_for(_T, _G), assertz((fetched_for(_T, _G)))" 
-                            target="{_available_alternatives}"
-                            maxresult="100"
-                            service_name="{@prolog_query}" />
-        <!-- TODO: Add fetched_for/2 predicate
-                % fetched_for(?Alternative, ?Gap)
-                :- dynamic fetched_for/2.
-        -->
-      </Fallback>
-      <!-- Update Alternatives 
-            previous_choice defaults to `[]`
-            choice_set is an input and output port
-
-      -->
-      <UpdateAlternatives previous_choice="{previous_choice}"
-                          available="{_available_alternatives}"
-                          choice_set="{choice_set}"
-                          action_name="" />
-    </Sequence>
+    <UpdateAlternatives gap="{gap}"
+                        previous_choice="{previous_choice}"
+                        choice_set="{choice_set}"
+                        action_name="" />
   </BehaviorTree>
 </root>

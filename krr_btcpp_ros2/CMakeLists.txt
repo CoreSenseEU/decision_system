@@ -128,6 +128,64 @@ target_include_directories(adapt_decision_components_plugin PUBLIC
 target_compile_definitions(adapt_decision_components_plugin PRIVATE BT_PLUGIN_EXPORT)
 ament_target_dependencies(adapt_decision_components_plugin ${DEPENDENCIES})
 
+# PrologQuery, BT::ActionNode (Plugin version)
+add_library(prolog_query_plugin SHARED src/prolog_query_bt_action.cpp)
+target_include_directories(prolog_query_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_compile_definitions(prolog_query_plugin PRIVATE BT_PLUGIN_EXPORT)
+ament_target_dependencies(prolog_query_plugin ${DEPENDENCIES})
+
+# PrologFetchFromGap, BT::ActionNode (Plugin version)
+add_library(prolog_fetch_from_gap_plugin SHARED src/prolog_fetch_from_gap_bt_action.cpp)
+target_include_directories(prolog_fetch_from_gap_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_compile_definitions(prolog_fetch_from_gap_plugin PRIVATE BT_PLUGIN_EXPORT)
+ament_target_dependencies(prolog_fetch_from_gap_plugin ${DEPENDENCIES})
+
+# CheckExistence, BT::ActionNode (Plugin version)
+add_library(check_existence_plugin SHARED src/check_existence_bt_action.cpp)
+target_include_directories(check_existence_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_compile_definitions(check_existence_plugin PRIVATE BT_PLUGIN_EXPORT)
+ament_target_dependencies(check_existence_plugin ${DEPENDENCIES})
+
+# CloseGap, BT::ActionNode (Plugin version)
+add_library(close_gap_plugin SHARED src/close_gap_bt_action.cpp)
+target_include_directories(close_gap_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_compile_definitions(close_gap_plugin PRIVATE BT_PLUGIN_EXPORT)
+ament_target_dependencies(close_gap_plugin ${DEPENDENCIES})
+
+# UpdateAlternatives, BT::ActionNode (Plugin version)
+add_library(update_alternatives_plugin SHARED src/update_alternatives_bt_action.cpp)
+target_include_directories(update_alternatives_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_compile_definitions(update_alternatives_plugin PRIVATE BT_PLUGIN_EXPORT)
+ament_target_dependencies(update_alternatives_plugin ${DEPENDENCIES})
+
+# UpdateCues, BT::ActionNode (Plugin version)
+add_library(update_cues_plugin SHARED src/update_cues_bt_action.cpp)
+target_include_directories(update_cues_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_compile_definitions(update_cues_plugin PRIVATE BT_PLUGIN_EXPORT)
+ament_target_dependencies(update_cues_plugin ${DEPENDENCIES})
+
+
+
+
+
 # # Navigate action BT Node 
 # add_executable(action_navigate src/action_navigate.cpp)
 # ament_target_dependencies(action_navigate ${DEPENDENCIES})
@@ -160,7 +218,7 @@ endif()
 ### Install targets and directories
 install(TARGETS
   bt_executor
-  get_alternatives_plugin
+  # get_alternatives_plugin
   assess_plugin
   aggregate_plugin
   order_plugin
@@ -169,6 +227,12 @@ install(TARGETS
   tree_execution_client_plugin
   assemble_decision_heuristic_plugin
   adapt_decision_components_plugin
+  prolog_query_plugin
+  prolog_fetch_from_gap_plugin
+  check_existence_plugin
+  close_gap_plugin
+  update_alternatives_plugin
+  update_cues_plugin
   # action_navigate
   # action_pick
   # action_place
@@ -183,7 +247,7 @@ install(DIRECTORY
 
 # Install plugins for other packages to load
 install(TARGETS
-  get_alternatives_plugin
+  # get_alternatives_plugin
   assess_plugin
   aggregate_plugin
   order_plugin
@@ -192,6 +256,12 @@ install(TARGETS
   tree_execution_client_plugin
   assemble_decision_heuristic_plugin
   adapt_decision_components_plugin
+  prolog_query_plugin
+  prolog_fetch_from_gap_plugin
+  check_existence_plugin
+  close_gap_plugin
+  update_alternatives_plugin
+  update_cues_plugin
   LIBRARY DESTINATION share/${PROJECT_NAME}/bt_plugins
   ARCHIVE DESTINATION share/${PROJECT_NAME}/bt_plugins
   RUNTIME DESTINATION share/${PROJECT_NAME}/bt_plugins

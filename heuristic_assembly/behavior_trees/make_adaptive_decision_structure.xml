@@ -19,8 +19,9 @@
                           payload="{gap}"
                           return_message="{_choice_query}"
                           action_name="ExecuteBehaviorTree"/>
+      <!-- The choices will all be bound to 'C' in these answers -->
       <PrologQuery query="{_choice_query}" 
-                   target="{choice}" 
+                   answers="{choice}" 
                    maxresult="-1"
                    service_name="{@prolog_query}" />
     </Sequence>
@@ -28,29 +29,19 @@
 
   <BehaviorTree ID="MakeSureGapDefined">
     <Fallback>
-      <!-- Check if the GAP exists
-              TODO: fail if gap="" (although this should be automatic anyway...)
-                  maybe specifically define gap() :- false.
-      -->
+      <!-- Check if the GAP exists -->
       <CheckExistence gap="{gap}" 
                       query="gap(_G)"
                       service_name="{@prolog_query}" />
 
       <!-- Automatically defining a gap is out of scope for now. 
           This just copies the predefined one with a new uuid
-          TODO: define duplicates_gap/2
-
-          % duplicate_gap(-\-NewGap, ++OldGap)
-          duplicate_gap(Gnew, Gold) :-
-            gap(Gold), uuid(Gnew), assertz((gap(Gnew))), 
-            assertz((alternative_of(A, Gnew) :- alternative_of(A, Gold))),
-            assertz((cue_of(C, Gnew) :- cue_of(C, Gold))),
-            assertz((heuristic_of(Xml_file, Gnew) :- heuristic_of(Xml_file, Gold))),
-            assertz((config_of(Yaml_file, Gnew) :- config_of(Yaml_file, Gold))),
       -->
-      <CopyGap parent="room_gap" 
-               child="{gap}" 
-               service_name="{@prolog_query}" />
+      <PrologFetchFromGap gap="room_gap" 
+                          query="duplicate_gap(_T, _G)" 
+                          target="{gap}" 
+                          maxresult="1"
+                          service_name="{@prolog_query}" />
     </Fallback>
   </BehaviorTree>
 

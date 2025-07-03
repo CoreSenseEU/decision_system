@@ -19,6 +19,7 @@ import yaml
 
 import rclpy
 from rclpy.action import ActionServer
+from ament_index_python.packages import get_package_share_directory
 
 from decision_msgs.action import AssembleDecisionHeuristic
 from prolog_kb.prolog_interface import PrologInterface
@@ -71,17 +72,31 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
 
         with open(file_path, 'r') as f:
             answer = f.readlines()
-        engines = [part[:part.find('_engine')] for part in answer.split('|')[0].split('exert(') if '_engine' in part]
+
+        first_heuristic = answer.split('|')[0].split('exert(') #)
+        engines = [part[:part.find('_engine')] for part in first_heuristic if '_engine' in part]
+
+        ### TODO: remove this hack
+        #   The first example was (conveniently) elimination-by-aspects (with preference ordering)
+        engines.append('update_alternatives_elim', 'update_cues_iter_one')
+        ###
+
         return engines
 
     def write_to_yaml(self, gap, pipeline, heuristic_dir):
-        params = {self._get_ros_node(engine): yaml.load(self._get_ros_params(engine)) 
-                  for engine in pipeline}
+        params = {}
+        for engine in pipeline:
+            config_path = os.path.join(get_package_share_directory('heuristic_assembly'), self._get_ros_params(engine))
+            with open(config_path, 'r') as f:
+                params.update({self._get_ros_node(engine): yaml.safe_load(f)})
 
         heuristic_name = f'DecideOnGap-{gap}'
-        with open(os.path.join(heuristic_dir, heuristic_name + '.yaml'), 'w') as f:
+        yaml_path = os.path.join(heuristic_dir, heuristic_name + '.yaml')
+        with open(yaml_path, 'w') as f:
             yaml.dump(params, f, default_flow_style=False)
         self.assertz(f'config_of({heuristic_name}, {gap})')
+
+        return yaml_path
 
     def write_to_xml(self, gap, pipeline, heuristic_dir):
         heuristic_name = f'DecideOnGap-{gap}'
@@ -93,13 +108,17 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
                                                   'choice_query': '{@return_message}'}))
 
         for engine in pipeline:
-            meta = self._get_meta(engine)
+            meta = os.path.join(get_package_share_directory('heuristic_assembly'), self._get_meta(engine))
             ros_node = self._get_ros_node(engine)
             behavior_tree = ET.parse(meta)
             for node in behavior_tree.iter():
                 if node.get('action_name') == '':
                     node.set('action_name', ros_node + '/' + node.tag)
-            root.append(behavior_tree)
+            for bt in behavior_tree.iter('BehaviorTree'):
+                root.append(bt)
+
+        decide_structure = os.path.join(get_package_share_directory('heuristic_assembly'), 'decide_structure.xml')
+        root.append(ET.parse(decide_structure))
 
         root.write(os.path.join(heuristic_dir, f'{gap}.xml'))
         self.assertz(f'heuristic_of({heuristic_name}, {gap})')
