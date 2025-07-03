@@ -47,15 +47,6 @@ target_include_directories(bt_executor PUBLIC
 )
 ament_target_dependencies(bt_executor ${DEPENDENCIES})
 
-# GetAlternatives BT::ActionNode (Plugin version)
-add_library(get_alternatives_plugin SHARED src/get_alternatives_bt_action.cpp)
-target_include_directories(get_alternatives_plugin PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
-target_compile_definitions(get_alternatives_plugin PRIVATE BT_PLUGIN_EXPORT)
-ament_target_dependencies(get_alternatives_plugin ${DEPENDENCIES})
-
 # Assess BT::ActionNode (Plugin version)
 add_library(assess_plugin SHARED src/assess_bt_action.cpp)
 target_include_directories(assess_plugin PUBLIC
@@ -218,7 +209,6 @@ endif()
 ### Install targets and directories
 install(TARGETS
   bt_executor
-  # get_alternatives_plugin
   assess_plugin
   aggregate_plugin
   order_plugin
@@ -247,7 +237,6 @@ install(DIRECTORY
 
 # Install plugins for other packages to load
 install(TARGETS
-  # get_alternatives_plugin
   assess_plugin
   aggregate_plugin
   order_plugin
