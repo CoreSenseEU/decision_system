@@ -6,7 +6,7 @@
 bool UpdateCuesAction::setGoal(Goal& goal)
 {
   // TODO: abstract away this call so that code isn't copied
-  if (!getInput<decision_msgs::msg::Gap>("gap", goal.gap))
+  if (!getInput("gap", goal.gap))
   {
     RCLCPP_ERROR(logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
         name().c_str(), "gap");

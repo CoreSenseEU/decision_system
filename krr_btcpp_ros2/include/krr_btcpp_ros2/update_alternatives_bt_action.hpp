@@ -30,7 +30,7 @@ public:
   static BT::PortsList providedPorts()
   {    
     return providedBasicPorts({ 
-        BT::InputPort<decision_msgs::msg::Gap>(
+        BT::InputPort(
             "gap",
             "A gap containing templates to match alternatives to"),
         BT::InputPort<decision_msgs::msg::AlternativeArray>(

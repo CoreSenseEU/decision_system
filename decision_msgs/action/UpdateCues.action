@@ -1,6 +1,6 @@
 # Request
 # A gap containing templates to match alternatives to
-Gap gap
+string gap
 
 # Any alternatives taken in the previous iteration (if there was one).
 CueArray previous_cues
