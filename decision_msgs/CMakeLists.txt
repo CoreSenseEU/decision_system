@@ -38,6 +38,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/GetAlternatives.action"
   "action/Order.action"
   "action/Take.action"
+  "action/UpdateAlternatives.action"
+  "action/UpdateCues.action"
 
   DEPENDENCIES geometry_msgs
 )
