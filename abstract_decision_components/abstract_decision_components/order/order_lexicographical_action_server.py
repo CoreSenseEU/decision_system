@@ -26,8 +26,8 @@ class OrderLexicographicalActionServer(OrderActionServer):
     """Orders alternatives lexicographically by score, breaking ties in order
     of axes. Highest score is better.
 
-    :param axis_ordering: A list of strings of axes in the desired order. All
-        judgments must contain exactly these axes.
+    :param axis_ordering: A list of strings of axes in the desired order. 
+        Any judgment any axies not present in this list will be ignored.
     """
     def __init__(self):
         super().__init__('lexicographical')
@@ -36,6 +36,14 @@ class OrderLexicographicalActionServer(OrderActionServer):
 
     def order(self, msg):
         axes = self.get_parameter('axis_ordering').value
+        if len(axes) == 0:
+            return lexicographical(scores_to_np_array(msg.scores, len(msg.alternatives)), list(range(len(msg.axes))))
+
+        if len(axes) == 1:
+            self.policy_str = 'maximize'
+        else:
+            self.policy_str = 'lexicographical'
+
         index_array = []
         for axis in axes:
             if axis in msg.axes:
@@ -46,11 +54,6 @@ class OrderLexicographicalActionServer(OrderActionServer):
         if len(index_array) == 0:
             self.get_logger().warn(f'No axes in the evaluation {msg.axes} match ordering parameters: {axes}')
             return [0] * len(msg.alternatives)
-
-        if len(index_array) == 1:
-            self.policy_str = 'maximize'
-        else:
-            self.policy_str = 'lexicographical'
 
         return lexicographical(scores_to_np_array(msg.scores, len(msg.alternatives)), index_array)
 
