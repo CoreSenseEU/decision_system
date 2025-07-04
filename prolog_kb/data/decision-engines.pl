@@ -5,7 +5,7 @@
 %    reuse = False, iter_add = 1
 % (used for eliminate-by-aspects)
 engine(update_cues_iter_one).
-has_ros_node(update_cues_iter_one, '/update_cues_action_server').
+has_ros_node(update_cues_iter_one, '/update_cues_prolog_action_server').
 has_meta(update_cues_iter_one, 'behavior_trees/update_cues_structure.xml').
 uses_ros_params(update_cues_iter_one, 'config/update_cues_iter_one.yaml').
 
@@ -16,7 +16,7 @@ uses_ros_params(update_cues_iter_one, 'config/update_cues_iter_one.yaml').
 %    keep_policy = taken, capacity = 0
 % (used for eliminate-by-aspects)
 engine(update_alternatives_elim).
-has_ros_node(update_alternatives_elim, '/update_alternatives_action_server').
+has_ros_node(update_alternatives_elim, '/update_alternatives_prolog_action_server').
 has_meta(update_alternatives_elim, 'behavior_trees/update_alternatives_structure.xml').
 uses_ros_params(update_alternatives_elim, 'config/update_alternatives_elim.yaml').
 
