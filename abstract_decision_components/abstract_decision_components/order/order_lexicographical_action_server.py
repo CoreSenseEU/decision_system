@@ -27,20 +27,20 @@ class OrderLexicographicalActionServer(OrderActionServer):
     of axes. Highest score is better.
 
     :param axis_ordering: A list of strings of axes in the desired order. 
-        Any judgment any axies not present in this list will be ignored.
+        Any axies not present in this list will be ignored.
+        If this is a single empty string, then use the axies in order of evaluation (the default).
     """
     def __init__(self):
         super().__init__('lexicographical')
 
-        self.declare_parameter('axis_ordering', Parameter.Type.STRING_ARRAY)
+        self.declare_parameter('axis_ordering', [''])
 
     def order(self, msg):
         axes = self.get_parameter('axis_ordering').value
-        if len(axes) == 0:
-            return lexicographical(scores_to_np_array(msg.scores, len(msg.alternatives)), list(range(len(msg.axes))))
-
         if len(axes) == 1:
             self.policy_str = 'maximize'
+            if axes[0] == '':
+                return lexicographical(scores_to_np_array(msg.scores, len(msg.alternatives)), list(range(len(msg.axes))))
         else:
             self.policy_str = 'lexicographical'
 
