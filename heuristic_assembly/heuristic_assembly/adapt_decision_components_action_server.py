@@ -20,14 +20,14 @@ import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer
 # from ros2param.api import call_get_parameters, call_set_parameters
-from ros2param.api import load_parameter_file
+# from ros2param.api import load_parameter_file
 
 # TODO: backport this from ROS 2 rolling?
 # from rclpy.parameter import parameter_dict_from_yaml_file
 from heuristic_assembly.rclpy_parameter_rolling import parameter_dict_from_yaml_file
 
 from rcl_interfaces.srv import SetParameters, GetParameters
-from rcl_interfaces.msg import Parameter
+from rcl_interfaces.msg import Parameter, ParameterType
 from decision_msgs.action import AdaptDecisionComponents
 
 
@@ -86,17 +86,18 @@ class AdaptDecisionComponentsActionServer(Node):
         nodes.append(bt_executor)
         heuristic_dir = os.path.join(self.get_parameter('working_directory').value, 'heuristics')
         client = self.create_client(GetParameters, bt_executor + "/get_parameters")
-        request = GetParameters.Request(names=['behavior_trees'])
+        request = GetParameters.Request(names=['external_behavior_trees'])
         response = self.call_service(client, request)
         if response is None or len(response.values) != 1:
-            reason = f"Failed to get 'behavior_trees' parameter for {bt_executor}"
+            reason = f"Failed to get 'external_behavior_trees' parameter for {bt_executor}"
             self.get_logger().error(reason)
             goal_handle.abort()
             return AdaptDecisionComponents.Result(success=False, reason=reason)
 
         parameter_value = response.values[0]
         parameter_value.string_array_value.append(heuristic_dir)
-        parameters.append([Parameter(name='behavior_trees', value=parameter_value)])
+        parameter_value.type = ParameterType.PARAMETER_STRING_ARRAY
+        parameters.append([Parameter(name='external_behavior_trees', value=parameter_value)])
 
         # TODO: switch to a parallel model instead of series?
         # Right now assume that the services return quickly so it's not too much of a difference
@@ -104,7 +105,7 @@ class AdaptDecisionComponentsActionServer(Node):
         for i, (node, params) in enumerate(zip(nodes, parameters)):
             if success:
                 success, reason = self.adapt_decision_component(node, params)
-                goal_handle.publish_feedback(AdaptDecisionComponents.Feedback(num_adapted=i, num_to_adapt=len(parameters)))
+                goal_handle.publish_feedback(AdaptDecisionComponents.Feedback(num_adapted=i+1, num_to_adapt=len(parameters)))
             else:
                 # TODO: should successful parameters be set back to how they started?
                 goal_handle.abort()

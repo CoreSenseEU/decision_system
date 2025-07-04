@@ -11,5 +11,8 @@ string heuristic_file
 # An absolute path to the heuristic ROS config YAML file.
 string params_file
 
+# The name of the behavior tree to tick to execute this heuristic
+string entry_point
+
 ---
 # Feedback

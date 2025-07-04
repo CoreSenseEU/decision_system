@@ -53,17 +53,21 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
         os.makedirs(heuristic_dir, exist_ok=True)
 
         gap = goal_handle.request.gap_id
+        heuristic_name = f'DecideOnGap_{gap}'
+
         try:
             pipeline = self.assemble_with_gap(gap)
-            xml = self.write_to_xml(gap, pipeline, heuristic_dir)
-            yaml = self.write_to_yaml(gap, pipeline, heuristic_dir)
+            xml = self.write_to_xml(gap, pipeline, heuristic_dir, heuristic_name)
+            yaml = self.write_to_yaml(gap, pipeline, heuristic_dir, heuristic_name)
         except Exception as e:
             self.get_logger().error(str(e))
             goal_handle.abort()
             return AssembleDecisionHeuristic.Result()
 
         goal_handle.succeed()
-        return AssembleDecisionHeuristic.Result(heuristic_file=xml, params_file=yaml)
+        return AssembleDecisionHeuristic.Result(heuristic_file=xml, 
+                                                params_file=yaml,
+                                                entry_point=heuristic_name)
 
     def assemble_with_gap(self, gap):
         # TODO: update this when the understanding core is in better condition
@@ -91,7 +95,7 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
 
         return engines
 
-    def write_to_yaml(self, gap, pipeline, heuristic_dir):
+    def write_to_yaml(self, gap, pipeline, heuristic_dir, heuristic_name):
         params = {}
         for engine in pipeline:
             config_path = os.path.join(get_package_share_directory('heuristic_assembly'), self._get_ros_params(engine))
@@ -116,7 +120,6 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
 
             params.update(config)
 
-        heuristic_name = f'DecideOnGap_{gap}'
         yaml_path = os.path.join(heuristic_dir, heuristic_name + '.yaml')
         with open(yaml_path, 'w') as f:
             yaml.dump(params, f, default_flow_style=False)
@@ -126,8 +129,7 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
         self.get_logger().debug(yaml.dump(params))
         return yaml_path
 
-    def write_to_xml(self, gap, pipeline, heuristic_dir):
-        heuristic_name = f'DecideOnGap_{gap}'
+    def write_to_xml(self, gap, pipeline, heuristic_dir, heuristic_name):
         root = ET.Element('root', attrib={'BTCPP_format' : "4"})
         main = ET.SubElement(root, 'BehaviorTree', attrib={'ID': heuristic_name})
         main.append(ET.Element('SubTree', attrib={'ID': 'MakeSureGapClosed',

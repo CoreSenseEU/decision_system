@@ -25,6 +25,8 @@ public:
   static BT::PortsList providedPorts()
   {    
     return providedBasicPorts({ 
+        // TODO: make this node responsible for updating the available behavior trees?
+        // BT::InputPort("xml", "Optional XML source file to be run."),
         BT::InputPort("target_tree", "", "Name of the behavior tree to execute"),
         BT::InputPort("payload", "An optional, implementation-dependent payload for the target tree"),
         BT::OutputPort("return_message", "The result payload or error message")

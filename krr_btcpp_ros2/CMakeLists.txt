@@ -22,7 +22,7 @@ find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(decision_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
-# find_package(rclcpp REQUIRED)
+find_package(rclcpp REQUIRED)
 # find_package(rclcpp_lifecycle REQUIRED)
 
 set(DEPENDENCIES
@@ -33,6 +33,7 @@ set(DEPENDENCIES
   std_srvs
   nav2_msgs
   decision_msgs
+  rclcpp
 )
 
 

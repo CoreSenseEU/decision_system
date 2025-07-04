@@ -2,8 +2,9 @@
 #define KRR_BT_CPP__BT_EXECUTOR_HPP_
 
 #include <behaviortree_cpp/basic_types.h>
-#include <rclcpp/rclcpp.hpp>
 #include <behaviortree_ros2/tree_execution_server.hpp>
+#include <rclcpp/rclcpp.hpp>
+
 #include <string>
 #include <optional>
 #include <memory>
@@ -19,6 +20,7 @@ public:
     this->node()->declare_parameter("prolog_query_service", "/query");
     this->node()->declare_parameter("prolog_assert_topic", "/assert");
     this->node()->declare_parameter("prolog_retract_topic", "/retract");
+    this->node()->declare_parameter("external_behavior_trees", rclcpp::ParameterType::PARAMETER_STRING_ARRAY);
   }
 
 protected:
@@ -43,7 +45,7 @@ protected:
    *
    * @param factory The factory to use to register nodes
    */
-  // void registerNodesIntoFactory(BT::BehaviorTreeFactory& factory) override;
+  void registerNodesIntoFactory(BT::BehaviorTreeFactory& factory) override;
 
   /**
    * @brief Optional method invoked at each loop, after tree.tickOnce().
@@ -72,7 +74,6 @@ protected:
    * If you don't want to return any feedback, return std::nullopt.
    */
   // std::optional<std::string> onLoopFeedback() override;
-
 };
 
 

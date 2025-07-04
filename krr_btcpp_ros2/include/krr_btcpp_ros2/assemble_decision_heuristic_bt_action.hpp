@@ -44,6 +44,9 @@ public:
         BT::OutputPort<bool>(
             "yaml",
             "An absolute path to the heuristic ROS config YAML file."),
+        BT::OutputPort(
+            "entry_point",
+            "The name of the behavior tree to tick to execute this heuristic"),
         });
   }
 

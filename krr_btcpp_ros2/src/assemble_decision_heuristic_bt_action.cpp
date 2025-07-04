@@ -21,6 +21,7 @@ BT::NodeStatus AssembleDecisionHeuristicAction::onResultReceived(const WrappedRe
 {
   setOutput("xml", wr.result->heuristic_file);
   setOutput("yaml", wr.result->params_file);
+  setOutput("entry_point", wr.result->entry_point);
   return BT::NodeStatus::SUCCESS;
 }
 

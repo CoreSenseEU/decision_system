@@ -1,8 +1,24 @@
 #include <behaviortree_cpp/basic_types.h>
-#include <rclcpp/rclcpp.hpp>
-#include <stdexcept>
+#include <behaviortree_ros2/bt_utils.hpp>
+#include <vector>
 
 #include "krr_btcpp_ros2/bt_executor.hpp"
+
+
+void BTExecutor::registerNodesIntoFactory(BT::BehaviorTreeFactory& factory)
+{
+  std::vector<std::string> external_directories;
+
+  // Get the values if they are set
+  if (node()->get_parameter<std::vector<std::string>>("external_behavior_trees", external_directories))
+  {
+
+    for (auto directory_path : external_directories)
+    {
+      BT::LoadBehaviorTrees(factory, directory_path);
+    }
+  }
+}
 
 
 void BTExecutor::onTreeCreated(BT::GoalResources& session)
