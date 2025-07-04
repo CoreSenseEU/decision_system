@@ -142,8 +142,8 @@ public:
         BT::InputPort(
             "query",
             "A query to submit to the Prolog knowledge base, without the terminating '.'"),
-        BT::InputPort(
-            "gap",
+        BT::InputPort<std::string>(
+            "gap", "",
             "A unique identifier for the decision actively being solved."),
         });
   }

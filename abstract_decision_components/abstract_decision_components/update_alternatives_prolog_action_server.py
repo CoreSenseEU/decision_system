@@ -69,7 +69,7 @@ class UpdateAlternativesActionServer(Node):
             choice_set = []
 
         # refill
-        query = 'alternative_of(A, _G), \+ fetched_for(A, _G), assertz((fetched_for(A, _G)))'
+        query = "alternative_of(A, '_G'), \+ fetched_for(A, '_G'), assertz((fetched_for(A, '_G')))"
         query.replace('_G', goal_handle.request.gap)
         try:
             if cap > 0:

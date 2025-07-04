@@ -30,9 +30,10 @@ bool CheckExistenceAction::setRequest(Request::SharedPtr& request)
 
   // guesstimate at how big it will need to be. This is unlikely to need to be resized more than once.
   request->query.clause.resize(query.size() + 4 * gap_.size()); 
-  request->query.clause = "gap(" + gap_ +"), ";
+  request->query.clause = "gap('" + gap_ +"'), ";
 
   // Replace any occurance of the sequence "_G" in the query with the gap
+  // Assume that any escaping is handled by the caller
   while ((next = query.find("_G", last)) != std::string::npos) {
     request->query.clause.append(query.substr(last, next - last));
     request->query.clause.append(gap_);

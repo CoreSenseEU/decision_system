@@ -69,7 +69,7 @@ class UpdateCuesPrologActionServer(Node):
             cues = []
 
         # refill
-        query = 'cue_of(C, _G), \+ fetched_for(C, _G), assertz((fetched_for(C, _G)))'
+        query = "cue_of(C, '_G'), \+ fetched_for(C, '_G'), assertz((fetched_for(C, '_G')))"
         query.replace('_G', goal_handle.request.gap)
         try:
             cues.append(self._get_available(query, iter_add))
