@@ -4,7 +4,10 @@
   <BehaviorTree ID="MakeAdaptiveDecision">
     <Sequence>
       <SubTree ID="MakeSureGapDefined" _autoremap="true" />
-      <SubTree ID="MakeSureHeuristicAssembled" _autoremap="true" heuristic="{_heuristic}" config="{_config}"/>
+      <SubTree ID="MakeSureHeuristicAssembled" _autoremap="true" 
+                                               heuristic="{_heuristic}" 
+                                               config="{_config}"
+                                               entry_point="{_target_tree}" />
 
       <!-- Setting ROS parameters may take a few tries, so give this a couple
            attempts before giving up. 
@@ -14,7 +17,8 @@
                                  action_name="AdaptDecisionComponents" />
       </RetryUntilSuccessful>
 
-      <RunExternalSubTree target_tree="{_heuristic}"
+      <!-- TODO: should this take an xml file directly? -->
+      <RunExternalSubTree target_tree="{_target_tree}"
                           payload="{gap}"
                           return_message="{_choice_query}"
                           action_name="ExecuteBehaviorTree"/>
@@ -67,6 +71,7 @@
       <AssembleDecisionHeuristic gap="{gap}" 
                                  xml="{heuristic}"
                                  yaml="{config}"
+                                 entry_point="{entry_point}"
                                  action_name="AssembleDecisionHeuristic" />
     </Fallback>
   </BehaviorTree>

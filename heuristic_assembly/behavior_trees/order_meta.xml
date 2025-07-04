@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
   <!-- Order Meta -->
-  <BehaviorTree ID="MakeSureOrderingExists">
+  <BehaviorTree ID="MakeSureAlternativesOrdered">
     <!-- <Fallback> -->
       <!-- An ordering could come from the KB, so get (the first) one if it exists -->
       <!-- Cut this for scope, now assuming this always needs to be updated
@@ -17,7 +17,7 @@
       <ConvertROSMessageFromYAML yaml="{_fetched_ordering}" ros_message_type="decision_msgs/msg/WeakOrdering" target="{ordering}" /> 
       -->
     <Sequence>
-      <SubTree ID="MakeSureEvaluationExists" _autoremap="true" />
+      <SubTree ID="MakeSureAlternativesEvaluated" _autoremap="true" />
       <Order evaluation="{evaluation}"
              ordering="{ordering}"
              action_name=""/>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
   <!-- Assess Meta -->
-  <BehaviorTree ID="MakeSureAssessmentMatrixExists">
+  <BehaviorTree ID="MakeSureAlternativesAssessed">
     <!-- Assume an assessment matrix will never be up to date if this is ticked, so no need for a fallback -->
     <Sequence>
       <SubTree ID="MakeSureAlternativesUpdated" _autoremap="true" previous_choice="{choice}"/>

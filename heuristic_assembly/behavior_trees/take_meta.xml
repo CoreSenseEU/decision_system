@@ -4,7 +4,7 @@
   <BehaviorTree ID="MakeSureChoiceTaken">
     <!-- Assume a choice will never be up to date if this is ticked, so no need for a fallback -->
     <Sequence>
-      <SubTree ID="MakeSureOrderingExists" _autoremap="true" />
+      <SubTree ID="MakeSureAlternativesOrdered" _autoremap="true" />
       <Take ordering="{ordering}"
             choice="{choice}"
             action_name=""/>
