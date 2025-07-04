@@ -5,17 +5,10 @@
 
 bool AdaptDecisionComponentsAction::setGoal(Goal& goal)
 {
-  // TODO: abstract away this call so that code isn't copied
-  if (!getInput("gap", goal.gap_id))
-  {
-    RCLCPP_ERROR(logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
-        name().c_str(), "gap");
-    return false;
-  }
   if (!getInput("config", goal.params_file))
   {
     RCLCPP_ERROR(logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
-        name().c_str(), "params_file");
+        name().c_str(), "config");
     return false;
   }
 

@@ -33,11 +33,6 @@ public:
   static BT::PortsList providedPorts()
   {    
     return providedBasicPorts({ 
-        // This is optional as it is only used by some ACCEPT actions.
-        // TODO: should we use two different kinds then?
-        BT::InputPort(
-            "gap",
-            "A unique identifier for the decision actively being solved."),
         BT::InputPort<bool>(
             "config",
             "An absolute path to the heuristic ROS config YAML file."),

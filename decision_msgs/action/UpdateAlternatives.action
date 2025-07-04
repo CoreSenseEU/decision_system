@@ -1,6 +1,6 @@
 # Request
 # A gap containing templates to match alternatives to
-string gap
+string gap_id
 
 # Any alternatives taken in the previous iteration (if there was one).
 AlternativeArray previous_taken
