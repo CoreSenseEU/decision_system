@@ -17,16 +17,17 @@ import os
 import yaml
 
 import rclpy
-from rclpy.parameter import Parameter
 from rclpy.node import Node
 from rclpy.action import ActionServer
 # from ros2param.api import call_get_parameters, call_set_parameters
+from ros2param.api import load_parameter_file
 
 # TODO: backport this from ROS 2 rolling?
 # from rclpy.parameter import parameter_dict_from_yaml_file
 from heuristic_assembly.rclpy_parameter_rolling import parameter_dict_from_yaml_file
 
 from rcl_interfaces.srv import SetParameters, GetParameters
+from rcl_interfaces.msg import Parameter
 from decision_msgs.action import AdaptDecisionComponents
 
 
@@ -58,6 +59,15 @@ class AdaptDecisionComponentsActionServer(Node):
         with open(params_file, 'r') as f:
             nodes = list(yaml.safe_load(f).keys())
 
+        # print('attempting api')
+        #
+        # for node in nodes:
+        #     load_parameter_file(node=self, 
+        #                         node_name=node, 
+        #                         parameter_file=params_file, 
+        #                         use_wildcard=False)
+        # print('loaded_all_nodes_with_api')
+        # breakpoint()
         bt_executor = self.get_parameter('bt_executor').value
 
         if len(nodes) < 1:
@@ -73,6 +83,7 @@ class AdaptDecisionComponentsActionServer(Node):
 
         # Add bt_execuor so that the behavior tree can be added
         # TODO: include a prolog entry for `engine(bt_executor), has_ros_node(???, bt_executor)`
+        nodes.append(bt_executor)
         heuristic_dir = os.path.join(self.get_parameter('working_directory').value, 'heuristics')
         client = self.create_client(GetParameters, bt_executor + "/get_parameters")
         request = GetParameters.Request(names=['behavior_trees'])
@@ -83,8 +94,9 @@ class AdaptDecisionComponentsActionServer(Node):
             goal_handle.abort()
             return AdaptDecisionComponents.Result(success=False, reason=reason)
 
-        nodes.append(bt_executor)
-        parameters.append([Parameter('behavior_trees', response.values[0].string_array_value.append(heuristic_dir))])
+        parameter_value = response.values[0]
+        parameter_value.string_array_value.append(heuristic_dir)
+        parameters.append([Parameter(name='behavior_trees', value=parameter_value)])
 
         # TODO: switch to a parallel model instead of series?
         # Right now assume that the services return quickly so it's not too much of a difference
@@ -119,7 +131,7 @@ class AdaptDecisionComponentsActionServer(Node):
         for i, result in enumerate(response.results):
             if not result.successful:
                 self.get_logger().error(
-                        f'Failed to set {request.parameters[i]}: {response.reason}')
+                        f'Failed to set {request.parameters[i]}: {result.reason}')
                 success = False
 
         if not success:
