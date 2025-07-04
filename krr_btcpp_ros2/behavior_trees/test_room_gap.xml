@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <include ros_pkg="heuristic_assembly" path="behavior_trees/make_adaptive_decision_structure.xml"/>
+
+  <BehaviorTree ID="TestRoomGap">
+    <SubTree ID="MakeAdaptiveDecision" choice="{choice}" gap="" />
+  </BehaviorTree>
+</root>

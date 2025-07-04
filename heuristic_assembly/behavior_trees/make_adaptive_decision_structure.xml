@@ -9,11 +9,10 @@
       <!-- Setting ROS parameters may take a few tries, so give this a couple
            attempts before giving up. 
       -->
-      <RetryUntilSuccess num_attempts="3">
+      <RetryUntilSuccessful num_attempts="3">
         <AdaptDecisionComponents config="{_config}" 
-                                 gap="{gap}" 
                                  action_name="AdaptDecisionComponents" />
-      </RetryUntilSuccess>
+      </RetryUntilSuccessful>
 
       <RunExternalSubTree target_tree="{_heuristic}"
                           payload="{gap}"
@@ -29,16 +28,18 @@
 
   <BehaviorTree ID="MakeSureGapDefined">
     <Fallback>
-      <!-- Check if the GAP exists -->
+      <!-- Check if the GAP exists
+          If {gap} is unset, this will fail and create a duplicate gap.
+      -->
       <CheckExistence gap="{gap}" 
-                      query="gap(_G)"
+                      query="gap('_G')"
                       service_name="{@prolog_query}" />
 
       <!-- Automatically defining a gap is out of scope for now. 
           This just copies the predefined one with a new uuid
       -->
       <PrologFetchFromGap gap="room_gap" 
-                          query="duplicate_gap(_T, _G)" 
+                          query="duplicate_gap(_T, '_G')" 
                           target="{gap}" 
                           maxresult="1"
                           service_name="{@prolog_query}" />
@@ -52,20 +53,20 @@
       -->
       <Sequence>
         <PrologFetchFromGap gap="{gap}" 
-                            query="heuristic_of(_T, _G)" 
-                            target="{_heuristic}" 
+                            query="heuristic_of(_T, '_G')" 
+                            target="{heuristic}" 
                             maxresult="1"
                             service_name="{@prolog_query}" />
         <PrologFetchFromGap gap="{gap}" 
-                            query="config_of(_T, _G)" 
-                            target="{_config}" 
+                            query="config_of(_T, '_G')" 
+                            target="{config}" 
                             maxresult="1"
                             service_name="{@prolog_query}" />
       </Sequence>
 
       <AssembleDecisionHeuristic gap="{gap}" 
-                                 xml="{_heuristic}"
-                                 yaml="{_config}"
+                                 xml="{heuristic}"
+                                 yaml="{config}"
                                  action_name="AssembleDecisionHeuristic" />
     </Fallback>
   </BehaviorTree>

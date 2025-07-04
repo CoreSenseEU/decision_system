@@ -6,7 +6,7 @@
       <Fallback>
         <!-- If this gap has already been closed, get the choice from it. -->
         <PrologFetchFromGap gap="{gap}" 
-                            query="closed_with(_G, _T)" 
+                            query="closed_with('_G', _T)" 
                             target="{choice}" 
                             maxresult="-1"
                             service_name="{@prolog_query}" />
