@@ -14,6 +14,7 @@
 
 import sys
 import os
+import yaml
 
 import rclpy
 from rclpy.parameter import Parameter
@@ -23,7 +24,7 @@ from rclpy.action import ActionServer
 
 # TODO: backport this from ROS 2 rolling?
 # from rclpy.parameter import parameter_dict_from_yaml_file
-from rclpy_parameter_rolling import parameter_dict_from_yaml_file
+from heuristic_assembly.rclpy_parameter_rolling import parameter_dict_from_yaml_file
 
 from rcl_interfaces.srv import SetParameters, GetParameters
 from decision_msgs.action import AdaptDecisionComponents
@@ -53,22 +54,44 @@ class AdaptDecisionComponentsActionServer(Node):
                 self.adapt_cb)
 
     def adapt_cb(self, goal_handle):
-        parameters = parameter_dict_from_yaml_file(goal_handle.request.file_path)
-        if len(parameters) < 1:
+        params_file = goal_handle.request.params_file
+        with open(params_file, 'r') as f:
+            nodes = list(yaml.safe_load(f).keys())
+
+        bt_executor = self.get_parameter('bt_executor').value
+
+        if len(nodes) < 1:
             reason = 'Recieved empty list of parameters'
             self.get_logger().error(reason)
             goal_handle.abort()
             return AdaptDecisionComponents.Result(success=False, reason=reason)
-        self.get_logger().info(f'Adapting {[c.node_name for c in parameters]}')
+        self.get_logger().info(f'Adapting {nodes}')
 
-        self._add_executor(parameters)
+        # TODO: just generate the parameters by hand and remove this dependency
+        parameters = [list(parameter_dict_from_yaml_file(params_file, target_nodes=[node]).values())
+                      for node in nodes]
+
+        # Add bt_execuor so that the behavior tree can be added
+        # TODO: include a prolog entry for `engine(bt_executor), has_ros_node(???, bt_executor)`
+        heuristic_dir = os.path.join(self.get_parameter('working_directory').value, 'heuristics')
+        client = self.create_client(GetParameters, bt_executor + "/get_parameters")
+        request = GetParameters.Request(names=['behavior_trees'])
+        response = self.call_service(client, request)
+        if response is None or len(response.values) != 1:
+            reason = f"Failed to get 'behavior_trees' parameter for {bt_executor}"
+            self.get_logger().error(reason)
+            goal_handle.abort()
+            return AdaptDecisionComponents.Result(success=False, reason=reason)
+
+        nodes.append(bt_executor)
+        parameters.append([Parameter('behavior_trees', response.values[0].string_array_value.append(heuristic_dir))])
 
         # TODO: switch to a parallel model instead of series?
         # Right now assume that the services return quickly so it's not too much of a difference
         success = True
-        for i, param in enumerate(parameters.items()):
+        for i, (node, params) in enumerate(zip(nodes, parameters)):
             if success:
-                success, reason = self.adapt_decision_component(param[0], param[1])
+                success, reason = self.adapt_decision_component(node, params)
                 goal_handle.publish_feedback(AdaptDecisionComponents.Feedback(num_adapted=i, num_to_adapt=len(parameters)))
             else:
                 # TODO: should successful parameters be set back to how they started?
@@ -76,6 +99,7 @@ class AdaptDecisionComponentsActionServer(Node):
                 return AdaptDecisionComponents.Result(success=False, reason=reason)
 
         goal_handle.succeed()
+        self.get_logger().info('Successfully adapted engines')
         return AdaptDecisionComponents.Result(success=success)
 
     def adapt_decision_component(self, node_name, parameters):
@@ -102,19 +126,19 @@ class AdaptDecisionComponentsActionServer(Node):
             return False, f'Failed to set all parameters for {node_name}'
         return True, ''
 
-    def _add_executor(self, parameters, heuristic_dir):
+    def _get_executor_params(self):
         # TODO: include a prolog entry for `engine(bt_executor), has_ros_node(???, bt_executor)`
         bt_executor = self.get_parameter('bt_executor').value
+        heuristic_dir = os.path.join(self.get_parameter('working_directory').value, 'heuristics')
 
         client = self.create_client(GetParameters, bt_executor + "/get_parameters")
-        request = GetParameters.Request(parameters=parameters)
+        request = GetParameters.Request(names=['behavior_trees'])
         response = self.call_service(client, request)
-        if response is None:
-            raise RuntimeError(f'Failed to get parameters for {bt_executor}')
-
-        param_value = response.values[0]
-        param_value.string_array_value.append(heuristic_dir)
-        parameters.update({bt_executor: Parameter('behavior_trees', value=param_value)})
+        if response is None or len(response.values) != 1:
+            raise RuntimeError(f"Failed to get 'behavior_trees' parameter for {bt_executor}")
+        
+        params = [Parameter('behavior_trees', response.values[0].string_array_value.append(heuristic_dir))]
+        return bt_executor, params 
 
     def call_service(self, cli, request):
         """

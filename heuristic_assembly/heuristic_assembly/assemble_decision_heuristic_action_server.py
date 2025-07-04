@@ -25,7 +25,7 @@ from decision_msgs.action import AssembleDecisionHeuristic
 from prolog_kb.prolog_interface import PrologInterface
 
 
-TEST_OUTPUT_FILE = '~/thesis/src/out.txt'
+TEST_OUTPUT_FILE = os.path.expanduser('~/thesis/src/out.txt')
 
 
 class AssembleDecisionHeuristicActionServer(PrologInterface):
@@ -52,13 +52,13 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
         heuristic_dir = os.path.join(self.get_parameter('working_directory').value, 'heuristics')
         os.makedirs(heuristic_dir, exist_ok=True)
 
-        gap = goal_handle.request.gap
+        gap = goal_handle.request.gap_id
         try:
             pipeline = self.assemble_with_gap(gap)
             xml = self.write_to_xml(gap, pipeline, heuristic_dir)
             yaml = self.write_to_yaml(gap, pipeline, heuristic_dir)
         except Exception as e:
-            self.get_logger().error(e)
+            self.get_logger().error(str(e))
             goal_handle.abort()
             return AssembleDecisionHeuristic.Result()
 
@@ -68,17 +68,25 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
     def assemble_with_gap(self, gap):
         # TODO: update this when the understanding core is in better condition
         file_path = TEST_OUTPUT_FILE
-        self.get_logger().warn('Using mock understanding output from {file_path}')
+        self.get_logger().warn(f'Using mock understanding output from {file_path}')
 
         with open(file_path, 'r') as f:
-            answer = f.readlines()
+            lines = f.readlines()
+
+        answer = ''
+        for line in lines:
+            if 'SZS answers Tuple' in line:
+                answer = line
+                break
+        if answer == '':
+            raise RuntimeError(f'No answer detected in the Vampire output file {file_path}')
 
         first_heuristic = answer.split('|')[0].split('exert(') #)
         engines = [part[:part.find('_engine')] for part in first_heuristic if '_engine' in part]
 
         ### TODO: remove this hack
         #   The first example was (conveniently) elimination-by-aspects (with preference ordering)
-        engines.append('update_alternatives_elim', 'update_cues_iter_one')
+        engines += ['update_alternatives_elim', 'update_cues_iter_one']
         ###
 
         return engines
@@ -87,19 +95,39 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
         params = {}
         for engine in pipeline:
             config_path = os.path.join(get_package_share_directory('heuristic_assembly'), self._get_ros_params(engine))
+            ros_node = self._get_ros_node(engine)
             with open(config_path, 'r') as f:
-                params.update({self._get_ros_node(engine): yaml.safe_load(f)})
+                config = yaml.safe_load(f)
 
-        heuristic_name = f'DecideOnGap-{gap}'
+            # Use the provided name for setting the parameters
+            # TODO: maybe switch to using a namespace instead, then these
+            #   parameter files wouldn't need to hardcode node names/assume the
+            #   name name space if there are multiple nodes
+            if '/**' in config.keys():
+                config[ros_node] = config.pop('/**')
+            elif len(config.keys()) == 1:
+                config[ros_node] = config.popitem()[1]
+            else:
+                raise RuntimeError(f"Unable to identify target node {ros_node} for {engine} engine in config: {config}")
+
+            if len(config[ros_node]['ros__parameters']) == 0:
+                self.get_logger().debug(f"No parameters set for {engine}. Skipping")
+                continue
+
+            params.update(config)
+
+        heuristic_name = f'DecideOnGap_{gap}'
         yaml_path = os.path.join(heuristic_dir, heuristic_name + '.yaml')
         with open(yaml_path, 'w') as f:
             yaml.dump(params, f, default_flow_style=False)
-        self.assertz(f'config_of({heuristic_name}, {gap})')
+        self.assertz(f"config_of('{heuristic_name}', '{gap}')")
 
+        self.get_logger().info(f'Successfully wrote config to: {yaml_path}')
+        self.get_logger().debug(yaml.dump(params))
         return yaml_path
 
     def write_to_xml(self, gap, pipeline, heuristic_dir):
-        heuristic_name = f'DecideOnGap-{gap}'
+        heuristic_name = f'DecideOnGap_{gap}'
         root = ET.Element('root', attrib={'BTCPP_format' : "4"})
         main = ET.SubElement(root, 'BehaviorTree', attrib={'ID': heuristic_name})
         main.append(ET.Element('SubTree', attrib={'ID': 'MakeSureGapClosed',
@@ -114,17 +142,29 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
             for node in behavior_tree.iter():
                 if node.get('action_name') == '':
                     node.set('action_name', ros_node + '/' + node.tag)
-            for bt in behavior_tree.iter('BehaviorTree'):
-                root.append(bt)
+            self._append_all_bts(root, behavior_tree)
 
-        decide_structure = os.path.join(get_package_share_directory('heuristic_assembly'), 'decide_structure.xml')
-        root.append(ET.parse(decide_structure))
+        decide_structure = os.path.join(get_package_share_directory('heuristic_assembly'), 'behavior_trees/decide_structure.xml')
+        self._append_all_bts(root, ET.parse(decide_structure))
 
-        root.write(os.path.join(heuristic_dir, f'{gap}.xml'))
-        self.assertz(f'heuristic_of({heuristic_name}, {gap})')
+        writer = ET.ElementTree(root)
+        xml_path = os.path.join(heuristic_dir, f'{gap}.xml')
+        writer.write(xml_path)
+        self.assertz(f"heuristic_of('{heuristic_name}', '{gap}')")
+
+        self.get_logger().info(f'Successfully wrote heuristic to: {xml_path}')
+        self.get_logger().debug(ET.tostring(root))
+
+        return xml_path
+
+    def _append_all_bts(self, parent, tree):
+        parent.extend(tree.iter('BehaviorTree'))
+
+        # Also add includes (assume they are all ROS flavored)
+        parent.extend(tree.iter('include'))
 
     def _get_ros_node(self, engine):
-        answers = self.query(f'engine({engine}), has_ros_node({engine}, N)', maxresult="1") 
+        answers = self.query(f'engine({engine}), has_ros_node({engine}, N)', maxresult=1) 
 
         if len(answers) == 0:
             raise RuntimeError(f'Cound not find ROS nodes for {engine} engine')
@@ -134,7 +174,7 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
         return answers[0]["N"]
 
     def _get_ros_params(self, engine):
-        answers = self.query(f'engine({engine}), uses_ros_params({engine}, C)', maxresult="1") 
+        answers = self.query(f'engine({engine}), uses_ros_params({engine}, C)', maxresult=1) 
 
         if len(answers) == 0:
             raise RuntimeError(f'Cound not find ROS parameter config for {engine} engine')
@@ -144,7 +184,7 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
         return answers[0]["C"]
 
     def _get_meta(self, engine):
-        answers = self.query(f'engine({engine}), has_meta({engine}, M)', maxresult="1") 
+        answers = self.query(f'engine({engine}), has_meta({engine}, M)', maxresult=1) 
 
         if len(answers) == 0:
             raise RuntimeError(f'Cound not find meta for {engine} engine')
