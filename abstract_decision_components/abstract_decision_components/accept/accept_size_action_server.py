@@ -26,13 +26,13 @@ class AcceptSizeActionServer(AcceptActionServer):
     :param n: An integer size to compare to. Defaults to 1
     :param relation: A relational operator with the rhs of ``choice`` on the
         right hand size and ``rhs`` on the left. Valid relation operators are:
-            `<`, `>`, `<=`, `>=`, `=`, and `!=`.
-        Defaults to '='
+            `lt`, `gt`, `leq`, `geq`, `eq`, and `neq`.
+        Defaults to 'eq'
     """
     def __init__(self):
         super().__init__('size')
         self.declare_parameter('n', 1)
-        self.declare_parameter('relation', '=')
+        self.declare_parameter('relation', 'eq')
 
     def accept(self, choice):
         n = self.get_parameter('n').value

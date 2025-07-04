@@ -24,8 +24,8 @@ def compare_size(choice, rhs, relation='='):
     :param rhs: An integer to compare the size of ``choice`` to.
     :param relation: A relational operator with the rhs of ``choice`` on the
         right hand size and ``rhs`` on the left. Valid relation operators are:
-            `<`, `>`, `<=`, `>=`, `=`, and `!=`.
-        Defaults to '='
+            `lt`, `gt`, `leq`, `geq`, `eq`, and `neq`.
+        Defaults to 'eq'
 
     :raises ValueError: If ``relation`` is invald.
 
@@ -33,17 +33,17 @@ def compare_size(choice, rhs, relation='='):
         message indicating the reason (left blank upon success).
     """
     match relation:
-        case '>':
+        case 'lt':
             return len(choice) > rhs
-        case '<':
+        case 'gt':
             return len(choice) < rhs
-        case '>=':
+        case 'leq':
             return len(choice) >= rhs
-        case '<=':
+        case 'geq':
             return len(choice) <= rhs
-        case '=':
+        case 'eq':
             return len(choice) == rhs
-        case '!=':
+        case 'neq':
             return len(choice) != rhs
 
     # TODO: move this to parameter checking in AcceptSizeNode?
