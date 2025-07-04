@@ -66,6 +66,11 @@ namespace BT
   {
     decision_msgs::msg::CueArray msg;
 
+    if (str.size() == 0)
+    {
+      return msg;
+    }
+
     // Take in strings separated by the character ';'
     // e.g. "blue;green;#06B4C1;yellow"
     std::vector<std::string> entries = convertFromString<std::vector<std::string>>(str);
@@ -91,6 +96,11 @@ namespace BT
   template <> inline decision_msgs::msg::AlternativeArray convertFromString(StringView str)
   {
     decision_msgs::msg::AlternativeArray msg;
+
+    if (str.size() == 0)
+    {
+      return msg;
+    }
 
     // Take in strings separated by the character ';'
     // e.g. "blue;green;#06B4C1;yellow"

@@ -70,29 +70,29 @@ class EliminateWorstActionServer(Node):
         self.get_logger().info(f'Succeeded with choice {choice}')
         return Take.Result(chosen=choice.alternatives)
 
-    def eliminate_n(self, ranked_alternatives, n):
+    def eliminate_n(self, ranked_alternatives, n, force_take=True):
         """
         Eliminates the worst N alternatives.
         """
-        chosen = take.eliminate_worst(ranked_alternatives, n=n)
+        chosen = take.eliminate_worst(ranked_alternatives, n=n, force_take=force_take)
 
         self.get_logger().info(f'{chosen} taken with policy: eliminate_n, n={n}')
         return chosen
 
-    def eliminate_n_random(self, ranked_alternatives, n):
+    def eliminate_n_random(self, ranked_alternatives, n, force_take=True):
         """
         Eliminates the worst N alternatives, randomly selecting among tied classes.
         """
-        chosen = take.eliminate_worst(ranked_alternatives, n=n, random_ties=True)
+        chosen = take.eliminate_worst(ranked_alternatives, n=n, random_ties=True, force_take=force_take)
 
         self.get_logger().info(f'{chosen} taken with policy: eliminate_n_random, n={n}')
         return chosen
 
-    def eliminate_worst(self, ranked_alternatives):
+    def eliminate_worst(self, ranked_alternatives, force_take=True):
         """
         Eliminates all the alternatives tied for worst score.
         """
-        chosen = take.eliminate_worst(ranked_alternatives)
+        chosen = take.eliminate_worst(ranked_alternatives, force_take=force_take)
 
         self.get_logger().info(f'{chosen} taken with policy: eliminate_worst')
         return chosen

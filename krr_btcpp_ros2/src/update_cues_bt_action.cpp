@@ -15,9 +15,13 @@ bool UpdateCuesAction::setGoal(Goal& goal)
   }
   if (!getInput<decision_msgs::msg::CueArray>("cues", goal.previous_cues))
   {
-    RCLCPP_ERROR(logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
+    // Assume this is the first iteration
+    RCLCPP_WARN(logger(), "%s: setGoal with warning: no blackboard entry for {%s}. Assuming this is the first iteration.", 
         name().c_str(), "cues");
-    return false;
+
+    // RCLCPP_ERROR(logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
+    //     name().c_str(), "cues");
+    // return false;
   }
 
   return true;

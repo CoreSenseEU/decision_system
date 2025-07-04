@@ -12,4 +12,3 @@ bt_executor:
     behavior_trees: # List of 'package_name/subfolder' containing SubTrees to load into the factory (defaults to '{}')
       - krr_btcpp_ros2/behavior_trees
       - krr_btcpp_ros2/behavior_trees/decision_heuristics
-      - heuristic_assembly/behavior_trees

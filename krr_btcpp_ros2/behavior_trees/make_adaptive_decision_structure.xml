@@ -21,7 +21,7 @@
       <RunExternalSubTree target_tree="{_target_tree}"
                           payload="{gap}"
                           return_message="{_choice_query}"
-                          action_name="ExecuteBehaviorTree"/>
+                          action_name="ExecuteBehaviorTree" />
       <!-- The choices will all be bound to 'C' in these answers -->
       <PrologQuery query="{_choice_query}" 
                    answers="{choice}" 

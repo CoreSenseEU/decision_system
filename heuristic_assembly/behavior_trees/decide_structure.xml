@@ -11,7 +11,10 @@
                             maxresult="-1"
                             service_name="{@prolog_query}" />
         <Sequence>
-          <RetryUntilSuccessful _while="!aborted" num_attempts="20">
+          <!-- TODO: implement aborted -->
+          <Script code="aborted := false" />
+          <!-- TODO: adjust make num_attempts a parameter -->
+          <RetryUntilSuccessful _while="!aborted" num_attempts="10">
             <!-- Make sure done -->
             <Sequence> 
               <SubTree ID="MakeSureChoiceTaken" _autoremap="true" />

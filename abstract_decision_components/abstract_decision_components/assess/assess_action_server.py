@@ -50,7 +50,7 @@ class AssessActionServer(Node):
         self.action_server_ = ActionServer(
                 self,
                 Assess,
-                'Assess',
+                '~/Assess',
                 self.assess_cb)
 
         self.pub_ = self.create_publisher(

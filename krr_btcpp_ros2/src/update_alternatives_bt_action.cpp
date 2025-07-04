@@ -15,15 +15,24 @@ bool UpdateAlternativesAction::setGoal(Goal& goal)
   }
   if (!getInput<decision_msgs::msg::AlternativeArray>("previous_choice", goal.previous_taken))
   {
-    RCLCPP_ERROR(logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
+    // Assume this is the first iteration
+    RCLCPP_WARN(logger(), "%s: setGoal with warning: no blackboard entry for {%s}. Assuming this is the first iteration.", 
         name().c_str(), "previous_choice");
-    return false;
+
+
+    // RCLCPP_ERROR(logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
+    //     name().c_str(), "previous_choice");
+    // return false;
   }
   if (!getInput<decision_msgs::msg::AlternativeArray>("choice_set", goal.previous_choice_set))
   {
-    RCLCPP_ERROR(logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
+    // Assume this is the first iteration
+    RCLCPP_WARN(logger(), "%s: setGoal with warning: no blackboard entry for {%s}. Assuming this is the first iteration.", 
         name().c_str(), "choice_set");
-    return false;
+
+    // RCLCPP_ERROR(logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
+    //     name().c_str(), "choice_set");
+    // return false;
   }
 
   return true;

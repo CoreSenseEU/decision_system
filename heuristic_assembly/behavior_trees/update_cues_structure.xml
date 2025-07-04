@@ -10,8 +10,11 @@
           were discovered, but this ordering could be enforced by the 
           definition of `cue_of/2`.
     -->
-    <UpdateCues gap="{gap}"
-                cues="{cues}"
-                action_name="" />
+    <Sequence>
+      <!-- NOTE: if cues is uninitialized, this assumes it is the first iteration -->
+      <UpdateCues gap="{gap}"
+                  cues="{cues}"
+                  action_name="" />
+    </Sequence>
   </BehaviorTree>
 </root>

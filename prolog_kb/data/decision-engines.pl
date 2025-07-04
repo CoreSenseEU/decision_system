@@ -32,7 +32,7 @@ uses_ros_params(assess, 'config/assess.yaml').
 
 %% Aggregate
 engine(aggregate_preferences).
-has_ros_node(aggregate_preferences, '/aggregate_preferences_boolean_action_server').
+has_ros_node(aggregate_preferences, '/aggregate_preferences_action_server').
 has_meta(aggregate_preferences, 'behavior_trees/aggregate_meta.xml').
 % NOTE: No parameters.
 uses_ros_params(aggregate_preferences, 'config/aggregate_preferences.yaml').

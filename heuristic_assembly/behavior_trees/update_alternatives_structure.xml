@@ -5,9 +5,13 @@
       or memory implementations.
   -->
   <BehaviorTree ID="MakeSureAlternativesUpdated">
-    <UpdateAlternatives gap="{gap}"
-                        previous_choice="{previous_choice}"
-                        choice_set="{choice_set}"
-                        action_name="" />
+    <Sequence>
+      <!-- NOTE: if either the previous choice or choice set are uninitialized, 
+            this assumes it is the first iteration -->
+      <UpdateAlternatives gap="{gap}"
+                          previous_choice="{previous_choice}"
+                          choice_set="{choice_set}"
+                          action_name="" />
+    </Sequence>
   </BehaviorTree>
 </root>

@@ -21,6 +21,7 @@ from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
 from decision_msgs.action import UpdateAlternatives
 from decision_msgs.srv import PrologQuery
+from decision_msgs.msg import AlternativeArray, Alternative
 
 
 class UpdateAlternativesActionServer(Node):
@@ -48,7 +49,7 @@ class UpdateAlternativesActionServer(Node):
         self.action_server_ = ActionServer(
                 self,
                 UpdateAlternatives,
-                'UpdateAlternatives',
+                '~/UpdateAlternatives',
                 self.update_alternatives_cb)
 
         self.prolog_client_ = self.create_client(
@@ -58,7 +59,7 @@ class UpdateAlternativesActionServer(Node):
 
     def update_alternatives_cb(self, goal_handle):
         cap = self.get_parameter('capacity').value
-        policy = self.get_parameter('policy').value
+        policy = self.get_parameter('keep_policy').value
         self.get_logger().info(f'Updating choice set with up to {cap} alternatives with policy: {policy}')
 
         if policy == 'taken':
@@ -66,16 +67,16 @@ class UpdateAlternativesActionServer(Node):
         elif policy == 'all':
             choice_set = goal_handle.request.previous_choice_set
         else:
-            choice_set = []
+            choice_set = AlternativeArray()
 
         # refill
         query = "alternative_of(A, '_G'), \+ fetched_for(A, '_G'), assertz((fetched_for(A, '_G')))"
-        query.replace('_G', goal_handle.request.gap)
+        query = query.replace('_G', goal_handle.request.gap_id)
         try:
             if cap > 0:
-                choice_set.append(self._get_available(query, cap - len(choice_set)))
+                choice_set.alternatives += self._get_available(query, cap - len(choice_set))
             else:
-                choice_set.append(self._get_available(query, -1))
+                choice_set.alternatives += self._get_available(query, -1)
         except ValueError as e:
             self.get_logger().error(str(e))
             goal_handle.abort()
@@ -90,7 +91,8 @@ class UpdateAlternativesActionServer(Node):
         :raises ValueError: If a query could not be answered or answer was
             missing a binding for the alternative variable `_A`.
         """
-        request = PrologQuery.Request(query=query, maxresult=maxresult)
+        request = PrologQuery.Request(maxresult=maxresult)
+        request.query.clause = query
 
         response = self.call_service(self.prolog_client_, request)
         if response is None:
@@ -100,7 +102,7 @@ class UpdateAlternativesActionServer(Node):
         for answer in response.answers:
             for binding in answer.bindings:
                 if binding.key == "A":
-                    alternatives.append(binding.value)
+                    alternatives.append(Alternative(id=binding.value))
 
         return alternatives
 

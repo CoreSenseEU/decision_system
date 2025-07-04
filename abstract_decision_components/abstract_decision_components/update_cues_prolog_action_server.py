@@ -21,6 +21,7 @@ from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
 from decision_msgs.action import UpdateCues
 from decision_msgs.srv import PrologQuery
+from decision_msgs.msg import CueArray, Cue
 
 
 class UpdateCuesPrologActionServer(Node):
@@ -44,7 +45,7 @@ class UpdateCuesPrologActionServer(Node):
         self.action_server_ = ActionServer(
                 self,
                 UpdateCues,
-                'UpdateAlternatives',
+                '~/UpdateCues',
                 self.update_alternatives_cb)
 
         self.prolog_client_ = self.create_client(
@@ -66,13 +67,13 @@ class UpdateCuesPrologActionServer(Node):
         if reuse:
             cues = goal_handle.request.previous_cues
         else:
-            cues = []
+            cues = CueArray()
 
         # refill
         query = "cue_of(C, '_G'), \+ fetched_for(C, '_G'), assertz((fetched_for(C, '_G')))"
-        query.replace('_G', goal_handle.request.gap)
+        query = query.replace('_G', goal_handle.request.gap_id)
         try:
-            cues.append(self._get_available(query, iter_add))
+            cues.cues += self._get_available(query, iter_add)
         except ValueError as e:
             self.get_logger().error(str(e))
             goal_handle.abort()
@@ -87,19 +88,20 @@ class UpdateCuesPrologActionServer(Node):
         :raises ValueError: If a query could not be answered or answer was
             missing a binding for the alternative variable `_A`.
         """
-        request = PrologQuery.Request(query=query, maxresult=maxresult)
+        request = PrologQuery.Request(maxresult=maxresult)
+        request.query.clause = query
 
         response = self.call_service(self.prolog_client_, request)
         if response is None:
             raise ValueError(f'Failed to answer query: "{request.query.clause}"')
 
-        alternatives = []
+        cues = []
         for answer in response.answers:
             for binding in answer.bindings:
                 if binding.key == "C":
-                    alternatives.append(binding.value)
+                    cues.append(Cue(id=binding.value))
 
-        return alternatives
+        return cues
 
     def call_service(self, cli, request):
         """

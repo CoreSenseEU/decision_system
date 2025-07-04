@@ -13,7 +13,7 @@ room_likely_from_habits(bedroom, 1) :-
 room_likely_from_habits(bedroom, 1) :-
     dirty_tableware_found.
 room_likely_from_habits(office, 1) :-
-    \+ (dirty_tableware_present, clean_tableware_found).
+    \+ (dirty_tableware_found, clean_tableware_found).
 room_likely_from_habits(R, 0) :-
     room(R), \+ room_likely_from_habits(R, 1).
 
@@ -46,7 +46,7 @@ room_favorable_if_doorway_open(R, 0.5) :- %% state of the doorways is unknown
 
 % TODO: match real values from sim. For now they are randomized and negated so bigger is worse
 neg_distance_to_room(R, S) :-
-    room(R), randon(N), S = -10 * N.
+    room(R), random(N), S is -10 * N.
 
 
 
