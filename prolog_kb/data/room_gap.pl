@@ -1,6 +1,7 @@
 %%% Hand-made definitions (and predicates used as cues) for room-gap
+:- consult("gap.pl").
 
-gap(room_gap)
+gap(room_gap).
 
 %% alternatives
 alternative_of(A, room_gap) :-

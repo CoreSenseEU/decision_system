@@ -6,7 +6,7 @@
 % (used for eliminate-by-aspects)
 engine(update_cues_iter_one).
 has_ros_node(update_cues_iter_one, '/update_cues_action_server').
-has_meta(update_cues_iter_one, 'behavior_trees/update_cues_meta.xml').
+has_meta(update_cues_iter_one, 'behavior_trees/update_cues_structure.xml').
 uses_ros_params(update_cues_iter_one, 'config/update_cues_iter_one.yaml').
 
 % ...
@@ -16,9 +16,9 @@ uses_ros_params(update_cues_iter_one, 'config/update_cues_iter_one.yaml').
 %    keep_policy = taken, capacity = 0
 % (used for eliminate-by-aspects)
 engine(update_alternatives_elim).
-has_ros_node(update_alternatives, '/update_alternatives_action_server').
-has_meta(update_alternatives, 'behavior_trees/update_alternatives_meta.xml').
-uses_ros_params(update_alternatives, 'config/update_alternatives_elim.yaml').
+has_ros_node(update_alternatives_elim, '/update_alternatives_action_server').
+has_meta(update_alternatives_elim, 'behavior_trees/update_alternatives_structure.xml').
+uses_ros_params(update_alternatives_elim, 'config/update_alternatives_elim.yaml').
 
 % ...
 
@@ -33,15 +33,15 @@ uses_ros_params(assess, 'config/assess.yaml').
 %% Aggregate
 engine(aggregate_preferences).
 has_ros_node(aggregate_preferences, '/aggregate_preferences_boolean_action_server').
-has_meta('behavior_trees/aggregate_meta.xml').
+has_meta(aggregate_preferences, 'behavior_trees/aggregate_meta.xml').
 % NOTE: No parameters.
-uses_ros_params('config/aggregate_preferences.yaml').
+uses_ros_params(aggregate_preferences, 'config/aggregate_preferences.yaml').
 
 % ...
 
 %% Order
 % TODO: rename this to indicate that the default uses the ording from evaluations
-engine(order_lexicographical)
+engine(order_lexicographical).
 has_ros_node(order_lexicographical, '/order_lexicographical_action_server').
 has_meta(order_lexicographical, 'behavior_trees/order_meta.xml').
 % NOTE: no axis ordering!!

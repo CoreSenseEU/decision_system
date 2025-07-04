@@ -42,7 +42,7 @@ room_favorable_if_doorway_open(R, 0.5) :- %% state of the doorways is unknown
 
 
 % Distance to room
-:- dynamic neg_distance_to_room(R, S).
+:- dynamic neg_distance_to_room/2.
 
 % TODO: match real values from sim. For now they are randomized and negated so bigger is worse
 neg_distance_to_room(R, S) :-

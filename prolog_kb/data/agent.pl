@@ -5,7 +5,8 @@
 % An engine running on the agent
 %
 % engine(?Engine)
-:- dynamic engine/1
+:- dynamic engine/1.
+:- discontiguous engine/1.
 
 
 
@@ -17,12 +18,14 @@
 %    to be different engines. In the future these should be modeled independently.
 %
 % uses_ros_params(?Engine, ?YAMLfile)
-:- dynamic uses_ros_params/2
+:- dynamic uses_ros_params/2.
+:- discontiguous uses_ros_params/2.
 
 % The current name of a running ROS node implementing(?) a particular engine.
 %
 % has_ros_node(?Engine, ++RosNodeName)
-:- dynamic has_ros_node/2
+:- dynamic has_ros_node/2.
+:- discontiguous has_ros_node/2.
 
 % An XML file implementing a behavior tree that executes a particular engine
 % when it is ticked. This may include fallback behaviors, ensuring inputs exist,
@@ -31,4 +34,5 @@
 % Assume file path is relative to the `heuristic_assembly` ROS package
 %
 % has_meta(?Engine, ++YAMLfile)
-:- dynamic has_meta/2
+:- dynamic has_meta/2.
+:- discontiguous has_meta/2.
