@@ -17,6 +17,8 @@ public:
   {
     // TODO: remove this from the blackboard and just set the query service in AssembleDecisionHeuristic
     this->node()->declare_parameter("prolog_query_service", "/query");
+    this->node()->declare_parameter("prolog_assert_topic", "/assert");
+    this->node()->declare_parameter("prolog_retract_topic", "/retract");
   }
 
 protected:
