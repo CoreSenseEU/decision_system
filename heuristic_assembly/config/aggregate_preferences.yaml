@@ -1,2 +1,2 @@
-/aggregate_preferences_action_server:
+aggregate_preferences_action_server:
   ros__parameters: {}
