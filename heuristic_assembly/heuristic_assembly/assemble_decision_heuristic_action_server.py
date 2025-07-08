@@ -100,20 +100,14 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
 
         first_heuristic = answer.split('|')[0].split('exert(') #)
         engines = [part[:part.find('_engine')] for part in first_heuristic if '_engine' in part]
-
-        ### TODO: remove this hack
-        #   The first example was (conveniently) elimination-by-aspects (with preference ordering)
-        engines += ['update_alternatives_elim', 'update_cues_iter_one']
-        ###
-
         return engines
 
     def _assemble_vampire(self):
         self.get_logger().info('Running Understanding system')
         output = subprocess.run(VAMPIRE_SHELL, shell=True, capture_output=True)
 
-        lines = [str(line) for line in output.stdout.splitlines()]
-        self.get_logger().info(f'Vampire output: {lines}')
+        lines = [line.decode() for line in output.stdout.splitlines()]
+        self.get_logger().info('Vampire output:\n' + '\n'.join(lines))
         return lines
 
     def write_to_yaml(self, gap, pipeline, heuristic_dir, heuristic_name):
