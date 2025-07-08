@@ -40,12 +40,18 @@ uses_ros_params(aggregate_preferences, 'config/aggregate_preferences.yaml').
 % ...
 
 %% Order
-% TODO: rename this to indicate that the default uses the ording from evaluations
+% TODO: rename this to indicate that the default uses the ordering from evaluations
 engine(order_lexicographical).
 has_ros_node(order_lexicographical, '/order_lexicographical_action_server').
 has_meta(order_lexicographical, 'behavior_trees/order_meta.xml').
 % NOTE: no axis ordering!!
 uses_ros_params(order_lexicographical, 'config/order_lexicographical_eval.yaml').
+
+engine(order_dominating).
+% TODO: rename this to indicate that the default policy is majority_rule
+has_ros_node(order_dominating, '/order_dominating_action_server').
+has_meta(order_dominating, 'behavior_trees/order_meta.xml').
+uses_ros_params(order_dominating, 'config/order_dominating_majority_rule.yaml').
 
 % ...
 
