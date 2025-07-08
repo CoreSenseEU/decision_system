@@ -23,8 +23,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'assemble_decision_heuristic = heuristic_assembly.assemble_decision_heuristic_action_server:main',
-            'adapt_decision_components = heuristic_assembly.adapt_decision_components_action_server:main',
+            'assemble_decision_heuristic_action_server = heuristic_assembly.assemble_decision_heuristic_action_server:main',
+            'adapt_decision_components_action_server = heuristic_assembly.adapt_decision_components_action_server:main',
         ],
     },
 )
