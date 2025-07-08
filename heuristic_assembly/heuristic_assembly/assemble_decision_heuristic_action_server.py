@@ -16,6 +16,7 @@ import sys
 import os
 import xml.etree.ElementTree as ET
 import yaml
+import subprocess
 
 import rclpy
 from rclpy.action import ActionServer
@@ -26,6 +27,15 @@ from prolog_kb.prolog_interface import PrologInterface
 
 
 TEST_OUTPUT_FILE = os.path.expanduser('~/thesis/src/out.txt')
+
+GAP_FILE = os.path.expanduser('~/thesis/src/decision-logic/tff/tests/test-decision-questions.tff')
+
+VAMPIRE_ARGS = [os.path.expanduser('~/thesis/vampire/build-master/vampire'),
+                '--input_syntax', 'tptp', '--proof', 'off',
+                GAP_FILE,
+                '-sa', 'lrs', '-s', '1010', '-nwc', '10.0'] # was -sa discount...
+
+VAMPIRE_SHELL = ' '.join(VAMPIRE_ARGS)
 
 
 class AssembleDecisionHeuristicActionServer(PrologInterface):
@@ -71,11 +81,13 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
 
     def assemble_with_gap(self, gap):
         # TODO: update this when the understanding core is in better condition
-        file_path = TEST_OUTPUT_FILE
-        self.get_logger().warn(f'Using mock understanding output from {file_path}')
-
-        with open(file_path, 'r') as f:
-            lines = f.readlines()
+        # file_path = TEST_OUTPUT_FILE
+        # self.get_logger().warn(f'Using mock understanding output from {file_path}')
+        #
+        # with open(file_path, 'r') as f:
+        #     lines = f.readlines()
+        #
+        lines = self._assemble_vampire()
 
         answer = ''
         for line in lines:
@@ -83,7 +95,8 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
                 answer = line
                 break
         if answer == '':
-            raise RuntimeError(f'No answer detected in the Vampire output file {file_path}')
+            # raise RuntimeError(f'No answer detected in the Vampire output file {file_path}')
+            raise RuntimeError('No answer detected in the Vampire output')
 
         first_heuristic = answer.split('|')[0].split('exert(') #)
         engines = [part[:part.find('_engine')] for part in first_heuristic if '_engine' in part]
@@ -94,6 +107,14 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
         ###
 
         return engines
+
+    def _assemble_vampire(self):
+        self.get_logger().info('Running Understanding system')
+        output = subprocess.run(VAMPIRE_SHELL, shell=True, capture_output=True)
+
+        lines = [str(line) for line in output.stdout.splitlines()]
+        self.get_logger().info(f'Vampire output: {lines}')
+        return lines
 
     def write_to_yaml(self, gap, pipeline, heuristic_dir, heuristic_name):
         params = {}
