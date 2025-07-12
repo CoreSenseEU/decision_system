@@ -26,7 +26,8 @@ from decision_msgs.msg import AlternativeArray, Alternative
 
 class UpdateAlternativesActionServer(Node):
     """
-    An action server to update the choice set from a set of available alternatives in the prolog KB.
+    An action server to update the choice set from a set of available
+    alternatives in the prolog KB.
 
     :param keep_policy: A policy to determine what alternatives to keep from the previous iteration.
         - `'all'`: keep all alternatives from the previous iteration.

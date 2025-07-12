@@ -46,14 +46,14 @@ class UpdateCuesPrologActionServer(Node):
                 self,
                 UpdateCues,
                 '~/UpdateCues',
-                self.update_alternatives_cb)
+                self.update_cues_cb)
 
         self.prolog_client_ = self.create_client(
                 PrologQuery,
                 'query',
                 callback_group = MutuallyExclusiveCallbackGroup())
 
-    def update_alternatives_cb(self, goal_handle):
+    def update_cues_cb(self, goal_handle):
         iter_add = self.get_parameter('iter_add').value
         if iter_add == 0:
             iter_add = -1
