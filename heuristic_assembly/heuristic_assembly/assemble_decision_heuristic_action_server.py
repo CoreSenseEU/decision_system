@@ -147,9 +147,10 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
     def write_to_xml(self, gap, pipeline, heuristic_dir, heuristic_name):
         root = ET.Element('root', attrib={'BTCPP_format' : "4"})
         main = ET.SubElement(root, 'BehaviorTree', attrib={'ID': heuristic_name})
-        main.append(ET.Element('SubTree', attrib={'ID': 'MakeSureGapClosed',
+        main.append(ET.Element('SubTree', attrib={'ID': f'MakeSureGapClosed_{gap}',
                                                   '_autoremap': 'true', 
                                                   'gap': '{@payload}'}))
+
 
         for engine in pipeline:
             meta = os.path.join(get_package_share_directory('heuristic_assembly'), self._get_meta(engine))
@@ -158,10 +159,15 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
             for node in behavior_tree.iter():
                 if node.get('action_name') == '':
                     node.set('action_name', ros_node + '/' + node.tag)
+            self._append_suffix_to_subtrees(gap, behavior_tree)
             self._append_all_bts(root, behavior_tree)
 
-        decide_structure = os.path.join(get_package_share_directory('heuristic_assembly'), 'behavior_trees/decide_structure.xml')
-        self._append_all_bts(root, ET.parse(decide_structure))
+        decide_structure = os.path.join(get_package_share_directory('heuristic_assembly'), 
+                                        'behavior_trees/decide_structure.xml')
+        decide_tree = ET.parse(decide_structure)
+        # TODO: remove this hack
+        self._append_suffix_to_subtrees(gap, decide_tree)
+        self._append_all_bts(root, decide_tree)
 
         writer = ET.ElementTree(root)
         xml_path = os.path.join(heuristic_dir, f'{gap}.xml')
@@ -178,6 +184,13 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
 
         # Also add includes (assume they are all ROS flavored)
         parent.extend(tree.iter('include'))
+
+    def _append_suffix_to_subtrees(self, gap, tree):
+        # TODO: make renaming more reusable. Right now it just tacks the gap onto everything
+        for node in tree.iter():
+            node_id = node.get('ID')
+            if node_id is not None:
+                node.set('ID', node_id + '_' + gap)
 
     def _get_ros_node(self, engine):
         answers = self.query(f'engine({engine}), has_ros_node({engine}, N)', maxresult=1) 
