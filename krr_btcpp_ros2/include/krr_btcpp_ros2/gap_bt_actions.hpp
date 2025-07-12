@@ -38,9 +38,11 @@ public:
         BT::InputPort<decision_msgs::msg::AlternativeArray>(
             "choice",
             "The chosen set of alternatives."),
-        BT::OutputPort(
-            "handle",
-            "A Prolog query to retrieve all the chosen alternatives."),
+        // TODO: for some reason this isn't writing to the output port.  
+        // Maybe because this derrived from a ConditionNode?
+        // BT::OutputPort<std::string>(
+        //     "handle",
+        //     "A Prolog query to retrieve all the chosen alternatives."),
         });
   }
 

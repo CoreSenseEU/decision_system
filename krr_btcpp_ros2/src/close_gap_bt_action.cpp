@@ -36,7 +36,9 @@ bool CloseGapAction::setMessage(decision_msgs::msg::PrologClause& msg)
   }
   msg.clause.append(")");
 
-  setOutput("handle", "closed_with(" + gap + ", C)");
+  // TODO: for some reason this isn't writing to the output port.  
+  // Maybe because this derrived from a ConditionNode?
+  // setOutput("handle", "closed_with(" + gap + ", C)");
   return true;
 }
 

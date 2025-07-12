@@ -28,7 +28,6 @@
       <!-- TODO: this creates duplicate entires in the database if the gap was already closed. -->
       <CloseGap gap="{gap}"
                 choice="{choice}" 
-                handle="{choice_query}"
                 topic_name="{@prolog_assert}" />
     </Sequence>
   </BehaviorTree>

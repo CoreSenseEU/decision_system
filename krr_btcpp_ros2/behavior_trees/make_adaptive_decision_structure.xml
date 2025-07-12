@@ -20,13 +20,12 @@
       <!-- TODO: should this take an xml file directly? -->
       <RunExternalSubTree target_tree="{_target_tree}"
                           payload="{gap}"
-                          return_message="{_choice_query}"
                           action_name="ExecuteBehaviorTree" />
-      <!-- The choices will all be bound to 'C' in these answers -->
-      <PrologQuery query="{_choice_query}" 
-                   answers="{choice}" 
-                   maxresult="-1"
-                   service_name="{@prolog_query}" />
+      <PrologFetchFromGap gap="{gap}" 
+                          query="closed_with('_G', _T)" 
+                          target="{choice}" 
+                          maxresult="-1"
+                          service_name="{@prolog_query}" />
     </Sequence>
   </BehaviorTree>
 

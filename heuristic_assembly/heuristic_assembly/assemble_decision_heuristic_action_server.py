@@ -149,8 +149,7 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
         main = ET.SubElement(root, 'BehaviorTree', attrib={'ID': heuristic_name})
         main.append(ET.Element('SubTree', attrib={'ID': 'MakeSureGapClosed',
                                                   '_autoremap': 'true', 
-                                                  'gap': '{@payload}',
-                                                  'choice_query': '{@return_message}'}))
+                                                  'gap': '{@payload}'}))
 
         for engine in pipeline:
             meta = os.path.join(get_package_share_directory('heuristic_assembly'), self._get_meta(engine))
