@@ -18,7 +18,7 @@ import numpy as np
 
 import rclpy
 from rclpy.parameter import Parameter
-from rcl_interfaces.choice import SetParametersResult
+from rcl_interfaces.msg import SetParametersResult
 
 from abstract_decision_components.accept.accept_action_server import AcceptActionServer
 from abstract_decision_components.accept.accept import satisficing
@@ -67,12 +67,12 @@ class AcceptSatisficingActionServer(AcceptActionServer):
             return SetParametersResult(successful=True)
 
         if axes is None:
-            if self.has_parameter('axes'):
+            if self.get_parameter_or('axes', False):
                 axes = self.get_parameter('axes').value
             else:
                 return SetParametersResult(successful=True)
         if thresholds is None:
-            if self.has_parameter('thresholds'):
+            if self.get_parameter_or('thresholds', False):
                 thresholds = self.get_parameter('thresholds').value
             else:
                 return SetParametersResult(successful=True)
