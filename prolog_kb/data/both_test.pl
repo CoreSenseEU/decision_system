@@ -2,10 +2,12 @@
 :- consult("gap.pl").
 
 % Mission model
+:- consult("room_gap.pl").
 :- consult("objects_gap.pl").
 
 % World model
 :- consult("objects_world.pl").
+:- consult("room_world.pl").
 
 % Agent model
 :- consult("agent.pl").

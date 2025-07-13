@@ -14,6 +14,7 @@
 %
 % gap(?Gap)
 :- dynamic gap/1.
+:- multifile gap/1.
 gap() :- fail.
 
 
@@ -27,12 +28,14 @@ gap() :- fail.
 %
 % heuristic_of(?XMLfile, ?Gap)
 :- dynamic heuristic_of/2.
+:- multifile heuristic_of/2.
 
 % The ID of the behavior tree root node of a heuristic used to make a decision.
 % TODO: change this to be relative to the heuristic instead of the GAP?
 %
 % entry_point_of(?BehaviorTreeID, ?Gap)
 :- dynamic entry_point_of/2.
+:- multifile entry_point_of/2.
 
 % A YAML file describing a configuration of ROS parameters corresponding to a particular heuristic.
 %
@@ -41,12 +44,14 @@ gap() :- fail.
 %
 % config_of(?YAMLfile, ?Gap)
 :- dynamic config_of/2.
+:- multifile config_of/2.
 
 % A condition to be implemented for each specific gap on the class of possible
 % alternatives which would close the gap.
 %
 % alternative_of(?Alternative, ?Gap)
 :- dynamic alternative_of/2.
+:- multifile alternative_of/2.
 
 % A condition to be implemented for each specific gap on the set of possible
 % cues which could be used to evaluate the alternatives of the gap.
@@ -54,6 +59,7 @@ gap() :- fail.
 %
 % cue_of(?RosService, ?Gap)
 :- dynamic cue_of/2.
+:- multifile cue_of/2.
 
 % When a decision is made, the gap is closed with all members of the chosen set of alternatives.
 %
