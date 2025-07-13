@@ -1,0 +1,120 @@
+<root BTCPP_format="4">
+
+<BehaviorTree ID="DecideOnGap_objects_gap">
+  <SubTree ID="MakeSureGapClosed_objects_gap" _autoremap="true" gap="{@payload}" />
+</BehaviorTree>
+
+<BehaviorTree ID="MakeSureChoiceAccepted_objects_gap">
+    <Sequence>
+      <RunOnce>
+        <Script code="accepted := false" />
+      </RunOnce>
+      <Sequence _successIf="accepted">
+        <SubTree ID="MakeSureChoiceTaken_objects_gap" _autoremap="true" />
+        <SubTree ID="MakeSureAlternativesEvaluated_objects_gap" _autoremap="true" />
+        <Accept choice="{choice}" 
+                evaluation="{evaluation}" 
+                accepted="{accepted}" 
+                action_name="/accept_always_action_server/Accept" />
+      </Sequence>
+    </Sequence>
+</BehaviorTree>
+
+<BehaviorTree ID="MakeSureChoiceTaken_objects_gap">
+    <Sequence _successIf="choice_last_updated_iteration >= iteration">
+      <SubTree ID="MakeSureAlternativesOrdered_objects_gap" _autoremap="true" />
+      <Take ordering="{ordering}" 
+            choice="{choice}" 
+            action_name="/take_best_action_server/Take" />
+      <Script code="choice_last_updated_iteration = iteration" />
+    </Sequence>
+</BehaviorTree>
+
+<BehaviorTree ID="MakeSureAlternativesOrdered_objects_gap">
+      <Sequence _successIf="ordering_last_updated_iteration >= iteration">
+        <Sequence>
+          <SubTree ID="MakeSureAlternativesEvaluated_objects_gap" _autoremap="true" />
+          <Order evaluation="{evaluation}" 
+                 ordering="{ordering}"
+                 action_name="/order_condorcet_extension_action_server/Order" />
+        </Sequence>
+        <Script code="ordering_last_updated_iteration = iteration" />
+      </Sequence>
+</BehaviorTree>
+
+<BehaviorTree ID="MakeSureAlternativesEvaluated_objects_gap">
+      <Sequence _successIf="evaluation_last_updated_iteration >= iteration">
+        <SubTree ID="MakeSureAlternativesAssessed_objects_gap" _autoremap="true" />
+        <Aggregate assessments="{assessments}" 
+                   evaluation="{evaluation}" 
+                   action_name="/aggregate_utility_signed_action_server/Aggregate" />
+        <Script code="evaluation_last_updated_iteration = iteration" />
+      </Sequence>
+</BehaviorTree>
+
+<BehaviorTree ID="MakeSureAlternativesAssessed_objects_gap">
+      <Sequence _successIf="assessment_matrix_last_updated_iteration >= iteration">
+        <SubTree ID="MakeSureAlternativesUpdated_objects_gap" _autoremap="true" previous_choice="{choice}" />
+        <SubTree ID="MakeSureCuesUpdated_objects_gap" _autoremap="true" previous_choice="{cues}" />
+        <Assess alternatives="{choice_set}" cues="{cues}" assessments="{assessments}" action_name="/assess_action_server/Assess" />
+        <Script code="assessment_matrix_last_updated_iteration = iteration" />
+      </Sequence>
+</BehaviorTree>
+
+<BehaviorTree ID="MakeSureAlternativesUpdated_objects_gap">
+      <Sequence _successIf="choice_set_last_updated_iteration >= iteration">
+        <UpdateAlternatives gap="{gap}" previous_choice="{previous_choice}" choice_set="{choice_set}" action_name="/update_alternatives_prolog_action_server/UpdateAlternatives" />
+        <Script code="choice_set_last_updated_iteration = iteration" />
+      </Sequence>
+</BehaviorTree>
+
+<BehaviorTree ID="MakeSureCuesUpdated_objects_gap">
+    <Sequence>
+      <Sequence _successIf="cues_last_updated_iteration >= iteration">
+        <UpdateCues gap="{gap}" 
+                    cues="{cues}" 
+                    action_name="/update_cues_prolog_action_server/UpdateCues" />
+        <Script code="cues_last_updated_iteration = iteration" />
+      </Sequence>
+    </Sequence>
+</BehaviorTree>
+
+  
+<BehaviorTree ID="MakeSureDecisionComponentsAdapted">
+    <Sequence>
+      <PrologFetchFromGap gap="{gap}" query="config_of(_T, '_G')" target="{_config}" maxresult="1" service_name="{@prolog_query}" />
+      <RetryUntilSuccessful num_attempts="3">
+        <AdaptDecisionComponents config="{_config}" action_name="AdaptDecisionComponents" />
+      </RetryUntilSuccessful>
+    </Sequence>
+  </BehaviorTree>
+<include ros_pkg="krr_btcpp_ros2" path="behavior_trees/make_adaptive_decision_structure.xml" />
+
+  
+<BehaviorTree ID="MakeSureGapClosed_objects_gap">
+    <Sequence>
+      <Fallback>
+        <PrologFetchFromGap gap="{gap}" query="closed_with('_G', _T)" target="{choice}" maxresult="-1" service_name="{@prolog_query}" />
+        <Sequence>
+          <Script code="aborted := false" />
+          <Script code="iteration := 0" />
+          <Script code="choice_last_updated_iteration := -1" />
+          <Script code="ordering_last_updated_iteration := -1" />
+          <Script code="evaluation_last_updated_iteration := -1" />
+          <Script code="assessment_matrix_last_updated_iteration := -1" />
+          <Script code="choice_set_last_updated_iteration := -1" />
+          <Script code="cues_last_updated_iteration := -1" />
+          <RetryUntilSuccessful _while="!aborted" num_attempts="10">
+            <Sequence> 
+              <SubTree ID="MakeSureChoiceTaken_objects_gap" _autoremap="true" />
+              <SubTree ID="MakeSureChoiceAccepted_objects_gap" _autoremap="true" />
+              <Script code="iteration += 1" />
+            </Sequence>
+          </RetryUntilSuccessful>
+          <AlwaysSuccess _failureIf="aborted | !accepted" />
+        </Sequence>
+      </Fallback>
+      <CloseGap gap="{gap}" choice="{choice}" topic_name="{@prolog_assert}" />
+    </Sequence>
+  </BehaviorTree>
+</root>

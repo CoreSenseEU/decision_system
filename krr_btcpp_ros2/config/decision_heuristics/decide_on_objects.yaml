@@ -1,0 +1,18 @@
+/take_best_action_server:
+  ros__parameters:
+    n: 0
+    random_ties: true
+/order_condorcet_extension_action_server:
+  ros__parameters:
+    policy: copeland
+/aggregate_utility_signed_action_server:
+  ros__parameters:
+    policy: dawes 
+/update_alternatives_prolog_action_server:
+  ros__parameters:
+    capacity: 0
+    keep_policy: none
+/update_cues_prolog_action_server:
+  ros__parameters:
+    iter_add: 0
+    reuse: false
