@@ -46,23 +46,23 @@ class UpdateCuesPrologActionServer(Node):
                 self,
                 UpdateCues,
                 '~/UpdateCues',
-                self.update_alternatives_cb)
+                self.update_cues_cb)
 
         self.prolog_client_ = self.create_client(
                 PrologQuery,
                 'query',
                 callback_group = MutuallyExclusiveCallbackGroup())
 
-    def update_alternatives_cb(self, goal_handle):
+    def update_cues_cb(self, goal_handle):
         iter_add = self.get_parameter('iter_add').value
         if iter_add == 0:
             iter_add = -1
 
         reuse = self.get_parameter('reuse').value
         if reuse:
-            self.get_logger().info(f'Adding up to {iter_add} cues to working set. -1 indicates no limit')
+            self.get_logger().info(f'Adding up to {iter_add} cues to working set. 0 indicates no limit')
         else:
-            self.get_logger().info(f'Replacing working set with up to {iter_add} cues. -1 indicates no limit')
+            self.get_logger().info(f'Replacing working set with up to {iter_add} cues. 0 indicates no limit')
 
         if reuse:
             cues = goal_handle.request.previous_cues

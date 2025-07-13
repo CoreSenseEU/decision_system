@@ -17,7 +17,12 @@
           <RetryUntilSuccessful _while="!aborted" num_attempts="10">
             <!-- Make sure done -->
             <Sequence> 
-              <SubTree ID="MakeSureChoiceTaken" _autoremap="true" />
+
+            <!-- TODO: this is implied by MakeSureChoiceAccepted, and doing it twice changes the
+              assumptions of MakeSureAlternativesUpdated/MakeSureCuesUpdated
+            Removing it here breaks the pattern, and really checks should be added for each iteration. -->
+
+              <!-- <SubTree ID="MakeSureChoiceTaken" _autoremap="true" /> -->
               <SubTree ID="MakeSureChoiceAccepted" _autoremap="true" />
             </Sequence>
           </RetryUntilSuccessful>

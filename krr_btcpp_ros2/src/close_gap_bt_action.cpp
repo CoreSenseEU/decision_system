@@ -26,15 +26,15 @@ bool CloseGapAction::setMessage(decision_msgs::msg::PrologClause& msg)
 
   // guesstimate at how big it will need to be. This is unlikely to need to be resized more than once.
   msg.clause.resize((choice.alternatives.size() + 1) * 14); 
-  msg.clause = "closed_with(" + gap + ", C) :- (";
+  msg.clause = "closed_with('" + gap + "', C) :- (";
 
-  std::string prefix = "C = ";
+  std::string prefix = "C = '";
   for (decision_msgs::msg::Alternative& a : choice.alternatives)
   {
     msg.clause.append(prefix + a.id);
-    prefix = "; C = ";
+    prefix = "'; C = '";
   }
-  msg.clause.append(")");
+  msg.clause.append("')");
 
   // TODO: for some reason this isn't writing to the output port.  
   // Maybe because this derrived from a ConditionNode?

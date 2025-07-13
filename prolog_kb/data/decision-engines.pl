@@ -9,6 +9,13 @@ has_ros_node(update_cues_iter_one, '/update_cues_prolog_action_server').
 has_meta(update_cues_iter_one, 'behavior_trees/update_cues_structure.xml').
 uses_ros_params(update_cues_iter_one, 'config/update_cues_iter_one.yaml').
 
+engine(update_cues_take_the_best).
+has_meta(update_cues_take_the_best, 'behavior_trees/update_cues_take_the_best_structure.xml').
+% TODO: This doesn't actually have a ROS node...
+%  for now this hack shouldn't matter though since the meta doesn't even call it.
+has_ros_node(update_cues_take_the_best, '/update_cues_prolog_action_server').
+uses_ros_params(update_cues_take_the_best, 'config/update_cues_iter_one.yaml').
+
 % ...
 
 %% UpdateAlternatives

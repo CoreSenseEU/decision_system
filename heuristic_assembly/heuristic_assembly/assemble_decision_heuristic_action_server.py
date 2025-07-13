@@ -138,7 +138,7 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
         yaml_path = os.path.join(heuristic_dir, heuristic_name + '.yaml')
         with open(yaml_path, 'w') as f:
             yaml.dump(params, f, default_flow_style=False)
-        self.assertz(f"config_of('{heuristic_name}', '{gap}')")
+        self.assertz(f"config_of('{yaml_path}', '{gap}')")
 
         self.get_logger().info(f'Successfully wrote config to: {yaml_path}')
         self.get_logger().debug(yaml.dump(params))
@@ -172,7 +172,8 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
         writer = ET.ElementTree(root)
         xml_path = os.path.join(heuristic_dir, f'{gap}.xml')
         writer.write(xml_path)
-        self.assertz(f"heuristic_of('{heuristic_name}', '{gap}')")
+        self.assertz(f"heuristic_of('{xml_path}', '{gap}')")
+        self.assertz(f"entry_point_of('{heuristic_name}', '{gap}')")
 
         self.get_logger().info(f'Successfully wrote heuristic to: {xml_path}')
         self.get_logger().debug(ET.tostring(root))
@@ -186,10 +187,12 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
         parent.extend(tree.iter('include'))
 
     def _append_suffix_to_subtrees(self, gap, tree):
-        # TODO: make renaming more reusable. Right now it just tacks the gap onto everything
+        # TODO: make renaming more reusable. Right now it just tacks the gap onto everything not in the whitelist
+        whitelist = ['MakeAdaptiveDecision']
+
         for node in tree.iter():
             node_id = node.get('ID')
-            if node_id is not None:
+            if node_id is not None and node_id not in whitelist:
                 node.set('ID', node_id + '_' + gap)
 
     def _get_ros_node(self, engine):

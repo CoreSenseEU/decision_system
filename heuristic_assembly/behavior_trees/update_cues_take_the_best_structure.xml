@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <include ros_pkg="krr_btcpp_ros2" path="behavior_trees/make_adaptive_decision_structure.xml" />
+
+  <!-- Update Cues Structure -->
+  <BehaviorTree ID="MakeSureCuesUpdated">
+    <Sequence>
+      <!-- Automatically defining a gap for each decision is out of scope for now. 
+          This creates a ttb clone for the specific alternatives at hand.
+      -->
+      <PrologFetchFromGap gap="{gap}" 
+                          query="create_cue_gap_from(_T, '_G')" 
+                          target="{_cues_gap}" 
+                          maxresult="1"
+                          service_name="{@prolog_query}" />
+
+      <!-- Indicate that the cues to be decided upon relate to alternatives from the 
+           {gap} to be solved 
+
+           This is just a mock for example.
+      -->
+      <!-- <PrologAssertWithGap gap="{gap}"  -->
+      <!--                      assertion="mock_associated_with(cues_ttb_gap, '_G')" -->
+      <!--                      service_name="{@prolog_assert}" /> -->
+
+      <!-- <SubTree ID="MakeAdaptiveDecision" choice="{_working_set}" gap="{_cues_gap}" /> -->
+      <SaySomething message="{_cues_gap}" />
+      <SaySomething message="Before Adaptive Decision on Cues" />
+      <SubTree ID="MakeAdaptiveDecision" choice="{cues}" gap="{_cues_gap}" />
+      <SaySomething message="After Adaptive Decision on Cues" />
+
+      <!-- <ParseCueArray text="{_working_set}" -->
+      <!--                cues="{cues}" -->
+      <!--                action_name="ParseCueArray" /> -->
+
+      <SubTree ID="MakeSureDecisionComponentsAdapted" _autoremap="true" />
+      <SaySomething message="After decision components updated again." />
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- NOTE: This is necessary because the parameters may be different for deciding on cues
+          than deciding on alternatives 
+  -->
+  <BehaviorTree ID="MakeSureDecisionComponentsAdapted">
+    <Sequence>
+      <PrologFetchFromGap gap="{gap}" 
+                          query="config_of(_T, '_G')" 
+                          target="{_config}" 
+                          maxresult="1"
+                          service_name="{@prolog_query}" />
+
+      <!-- Setting ROS parameters may take a few tries, so give this a couple
+           attempts before giving up. 
+      -->
+      <RetryUntilSuccessful num_attempts="3">
+        <AdaptDecisionComponents config="{_config}" 
+                                 action_name="AdaptDecisionComponents" />
+      </RetryUntilSuccessful>
+    </Sequence>
+  </BehaviorTree>
+</root>

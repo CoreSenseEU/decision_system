@@ -9,7 +9,7 @@
       </RunOnce>
       <Sequence _successIf="accepted">
         <SubTree ID="MakeSureChoiceTaken" _autoremap="true" />
-        <SubTree ID="MakeSureAlternativesEvaluated" _autoremap="true" />
+        <!-- <SubTree ID="MakeSureAlternativesEvaluated" _autoremap="true" /> -->
         <Accept choice="{choice}"
                 evaluation="{evaluation}"
                 accepted="{accepted}"
