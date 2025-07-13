@@ -98,17 +98,17 @@
         <Sequence>
           <Script code="aborted := false" />
           <Script code="iteration := 0" />
-          <Script code="choice_last_updated_iteration := -1" />
-          <Script code="ordering_last_updated_iteration := -1" />
-          <Script code="evaluation_last_updated_iteration := -1" />
-          <Script code="assessment_matrix_last_updated_iteration := -1" />
-          <Script code="choice_set_last_updated_iteration := -1" />
-          <Script code="cues_last_updated_iteration := -1" />
+          <Script code="choice_last_updated_iteration := 0" />
+          <Script code="ordering_last_updated_iteration := 0" />
+          <Script code="evaluation_last_updated_iteration := 0" />
+          <Script code="assessment_matrix_last_updated_iteration := 0" />
+          <Script code="choice_set_last_updated_iteration := 0" />
+          <Script code="cues_last_updated_iteration := 0" />
           <RetryUntilSuccessful _while="!aborted" num_attempts="10">
             <Sequence> 
+              <Script code="iteration += 1" />
               <SubTree ID="MakeSureChoiceTaken_objects_gap" _autoremap="true" />
               <SubTree ID="MakeSureChoiceAccepted_objects_gap" _autoremap="true" />
-              <Script code="iteration += 1" />
             </Sequence>
           </RetryUntilSuccessful>
           <AlwaysSuccess _failureIf="aborted | !accepted" />
