@@ -1,0 +1,48 @@
+#include <behaviortree_ros2/plugins.hpp>
+
+#include "krr_btcpp_ros2/assemble_decision_heuristic_bt_action.hpp"
+
+
+bool AssembleDecisionHeuristicAction::setGoal(Goal& goal)
+{
+  // TODO: abstract away this call so that code isn't copied
+  if (!getInput("gap", goal.gap_id))
+  {
+    RCLCPP_ERROR(logger(), "%s: setGoal with error: no blackboard entry for {%s}", 
+        name().c_str(), "gap");
+    return false;
+  }
+
+  return true;
+}
+
+
+BT::NodeStatus AssembleDecisionHeuristicAction::onResultReceived(const WrappedResult& wr)
+{
+  setOutput("xml", wr.result->heuristic_file);
+  setOutput("yaml", wr.result->params_file);
+  setOutput("entry_point", wr.result->entry_point);
+  return BT::NodeStatus::SUCCESS;
+}
+
+
+// BT::NodeStatus AssembleDecisionHeuristicAction::onFeedback(const std::shared_ptr<const Feedback> feedback)
+// {
+//   return BT::NodeStatus::RUNNING;
+// }
+
+
+BT::NodeStatus AssembleDecisionHeuristicAction::onFailure(BT::ActionNodeErrorCode error)
+{
+  RCLCPP_ERROR(logger(), "%s: onFailure with error: %s", name().c_str(), toStr(error));
+  return BT::NodeStatus::FAILURE;
+}
+
+
+void AssembleDecisionHeuristicAction::onHalt()
+{
+  RCLCPP_WARN(logger(), "%s: onHalt with warning: goal was cancelled", name().c_str());
+}
+
+// Register this node as a plugin with the BT factory
+CreateRosNodePlugin(AssembleDecisionHeuristicAction, "AssembleDecisionHeuristic");

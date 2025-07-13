@@ -1,0 +1,14 @@
+# Request
+# A gap containing templates to match alternatives to
+string gap_id
+
+# Any alternatives taken in the previous iteration (if there was one).
+CueArray previous_cues
+
+---
+# Response
+# A new set of cues to use to evaluate the alternatives
+CueArray cues
+
+---
+# Feedback

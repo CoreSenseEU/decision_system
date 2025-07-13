@@ -77,7 +77,6 @@ def take_best(ranked_alternatives, n=None, random_ties=False):
 
     :param ranked_alternatives: A list of pairs of :class:`decision_interfaces.msg.Alternative`
         alternatives and integer ranks sorted by rank.
-        under consideration.
     :param n: The number of best alternatives to return. Assume all are taken
         if this is larger than the number of ``alternatives``.
     :type n: int, optional
@@ -96,25 +95,40 @@ def take_best(ranked_alternatives, n=None, random_ties=False):
     return chosen
 
 
-def eliminate_worst(ranked_alternatives, n=None, random_ties=False):
+def eliminate_worst(ranked_alternatives, n=None, random_ties=False, force_take=True):
     """Eliminates the worst alternatives.
 
     :param ranked_alternatives: A list of pairs of :class:`decision_interfaces.msg.Alternative`
         alternatives and integer ranks sorted by rank.
-        under consideration.
     :param n: The number of worst alternatives to remove.  Assume none are taken
         if this is larger than the number of ``alternatives``.
     :type n: int, optional
     :param random_ties: If true, randomly select between tied alternatives, default to False.
     :type random_ties: boolean, optional
+    :param force_take: If true, don't elimate any alternatives if they are all tied, default to True.
+    :type force_take: boolean, optional
 
     :return: A list of chosen alternatives.
 
     """
     if n is None: # Eliminate all tied for worst score
-        chosen, _ = zip(*ranked_alternatives[:_march_backward(ranked_alternatives, len(ranked_alternatives) - 1)])
-    elif random_ties:
-        return _choose_with_ties(ranked_alternatives, len(ranked_alternatives) - n - 1)
-    else:
-        chosen, _ = zip(*ranked_alternatives[:-n])
+        ranked_chosen = ranked_alternatives[:_march_backward(ranked_alternatives, len(ranked_alternatives) - 1)]
+        if len(ranked_chosen) != 0:
+            chosen, _ = zip(*ranked_chosen)
+        elif force_take:
+            chosen, _ = zip(*ranked_alternatives)
+        else:
+            chosen = []
+
+    elif random_ties: # Eliminate worst n, break ties randomly
+        chosen = _choose_with_ties(ranked_alternatives, len(ranked_alternatives) - n - 1)
+        if len(chosen) == 0 and force_take:
+            chosen, _ = zip(*ranked_alternatives)
+
+    else: # Eliminate worst n
+        if n > len(ranked_alternatives) and force_take:
+            chosen, _ = zip(*ranked_alternatives)
+        else:
+            chosen, _ = zip(*ranked_alternatives[:-n])
+
     return chosen

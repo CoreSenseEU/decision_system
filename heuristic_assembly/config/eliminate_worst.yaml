@@ -1,0 +1,5 @@
+eliminate_worst_action_server:
+  ros__parameters: # use the default parameters
+    n: 0
+    random_ties: False
+    force_take: True

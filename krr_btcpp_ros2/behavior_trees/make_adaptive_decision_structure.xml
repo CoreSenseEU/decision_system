@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <!-- Structure for Adaptive decision making -->
+  <BehaviorTree ID="MakeAdaptiveDecision">
+    <Sequence>
+      <SubTree ID="MakeSureGapDefined" _autoremap="true" />
+      <SubTree ID="MakeSureHeuristicAssembled" _autoremap="true" 
+                                               heuristic="{_heuristic}" 
+                                               config="{_config}"
+                                               entry_point="{_target_tree}" />
+
+      <!-- Setting ROS parameters may take a few tries, so give this a couple
+           attempts before giving up. 
+      -->
+      <RetryUntilSuccessful num_attempts="3">
+        <AdaptDecisionComponents config="{_config}" 
+                                 action_name="AdaptDecisionComponents" />
+      </RetryUntilSuccessful>
+
+      <!-- TODO: should this take an xml file directly? -->
+      <RunExternalSubTree target_tree="{_target_tree}"
+                          payload="{gap}"
+                          action_name="ExecuteBehaviorTree" />
+      <PrologFetchFromGap gap="{gap}" 
+                          query="closed_with('_G', _T)" 
+                          target="{choice}" 
+                          maxresult="-1"
+                          service_name="{@prolog_query}" />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="MakeSureGapDefined">
+    <Fallback>
+      <!-- Check if the GAP exists
+          If {gap} is unset, this will fail and create a duplicate gap.
+      -->
+      <CheckExistence gap="{gap}" 
+                      query="gap('_G')"
+                      service_name="{@prolog_query}" />
+
+      <!-- Automatically defining a gap is out of scope for now. 
+          This just copies the predefined one with a new uuid
+      -->
+      <PrologFetchFromGap gap="room_gap" 
+                          query="duplicate_gap(_T, '_G')" 
+                          target="{gap}" 
+                          maxresult="1"
+                          service_name="{@prolog_query}" />
+    </Fallback>
+  </BehaviorTree>
+
+  <BehaviorTree ID="MakeSureHeuristicAssembled">
+    <Fallback>
+      <!-- NOTE: heuristic/config_of(_, room_gap) will not be predefined! 
+              But let it be reused in later iterations
+      -->
+      <Sequence>
+        <PrologFetchFromGap gap="{gap}" 
+                            query="heuristic_of(_T, '_G')" 
+                            target="{heuristic}" 
+                            maxresult="1"
+                            service_name="{@prolog_query}" />
+        <PrologFetchFromGap gap="{gap}" 
+                            query="config_of(_T, '_G')" 
+                            target="{config}" 
+                            maxresult="1"
+                            service_name="{@prolog_query}" />
+        <PrologFetchFromGap gap="{gap}" 
+                            query="entry_point_of(_T, '_G')" 
+                            target="{entry_point}" 
+                            maxresult="1"
+                            service_name="{@prolog_query}" />
+      </Sequence>
+
+      <AssembleDecisionHeuristic gap="{gap}" 
+                                 xml="{heuristic}"
+                                 yaml="{config}"
+                                 entry_point="{entry_point}"
+                                 action_name="AssembleDecisionHeuristic" />
+    </Fallback>
+  </BehaviorTree>
+</root>

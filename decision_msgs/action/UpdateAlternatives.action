@@ -1,0 +1,17 @@
+# Request
+# A gap containing templates to match alternatives to
+string gap_id
+
+# Any alternatives taken in the previous iteration (if there was one).
+AlternativeArray previous_taken
+
+# The choice set in the previous iteration (if there was one).
+AlternativeArray previous_choice_set
+
+---
+# Response
+# An new set of alternatives to choose from
+AlternativeArray choice_set
+
+---
+# Feedback

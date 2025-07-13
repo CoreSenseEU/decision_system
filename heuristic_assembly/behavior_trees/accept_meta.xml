@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <!-- Accept Meta -->
+  <BehaviorTree ID="MakeSureChoiceAccepted_Template">
+    <!-- Check if already accepted -->
+    <Sequence>
+      <RunOnce>
+        <Script code="accepted := false" />
+      </RunOnce>
+      <Sequence _successIf="accepted">
+        <SubTree ID="MakeSureChoiceTaken_Template" _autoremap="true" />
+        <SubTree ID="MakeSureAlternativesEvaluated_Template" _autoremap="true" />
+        <Accept choice="{choice}"
+                evaluation="{evaluation}"
+                accepted="{accepted}"
+                action_name=""/>
+      </Sequence>
+    </Sequence>
+  </BehaviorTree>
+</root>

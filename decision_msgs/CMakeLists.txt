@@ -24,9 +24,19 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/PrologBinding.msg"
   "msg/WeakOrdering.msg"
 
-  "srv/AssessAlternatives.srv"
+  "srv/AssessAlternatives.srv" # Used by cues
   "srv/CreatePose.srv"
   "srv/PrologQuery.srv"
+
+  "action/Accept.action"
+  "action/Aggregate.action"
+  "action/AssembleDecisionHeuristic.action"
+  "action/AdaptDecisionComponents.action"
+  "action/Assess.action"
+  "action/Order.action"
+  "action/Take.action"
+  "action/UpdateAlternatives.action"
+  "action/UpdateCues.action"
 
   DEPENDENCIES geometry_msgs
 )

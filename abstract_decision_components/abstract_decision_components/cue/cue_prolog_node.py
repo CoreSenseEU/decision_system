@@ -30,7 +30,6 @@ class CuePrologNode(Node):
 
     :param query: A prolog query to submit to the database where the variable `_A`
         is used for input alternatives and `V` is used for the desired value.
-    :param knowledge_base: A path to the prolog knowledge base.
     """
     def __init__(self):
         super().__init__('cue_prolog_service')
@@ -80,7 +79,7 @@ class CuePrologNode(Node):
         request.maxresult = 1
 
         response = self.call_service(self.prolog_client_, request)
-        if not response.success or len(response.answers) == 0:
+        if response is None or not response.success or len(response.answers) == 0:
             raise ValueError(f'Failed to answer query: "{request.query.clause}"')
 
         for answer in response.answers:

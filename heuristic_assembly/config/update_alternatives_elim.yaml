@@ -1,0 +1,4 @@
+update_alternatives_prolog_action_server:
+  ros__parameters:
+    keep_policy: 'taken'
+    capacity: 0

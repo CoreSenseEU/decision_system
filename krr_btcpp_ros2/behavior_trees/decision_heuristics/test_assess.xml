@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="TestAssess">
+    <Sequence>
+      <Assess alternatives="blue;red;#808006"
+              cues="r;g"
+              assessments="{assessments}"
+              action_name="Assess"/>
+    </Sequence>
+  </BehaviorTree>
+</root>

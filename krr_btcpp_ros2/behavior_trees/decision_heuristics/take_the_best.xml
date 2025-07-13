@@ -1,0 +1,80 @@
+<root BTCPP_format="4">
+
+  <BehaviorTree ID="DecideOnGap_cues_ttb_gap">
+    <SubTree ID="MakeSureGapClosed_cues_ttb_gap" _autoremap="true" gap="{@payload}" />
+  </BehaviorTree>
+
+  <BehaviorTree ID="MakeSureChoiceAccepted_cues_ttb_gap">
+    <Sequence>
+      <RunOnce>
+        <Script code="accepted := false" />
+      </RunOnce>
+      <Sequence _successIf="accepted">
+        <SubTree ID="MakeSureChoiceTaken_cues_ttb_gap" _autoremap="true" />
+        <!-- <SubTree ID="MakeSureAlternativesEvaluated_cues_ttb_gap" _autoremap="true" /> -->
+        <Accept choice="{choice}" evaluation="{evaluation}" accepted="{accepted}" action_name="/accept_satisficing_action_server/Accept" />
+      </Sequence>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="MakeSureChoiceTaken_cues_ttb_gap">
+    <Sequence>
+      <SubTree ID="MakeSureAlternativesOrdered_cues_ttb_gap" _autoremap="true" />
+      <Take ordering="{ordering}" choice="{choice}" action_name="/take_best_action_server/Take" />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="MakeSureAlternativesOrdered_cues_ttb_gap">
+    <Sequence>
+      <SubTree ID="MakeSureAlternativesEvaluated_cues_ttb_gap" _autoremap="true" />
+      <Order evaluation="{evaluation}" ordering="{ordering}" action_name="/order_lexicographical_action_server/Order" />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="MakeSureAlternativesEvaluated_cues_ttb_gap">
+    <Sequence>
+      <SubTree ID="MakeSureAlternativesAssessed_cues_ttb_gap" _autoremap="true" />
+      <Aggregate assessments="{assessments}" evaluation="{evaluation}" action_name="/aggregate_preferences_action_server/Aggregate" />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="MakeSureAlternativesAssessed_cues_ttb_gap">
+    <Sequence>
+      <SubTree ID="MakeSureAlternativesUpdated_cues_ttb_gap" _autoremap="true" previous_choice="{choice}" />
+      <SubTree ID="MakeSureCuesUpdated_cues_ttb_gap" _autoremap="true" previous_choice="{cues}" />
+      <Assess alternatives="{choice_set}" cues="{cues}" assessments="{assessments}" action_name="/assess_action_server/Assess" />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="MakeSureAlternativesUpdated_cues_ttb_gap">
+    <Sequence>
+      <UpdateAlternatives gap="{gap}" previous_choice="{previous_choice}" choice_set="{choice_set}" action_name="/update_alternatives_prolog_action_server/UpdateAlternatives" />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="MakeSureCuesUpdated_cues_ttb_gap">
+    <Sequence>
+      <UpdateCues gap="{gap}" cues="{cues}" action_name="/update_cues_prolog_action_server/UpdateCues" />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="MakeSureGapClosed_cues_ttb_gap">
+    <Sequence>
+      <Fallback>
+        <PrologFetchFromGap gap="{gap}" query="closed_with('_G', _T)" target="{choice}" maxresult="-1" service_name="{@prolog_query}" />
+        <Sequence>
+          <Script code="aborted := false" />
+          <RetryUntilSuccessful _while="!aborted" num_attempts="2">
+            <Sequence> 
+              <!-- <SubTree ID="MakeSureChoiceTaken_cues_ttb_gap" _autoremap="true" /> -->
+              <SubTree ID="MakeSureChoiceAccepted_cues_ttb_gap" _autoremap="true" />
+            </Sequence>
+          </RetryUntilSuccessful>
+          <AlwaysSuccess _failureIf="aborted | !accepted" />
+        </Sequence>
+      </Fallback>
+      <CloseGap gap="{gap}" choice="{choice}" topic_name="{@prolog_assert}" />
+    </Sequence>
+  </BehaviorTree>
+
+</root>

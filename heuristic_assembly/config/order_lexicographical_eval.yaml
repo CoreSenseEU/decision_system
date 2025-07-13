@@ -1,0 +1,5 @@
+# TODO: rename this to indicate that the default uses the ording from evaluations
+
+order_lexicographical_action_server:
+  ros__parameters:
+    axis_ordering: ['']

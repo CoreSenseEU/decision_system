@@ -1,0 +1,4 @@
+order_dominating_action_server:
+  ros__parameters:
+    strict: False
+    policy: majority_rule
