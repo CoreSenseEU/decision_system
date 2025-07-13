@@ -95,7 +95,8 @@ class AdaptDecisionComponentsActionServer(Node):
             return AdaptDecisionComponents.Result(success=False, reason=reason)
 
         parameter_value = response.values[0]
-        parameter_value.string_array_value.append(heuristic_dir)
+        if heuristic_dir not in parameter_value.string_array_value:
+            parameter_value.string_array_value.append(heuristic_dir)
         parameter_value.type = ParameterType.PARAMETER_STRING_ARRAY
         parameters.append([Parameter(name='external_behavior_trees', value=parameter_value)])
 
@@ -138,20 +139,6 @@ class AdaptDecisionComponentsActionServer(Node):
         if not success:
             return False, f'Failed to set all parameters for {node_name}'
         return True, ''
-
-    def _get_executor_params(self):
-        # TODO: include a prolog entry for `engine(bt_executor), has_ros_node(???, bt_executor)`
-        bt_executor = self.get_parameter('bt_executor').value
-        heuristic_dir = os.path.join(self.get_parameter('working_directory').value, 'heuristics')
-
-        client = self.create_client(GetParameters, bt_executor + "/get_parameters")
-        request = GetParameters.Request(names=['behavior_trees'])
-        response = self.call_service(client, request)
-        if response is None or len(response.values) != 1:
-            raise RuntimeError(f"Failed to get 'behavior_trees' parameter for {bt_executor}")
-        
-        params = [Parameter('behavior_trees', response.values[0].string_array_value.append(heuristic_dir))]
-        return bt_executor, params 
 
     def call_service(self, cli, request):
         """
