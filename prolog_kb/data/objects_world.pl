@@ -1,4 +1,5 @@
 %%% World model for `objects` decision
+:- consult("shared_world.pl").
 
 % Assume none of these are tidied objects
 object(object_1).
