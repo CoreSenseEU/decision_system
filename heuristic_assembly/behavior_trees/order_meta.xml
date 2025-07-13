@@ -2,26 +2,35 @@
 <root BTCPP_format="4">
   <!-- Order Meta -->
   <BehaviorTree ID="MakeSureAlternativesOrdered">
-    <!-- <Fallback> -->
-      <!-- An ordering could come from the KB, so get (the first) one if it exists -->
-      <!-- Cut this for scope, now assuming this always needs to be updated
-      <PrologFetchFromGap gap="{gap}" 
-                          query="ordering(O), has_static_ordering(_G, O), has_ros_message(O, _T)" 
-                          target="{ordering}"
-                          maxresult="1"
-                          service_name="{@prolog_query}" />
-      -->
-      <!-- 
-      This may be necessary instead if BT.CPP does not do automatic type conversion from strings
-      <PrologFetch gap="{gap}" source="gap(G), ordering(O), has_static_ordering(G, O), ordering_data(O, _T)" target="{_fetched_ordering}"/>
-      <ConvertROSMessageFromYAML yaml="{_fetched_ordering}" ros_message_type="decision_msgs/msg/WeakOrdering" target="{ordering}" /> 
-      -->
     <Sequence>
-      <SubTree ID="MakeSureAlternativesEvaluated" _autoremap="true" />
-      <Order evaluation="{evaluation}"
-             ordering="{ordering}"
-             action_name=""/>
+      <RunOnce>
+        <Script code="_last_updated_iteration := -1" />
+      </RunOnce>
+
+      <Sequence _successIf="_last_updated_iteration > iteration">
+        <!-- <Fallback> -->
+          <!-- An ordering could come from the KB, so get (the first) one if it exists -->
+          <!-- Cut this for scope, now assuming this always needs to be updated
+          <PrologFetchFromGap gap="{gap}" 
+                              query="ordering(O), has_static_ordering(_G, O), has_ros_message(O, _T)" 
+                              target="{ordering}"
+                              maxresult="1"
+                              service_name="{@prolog_query}" />
+          -->
+          <!-- 
+          This may be necessary instead if BT.CPP does not do automatic type conversion from strings
+          <PrologFetch gap="{gap}" source="gap(G), ordering(O), has_static_ordering(G, O), ordering_data(O, _T)" target="{_fetched_ordering}"/>
+          <ConvertROSMessageFromYAML yaml="{_fetched_ordering}" ros_message_type="decision_msgs/msg/WeakOrdering" target="{ordering}" /> 
+          -->
+        <Sequence>
+          <SubTree ID="MakeSureAlternativesEvaluated" _autoremap="true" />
+          <Order evaluation="{evaluation}"
+                 ordering="{ordering}"
+                 action_name=""/>
+        </Sequence>
+        <!-- </Fallback> -->
+        <Script code="_last_updated_iteration = iteration" />
+      </Sequence>
     </Sequence>
-    <!-- </Fallback> -->
   </BehaviorTree>
 </root>

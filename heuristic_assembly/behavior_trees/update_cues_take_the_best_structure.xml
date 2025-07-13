@@ -5,36 +5,23 @@
   <!-- Update Cues Structure -->
   <BehaviorTree ID="MakeSureCuesUpdated">
     <Sequence>
-      <!-- Automatically defining a gap for each decision is out of scope for now. 
-          This creates a ttb clone for the specific alternatives at hand.
-      -->
-      <PrologFetchFromGap gap="{gap}" 
-                          query="create_cue_gap_from(_T, '_G')" 
-                          target="{_cues_gap}" 
-                          maxresult="1"
-                          service_name="{@prolog_query}" />
+      <RunOnce>
+        <Script code="_last_updated_iteration := -1" />
+      </RunOnce>
 
-      <!-- Indicate that the cues to be decided upon relate to alternatives from the 
-           {gap} to be solved 
-
-           This is just a mock for example.
-      -->
-      <!-- <PrologAssertWithGap gap="{gap}"  -->
-      <!--                      assertion="mock_associated_with(cues_ttb_gap, '_G')" -->
-      <!--                      service_name="{@prolog_assert}" /> -->
-
-      <!-- <SubTree ID="MakeAdaptiveDecision" choice="{_working_set}" gap="{_cues_gap}" /> -->
-      <SaySomething message="{_cues_gap}" />
-      <SaySomething message="Before Adaptive Decision on Cues" />
-      <SubTree ID="MakeAdaptiveDecision" choice="{cues}" gap="{_cues_gap}" />
-      <SaySomething message="After Adaptive Decision on Cues" />
-
-      <!-- <ParseCueArray text="{_working_set}" -->
-      <!--                cues="{cues}" -->
-      <!--                action_name="ParseCueArray" /> -->
-
-      <SubTree ID="MakeSureDecisionComponentsAdapted" _autoremap="true" />
-      <SaySomething message="After decision components updated again." />
+      <Sequence _successIf="_last_updated_iteration > iteration">
+        <!-- Automatically defining a gap for each decision is out of scope for now. 
+            This creates a ttb clone for the specific alternatives at hand.
+        -->
+        <PrologFetchFromGap gap="{gap}" 
+                            query="create_cue_gap_from(_T, '_G')" 
+                            target="{_cues_gap}" 
+                            maxresult="1"
+                            service_name="{@prolog_query}" />
+        <SubTree ID="MakeAdaptiveDecision" choice="{cues}" gap="{_cues_gap}" />
+        <SubTree ID="MakeSureDecisionComponentsAdapted" _autoremap="true" />
+        <Script code="_last_updated_iteration = iteration" />
+      </Sequence>
     </Sequence>
   </BehaviorTree>
 
