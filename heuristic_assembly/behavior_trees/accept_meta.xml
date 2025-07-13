@@ -2,7 +2,9 @@
 <root BTCPP_format="4">
   <!-- Accept Meta -->
   <BehaviorTree ID="MakeSureChoiceAccepted_Template">
-    <!-- Check if already accepted -->
+  <!-- Check if already accepted
+      WARNING: This only works if there is exactly one MakeSureChoiceAccepted subtree.
+  -->
     <Sequence>
       <RunOnce>
         <Script code="accepted := false" />

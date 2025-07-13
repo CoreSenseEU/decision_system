@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="TestObjectsGap">
+    <Sequence>
+      <SubTree ID="MakeAdaptiveDecision" choice="{choice}" gap="objects_gap" />
+      <SaySomething message="{choice}" />
+      <Script code="@return_message = choice" />
+    </Sequence>
+  </BehaviorTree>
+</root>

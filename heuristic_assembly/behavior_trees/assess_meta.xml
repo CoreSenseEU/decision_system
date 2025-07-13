@@ -2,20 +2,14 @@
 <root BTCPP_format="4">
   <!-- Assess Meta -->
   <BehaviorTree ID="MakeSureAlternativesAssessed_Template">
-    <Sequence>
-      <RunOnce>
-        <Script code="_last_updated_iteration := -1" />
-      </RunOnce>
-
-      <Sequence _successIf="_last_updated_iteration > iteration">
-        <SubTree ID="MakeSureAlternativesUpdated_Template" _autoremap="true" previous_choice="{choice}"/>
-        <SubTree ID="MakeSureCuesUpdated_Template" _autoremap="true" previous_choice="{cues}"/>
-        <Assess alternatives="{choice_set}"
-                cues="{cues}"
-                assessments="{assessments}"
-                action_name="" />
-        <Script code="_last_updated_iteration = iteration" />
-      </Sequence>
+    <Sequence _successIf="assessment_matrix_last_updated_iteration >= iteration">
+      <SubTree ID="MakeSureAlternativesUpdated_Template" _autoremap="true" previous_choice="{choice}"/>
+      <SubTree ID="MakeSureCuesUpdated_Template" _autoremap="true" previous_choice="{cues}"/>
+      <Assess alternatives="{choice_set}"
+              cues="{cues}"
+              assessments="{assessments}"
+              action_name="" />
+      <Script code="assessment_matrix_last_updated_iteration = iteration" />
     </Sequence>
   </BehaviorTree>
 </root>

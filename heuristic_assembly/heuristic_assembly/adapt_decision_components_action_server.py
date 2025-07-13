@@ -83,22 +83,23 @@ class AdaptDecisionComponentsActionServer(Node):
 
         # Add bt_execuor so that the behavior tree can be added
         # TODO: include a prolog entry for `engine(bt_executor), has_ros_node(???, bt_executor)`
-        nodes.append(bt_executor)
         heuristic_dir = os.path.join(self.get_parameter('working_directory').value, 'heuristics')
-        client = self.create_client(GetParameters, bt_executor + "/get_parameters")
-        request = GetParameters.Request(names=['external_behavior_trees'])
-        response = self.call_service(client, request)
-        if response is None or len(response.values) != 1:
-            reason = f"Failed to get 'external_behavior_trees' parameter for {bt_executor}"
-            self.get_logger().error(reason)
-            goal_handle.abort()
-            return AdaptDecisionComponents.Result(success=False, reason=reason)
+        if os.path.exists(heuristic_dir): # if it doesn't exist there were no new heuristics that need to be loaded
+            nodes.append(bt_executor)
+            client = self.create_client(GetParameters, bt_executor + "/get_parameters")
+            request = GetParameters.Request(names=['external_behavior_trees'])
+            response = self.call_service(client, request)
+            if response is None or len(response.values) != 1:
+                reason = f"Failed to get 'external_behavior_trees' parameter for {bt_executor}"
+                self.get_logger().error(reason)
+                goal_handle.abort()
+                return AdaptDecisionComponents.Result(success=False, reason=reason)
 
-        parameter_value = response.values[0]
-        if heuristic_dir not in parameter_value.string_array_value:
-            parameter_value.string_array_value.append(heuristic_dir)
-        parameter_value.type = ParameterType.PARAMETER_STRING_ARRAY
-        parameters.append([Parameter(name='external_behavior_trees', value=parameter_value)])
+            parameter_value = response.values[0]
+            if heuristic_dir not in parameter_value.string_array_value:
+                parameter_value.string_array_value.append(heuristic_dir)
+            parameter_value.type = ParameterType.PARAMETER_STRING_ARRAY
+            parameters.append([Parameter(name='external_behavior_trees', value=parameter_value)])
 
         # TODO: switch to a parallel model instead of series?
         # Right now assume that the services return quickly so it's not too much of a difference
