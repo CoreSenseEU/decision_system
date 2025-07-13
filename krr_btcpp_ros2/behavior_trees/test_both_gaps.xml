@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="TestBoth">
+    <Sequence>
+      <SubTree ID="GetRoom" choice="{room}"/>
+      <SubTree ID="GetObjects" choice="{objects}"/>
+
+      <Script code="message := 'Im going to explore the room: ' + room + ' and look at these objects: ' + objects" />
+      <SaySomething message="{message}" />
+
+      <Script code="@return_message = message" />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="GetRoom">
+    <Sequence>
+      <SubTree ID="MakeAdaptiveDecision" choice="{choice}" gap="" />
+      <SaySomething message="{choice}" />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="GetObjects">
+    <Sequence>
+      <SubTree ID="MakeAdaptiveDecision" choice="{choice}" gap="objects_gap" />
+      <SaySomething message="{choice}" />
+    </Sequence>
+  </BehaviorTree>
+</root>
