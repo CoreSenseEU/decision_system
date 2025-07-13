@@ -15,6 +15,14 @@
           <Script code="aborted := false" />
           <Script code="iteration := 0" />
 
+          <!-- TODO: Move these checks to the KB instead -->
+          <Script code="choice_last_updated_iteration := -1" />
+          <Script code="ordering_last_updated_iteration := -1" />
+          <Script code="evaluation_last_updated_iteration := -1" />
+          <Script code="assessment_matrix_last_updated_iteration := -1" />
+          <Script code="choice_set_last_updated_iteration := -1" />
+          <Script code="cues_last_updated_iteration := -1" />
+
           <!-- TODO: adjust make num_attempts a parameter -->
           <RetryUntilSuccessful _while="!aborted" num_attempts="10">
             <!-- Make sure done -->
