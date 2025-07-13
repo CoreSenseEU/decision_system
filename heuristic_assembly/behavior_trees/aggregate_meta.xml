@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
   <!-- Aggregate Meta -->
-  <BehaviorTree ID="MakeSureAlternativesEvaluated">
+  <BehaviorTree ID="MakeSureAlternativesEvaluated_Template">
     <Sequence>
       <RunOnce>
         <Script code="_last_updated_iteration := -1" />
       </RunOnce>
 
       <Sequence _successIf="_last_updated_iteration > iteration">
-        <SubTree ID="MakeSureAlternativesAssessed" _autoremap="true" />
+        <SubTree ID="MakeSureAlternativesAssessed_Template" _autoremap="true" />
         <Aggregate assessments="{assessments}"
                    evaluation="{evaluation}"
                    action_name=""/>

@@ -2,7 +2,7 @@
 <root BTCPP_format="4">
   <!-- Update Cues Structure 
       NOTE: This could be a more complex behavior tree if deciding on cues -->
-  <BehaviorTree ID="MakeSureCuesUpdated">
+  <BehaviorTree ID="MakeSureCuesUpdated_Template">
     <Sequence>
       <!-- <RunOnce> -->
       <!--   <Script code="_last_updated_iteration := -1" /> -->

@@ -4,7 +4,7 @@
       NOTE: This could be a more complex behavior tree depending on the heuristic
       or memory implementations.
   -->
-  <BehaviorTree ID="MakeSureAlternativesUpdated">
+  <BehaviorTree ID="MakeSureAlternativesUpdated_Template">
     <Sequence>
       <RunOnce>
         <Script code="_last_updated_iteration := -1" />

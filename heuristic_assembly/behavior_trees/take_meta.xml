@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
   <!-- Take Meta -->
-  <BehaviorTree ID="MakeSureChoiceTaken">
+  <BehaviorTree ID="MakeSureChoiceTaken_Template">
     <Sequence>
       <RunOnce>
         <Script code="_last_updated_iteration := -1" />
       </RunOnce>
 
       <Sequence _successIf="_last_updated_iteration > iteration">
-        <SubTree ID="MakeSureAlternativesOrdered" _autoremap="true" />
+        <SubTree ID="MakeSureAlternativesOrdered_Template" _autoremap="true" />
         <Take ordering="{ordering}"
               choice="{choice}"
               action_name=""/>

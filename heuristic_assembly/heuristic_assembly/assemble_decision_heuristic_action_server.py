@@ -159,14 +159,14 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
             for node in behavior_tree.iter():
                 if node.get('action_name') == '':
                     node.set('action_name', ros_node + '/' + node.tag)
-            self._append_suffix_to_subtrees(gap, behavior_tree)
+            self._rename_template_subtrees(gap, behavior_tree)
             self._append_all_bts(root, behavior_tree)
 
         decide_structure = os.path.join(get_package_share_directory('heuristic_assembly'), 
                                         'behavior_trees/decide_structure.xml')
         decide_tree = ET.parse(decide_structure)
         # TODO: remove this hack
-        self._append_suffix_to_subtrees(gap, decide_tree)
+        self._rename_template_subtrees(gap, decide_tree)
         self._append_all_bts(root, decide_tree)
 
         writer = ET.ElementTree(root)
@@ -186,14 +186,13 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
         # Also add includes (assume they are all ROS flavored)
         parent.extend(tree.iter('include'))
 
-    def _append_suffix_to_subtrees(self, gap, tree):
-        # TODO: make renaming more reusable. Right now it just tacks the gap onto everything not in the whitelist
-        whitelist = ['MakeAdaptiveDecision']
-
+    def _rename_template_subtrees(self, gap, tree):
+        # TODO: maybe mark templates as unique or not, then only rename the ones
+        #       that need to be unique?
         for node in tree.iter():
             node_id = node.get('ID')
-            if node_id is not None and node_id not in whitelist:
-                node.set('ID', node_id + '_' + gap)
+            if node_id is not None and node_id.endswith('_Template'):
+                node.set('ID', node_id.removesuffix('Template') + gap)
 
     def _get_ros_node(self, engine):
         answers = self.query(f'engine({engine}), has_ros_node({engine}, N)', maxresult=1) 

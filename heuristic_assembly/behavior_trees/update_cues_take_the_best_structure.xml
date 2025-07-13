@@ -3,7 +3,7 @@
   <include ros_pkg="krr_btcpp_ros2" path="behavior_trees/make_adaptive_decision_structure.xml" />
 
   <!-- Update Cues Structure -->
-  <BehaviorTree ID="MakeSureCuesUpdated">
+  <BehaviorTree ID="MakeSureCuesUpdated_Template">
     <Sequence>
       <RunOnce>
         <Script code="_last_updated_iteration := -1" />

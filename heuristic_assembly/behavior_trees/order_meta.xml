@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
   <!-- Order Meta -->
-  <BehaviorTree ID="MakeSureAlternativesOrdered">
+  <BehaviorTree ID="MakeSureAlternativesOrdered_Template">
     <Sequence>
       <RunOnce>
         <Script code="_last_updated_iteration := -1" />
@@ -23,7 +23,7 @@
           <ConvertROSMessageFromYAML yaml="{_fetched_ordering}" ros_message_type="decision_msgs/msg/WeakOrdering" target="{ordering}" /> 
           -->
         <Sequence>
-          <SubTree ID="MakeSureAlternativesEvaluated" _autoremap="true" />
+          <SubTree ID="MakeSureAlternativesEvaluated_Template" _autoremap="true" />
           <Order evaluation="{evaluation}"
                  ordering="{ordering}"
                  action_name=""/>
