@@ -65,6 +65,11 @@
                             target="{config}" 
                             maxresult="1"
                             service_name="{@prolog_query}" />
+        <PrologFetchFromGap gap="{gap}" 
+                            query="entry_point_of(_T, '_G')" 
+                            target="{entry_point}" 
+                            maxresult="1"
+                            service_name="{@prolog_query}" />
       </Sequence>
 
       <AssembleDecisionHeuristic gap="{gap}" 

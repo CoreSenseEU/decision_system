@@ -138,7 +138,7 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
         yaml_path = os.path.join(heuristic_dir, heuristic_name + '.yaml')
         with open(yaml_path, 'w') as f:
             yaml.dump(params, f, default_flow_style=False)
-        self.assertz(f"config_of('{heuristic_name}', '{gap}')")
+        self.assertz(f"config_of('{yaml_path}', '{gap}')")
 
         self.get_logger().info(f'Successfully wrote config to: {yaml_path}')
         self.get_logger().debug(yaml.dump(params))
@@ -147,9 +147,10 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
     def write_to_xml(self, gap, pipeline, heuristic_dir, heuristic_name):
         root = ET.Element('root', attrib={'BTCPP_format' : "4"})
         main = ET.SubElement(root, 'BehaviorTree', attrib={'ID': heuristic_name})
-        main.append(ET.Element('SubTree', attrib={'ID': 'MakeSureGapClosed',
+        main.append(ET.Element('SubTree', attrib={'ID': f'MakeSureGapClosed_{gap}',
                                                   '_autoremap': 'true', 
                                                   'gap': '{@payload}'}))
+
 
         for engine in pipeline:
             meta = os.path.join(get_package_share_directory('heuristic_assembly'), self._get_meta(engine))
@@ -158,15 +159,21 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
             for node in behavior_tree.iter():
                 if node.get('action_name') == '':
                     node.set('action_name', ros_node + '/' + node.tag)
+            self._rename_template_subtrees(gap, behavior_tree)
             self._append_all_bts(root, behavior_tree)
 
-        decide_structure = os.path.join(get_package_share_directory('heuristic_assembly'), 'behavior_trees/decide_structure.xml')
-        self._append_all_bts(root, ET.parse(decide_structure))
+        decide_structure = os.path.join(get_package_share_directory('heuristic_assembly'), 
+                                        'behavior_trees/decide_structure.xml')
+        decide_tree = ET.parse(decide_structure)
+        # TODO: remove this hack
+        self._rename_template_subtrees(gap, decide_tree)
+        self._append_all_bts(root, decide_tree)
 
         writer = ET.ElementTree(root)
         xml_path = os.path.join(heuristic_dir, f'{gap}.xml')
         writer.write(xml_path)
-        self.assertz(f"heuristic_of('{heuristic_name}', '{gap}')")
+        self.assertz(f"heuristic_of('{xml_path}', '{gap}')")
+        self.assertz(f"entry_point_of('{heuristic_name}', '{gap}')")
 
         self.get_logger().info(f'Successfully wrote heuristic to: {xml_path}')
         self.get_logger().debug(ET.tostring(root))
@@ -178,6 +185,14 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
 
         # Also add includes (assume they are all ROS flavored)
         parent.extend(tree.iter('include'))
+
+    def _rename_template_subtrees(self, gap, tree):
+        # TODO: maybe mark templates as unique or not, then only rename the ones
+        #       that need to be unique?
+        for node in tree.iter():
+            node_id = node.get('ID')
+            if node_id is not None and node_id.endswith('_Template'):
+                node.set('ID', node_id.removesuffix('Template') + gap)
 
     def _get_ros_node(self, engine):
         answers = self.query(f'engine({engine}), has_ros_node({engine}, N)', maxresult=1) 

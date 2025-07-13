@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
   <!-- Decide Structure -->
-  <BehaviorTree ID="MakeSureGapClosed">
+  <BehaviorTree ID="MakeSureGapClosed_Template">
     <Sequence>
       <Fallback>
         <!-- If this gap has already been closed, get the choice from it. -->
@@ -13,12 +13,15 @@
         <Sequence>
           <!-- TODO: implement aborted -->
           <Script code="aborted := false" />
+          <Script code="iteration := 0" />
+
           <!-- TODO: adjust make num_attempts a parameter -->
           <RetryUntilSuccessful _while="!aborted" num_attempts="10">
             <!-- Make sure done -->
             <Sequence> 
-              <SubTree ID="MakeSureChoiceTaken" _autoremap="true" />
-              <SubTree ID="MakeSureChoiceAccepted" _autoremap="true" />
+              <SubTree ID="MakeSureChoiceTaken_Template" _autoremap="true" />
+              <SubTree ID="MakeSureChoiceAccepted_Template" _autoremap="true" />
+              <Script code="iteration += 1" />
             </Sequence>
           </RetryUntilSuccessful>
           <AlwaysSuccess _failureIf="aborted | !accepted"/>
