@@ -11,7 +11,7 @@ room(kitchen).
 
 room_likely_from_habits(bedroom, 1) :-
     clean_tableware_found.
-room_likely_from_habits(bedroom, 1) :-
+room_likely_from_habits(living_room, 1) :-
     dirty_tableware_found.
 room_likely_from_habits(office, 1) :-
     \+ (dirty_tableware_found, clean_tableware_found).

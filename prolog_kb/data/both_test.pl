@@ -27,3 +27,8 @@ confidence_is_book(object_3, 0.0).
 confidence_is_book(object_4, 0.6).
 confidence_is_book(object_5, 0.6).
 confidence_is_book(object_6, 0.6).
+
+
+% Stacked to demonstrate iterative decision process
+dirty_tableware_found().
+clean_tableware_found().
