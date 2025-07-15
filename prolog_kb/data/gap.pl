@@ -53,13 +53,23 @@ gap() :- fail.
 :- dynamic alternative_of/2.
 :- multifile alternative_of/2.
 
-% A condition to be implemented for each specific gap on the set of possible
-% cues which could be used to evaluate the alternatives of the gap.
+% A condition to be implemented for each specific gap on the set of relevant
+% cues which could be used to evaluate the alternatives of the gap (in the current iteration).
 % Assume every cue is some ROS service.
+%
+% TODO: rename this to something indicating relevance instead. Maybe relevant_for/2 ?
 %
 % cue_of(?RosService, ?Gap)
 :- dynamic cue_of/2.
 :- multifile cue_of/2.
+
+% A condition to be implemented for each specific gap on the set of possible
+% cues which could be used to evaluate the alternatives of the gap.
+% Assume every cue is some ROS service.
+%
+% available_for(?RosService, ?Gap)
+:- dynamic available_for/2.
+:- multifile available_for/2.
 
 % When a decision is made, the gap is closed with all members of the chosen set of alternatives.
 %
@@ -87,6 +97,7 @@ duplicate_gap(Gnew, Gold) :-
     assertz((gap(Gnew))), 
     assertz((alternative_of(A, Gnew) :- alternative_of(A, Gold))),
     assertz((cue_of(C, Gnew) :- cue_of(C, Gold))),
+    assertz((available_for(C, Gnew) :- available_for(C, Gold))),
     assertz((heuristic_of(Xml_file, Gnew) :- heuristic_of(Xml_file, Gold))),
     assertz((entry_point_of(BT, Gnew) :- entry_point_of(BT, Gold))),
     assertz((config_of(Yaml_file, Gnew) :- config_of(Yaml_file, Gold))).
@@ -98,11 +109,11 @@ create_cue_gap_from(Gnew, Gold) :-
     gap(Gold), 
     uuid(ID), sub_atom(ID, 0, 8, _, Suffix), atom_concat(cues_gap_, Suffix, Gnew),
     assertz((gap(Gnew))), 
-    assertz((alternative_of(A, Gnew) :- cue_of(A, Gold), \+ fetched_for(A, Gold))),
+    assertz((alternative_of(A, Gnew) :- available_for(A, Gold), \+ fetched_for(A, Gold))),
     % assertz((alternative_of(A, Gnew) :- cue_of(A, Gold))),
 
     % For now, always use Take-The-Best
-    assertz((fetched_for(A, Gold) :- closed_with(Gnew, A))), % This prevents cues that were previously tried from being used again.
+    assertz((cue_of(A, Gold) :- closed_with(Gnew, A))), % This prevents cues that were previously tried from being used again.
     assertz((cue_of('/validity', Gnew))),
     assertz((heuristic_of(Path, Gnew) :- 
               ament_package_share_prefix(Dir), 

@@ -4,7 +4,7 @@
 
   <!-- Update Cues Structure -->
   <BehaviorTree ID="MakeSureCuesUpdated_Template">
-    <Sequence _successIf="cues_last_updated_iteration > iteration">
+    <Sequence _successIf="cues_last_updated_iteration >= iteration">
       <!-- Automatically defining a gap for each decision is out of scope for now. 
           This creates a ttb clone for the specific alternatives at hand.
       -->
@@ -14,6 +14,9 @@
                           maxresult="1"
                           service_name="{@prolog_query}" />
       <SubTree ID="MakeAdaptiveDecision" choice="{cues}" gap="{_cues_gap}" />
+      <UpdateCues gap="{gap}"
+                  cues="{cues}"
+                  action_name="" />
       <SubTree ID="MakeSureDecisionComponentsAdapted" _autoremap="true" />
       <Script code="cues_last_updated_iteration = iteration" />
     </Sequence>

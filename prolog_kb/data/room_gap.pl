@@ -8,10 +8,10 @@ alternative_of(A, room_gap) :-
     room(A).
 
 %% cues
-cue_of('/visited', room_gap).
-cue_of('/habits', room_gap).
-cue_of('/doorway_status', room_gap).
-cue_of('/distance', room_gap).
+available_for('/visited', room_gap).
+available_for('/habits', room_gap).
+available_for('/doorway_status', room_gap).
+available_for('/distance', room_gap).
 
 
 %%% Room Cue cues (used to decide which cue to use next in ttb)

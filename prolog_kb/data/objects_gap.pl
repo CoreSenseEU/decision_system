@@ -8,10 +8,13 @@ alternative_of(A, objects_gap) :-
     object(A).
 
 %% cues
-cue_of('/visited', objects_gap).
-cue_of('/distance', objects_gap).
-cue_of('/is_book', objects_gap).
-cue_of('/in_doorway', objects_gap).
+% Assume all available cues are relevant for this heursitic...because it is not iterative.
+cue_of(C, objects_gap) :- available_for(C, objects_gap).
+
+available_for('/visited', objects_gap).
+available_for('/distance', objects_gap).
+available_for('/is_book', objects_gap).
+available_for('/in_doorway', objects_gap).
 
 %% runtime
 heuristic_of(Path, objects_gap) :- 
