@@ -12,7 +12,11 @@
   ros__parameters:
     axis_ordering: 
       - '/validity'
+/update_cues_prolog_action_server:
+  ros__parameters:
+    iter_add: 0
+    reuse: false
 /update_alternatives_prolog_action_server:
   ros__parameters:
     capacity: 0
-    keep_policy: all
+    keep_policy: none
