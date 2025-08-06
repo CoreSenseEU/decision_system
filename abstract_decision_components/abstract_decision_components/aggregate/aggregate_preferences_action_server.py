@@ -62,6 +62,7 @@ class AggregatePreferencesActionServer(Node):
         self.pub_.publish(evaluation)
 
         goal_handle.succeed()
+        self.get_logger().info(f'Succeeded with evaluation {evaluation}')
         return Aggregate.Result(axes=evaluation.axes,
                                 scores=evaluation.scores)
 

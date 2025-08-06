@@ -45,7 +45,7 @@ class EliminateWorstActionServer(Node):
 
     def take_cb(self, goal_handle):
         ordering = goal_handle.request.ordering
-        self.get_logger().info(f'Ordering {ordering.alternatives} with policy: eliminate_worst')
+        self.get_logger().info(f'Taking from {ordering.alternatives} with policy: eliminate_worst')
 
         n = self.get_parameter('n').value
         try:

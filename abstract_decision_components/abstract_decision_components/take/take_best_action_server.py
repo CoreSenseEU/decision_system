@@ -49,7 +49,7 @@ class TakeBestActionServer(Node):
 
     def take_cb(self, goal_handle):
         ordering = goal_handle.request.ordering
-        self.get_logger().info(f'Ordering {ordering.alternatives} with policy: take_best')
+        self.get_logger().info(f'Taking from {ordering.alternatives} with policy: take_best')
 
         n = self.get_parameter('n').value
         try:

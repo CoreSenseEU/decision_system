@@ -121,6 +121,7 @@ class AssessActionServer(Node):
         self.pub_.publish(assessments)
 
         goal_handle.succeed()
+        self.get_logger().info(f'Succeeded with assessment matrix {assessments}')
         return Assess.Result(scores=assessments.scores)
 
     def _update_cues(self, cues):

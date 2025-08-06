@@ -64,6 +64,7 @@ class CuePrologNode(Node):
             return result
 
         result.preferences = preferences
+        self.get_logger().info(f'Suceeded with preferences {preferences}')
         return result
 
     def assess_one(self, alternative):
