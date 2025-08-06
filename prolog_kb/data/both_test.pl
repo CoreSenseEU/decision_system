@@ -14,7 +14,7 @@
 :- consult("decision-engines.pl").
 
 
-% Stacked to demonstrate interesting results from dawe's rule and condorcet
+% Stacked to demonstrate interesting results from dawe's rule and copeland method
 in_doorway(object_1).
 in_doorway(object_2).
 
