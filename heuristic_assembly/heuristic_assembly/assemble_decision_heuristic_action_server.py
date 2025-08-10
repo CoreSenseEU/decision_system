@@ -31,11 +31,11 @@ TEST_OUTPUT_FILE = os.path.expanduser('~/thesis/src/out.txt')
 GAP_FILE = os.path.expanduser('~/thesis/src/decision-logic/tff/tests/test-decision-questions.tff')
 
 VAMPIRE_ARGS = [os.path.expanduser('~/thesis/vampire/build-master/vampire'),
-                '--input_syntax', 'tptp', '--proof', 'off',
-                GAP_FILE,
-                '-sa', 'lrs', '-s', '1010', '-nwc', '10.0'] # was -sa discount...
+                '--input_syntax', 'tptp', '--proof', 'off']
 
-VAMPIRE_SHELL = ' '.join(VAMPIRE_ARGS)
+VAMPIRE_ASSEMBLY_ARGS = ['-sa', 'lrs', '-s', '1010', '-nwc', '10.0'] # was -sa discount...
+#VAMPIRE_VALIDATION_ARGS = ['-sa', 'lrs', '-s', '1010', '-nwc', '10.0', '-awr', '1:4']
+VAMPIRE_VALIDATION_ARGS = []
 
 
 class AssembleDecisionHeuristicActionServer(PrologInterface):
@@ -80,15 +80,11 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
                                                 entry_point=heuristic_name)
 
     def assemble_with_gap(self, gap):
-        # TODO: update this when the understanding core is in better condition
-        # file_path = TEST_OUTPUT_FILE
-        # self.get_logger().warn(f'Using mock understanding output from {file_path}')
-        #
-        # with open(file_path, 'r') as f:
-        #     lines = f.readlines()
-        #
-        lines = self._assemble_vampire()
+        # Collect any requirements on the shape of the decision
+        requirements = self._get_gap_requirements(gap)
 
+        # Collect possible heuristics with the understanding core
+        lines = self._assemble_vampire()
         answer = ''
         for line in lines:
             if 'SZS answers Tuple' in line:
@@ -98,17 +94,59 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
             # raise RuntimeError(f'No answer detected in the Vampire output file {file_path}')
             raise RuntimeError('No answer detected in the Vampire output')
 
-        first_heuristic = answer.split('|')[0].split('exert(') #)
-        engines = [part[:part.find('_engine')] for part in first_heuristic if '_engine' in part]
-        return engines
+        # Select a heuristic that meets the decision requirements
+        possible_heuristics = answer.split('|')
+        i = 0
+        while i < (len(possible_heuristics) - 1):
+            heuristic = possible_heuristics[i].split('exert(') #) <-- for editor to find closing brace
+            engines = [part[:part.find('_engine')] for part in heuristic if '_engine' in part]
+            if self._validate_vampire(engines, requirements):
+                return engines
+
+        raise RuntimeError('No valid heuristics created by understanding core')
 
     def _assemble_vampire(self):
         self.get_logger().info('Running Understanding system')
-        output = subprocess.run(VAMPIRE_SHELL, shell=True, capture_output=True)
+        VAMPIRE_SHELL = ' '.join(VAMPIRE_ARGS + VAMPIRE_ASSEMBLY_ARGS)
+        command = VAMPIRE_SHELL + ' ' + GAP_FILE
+        self.get_logger().info('Executing command: ' + command)
+        output = subprocess.run(command, shell=True, capture_output=True)
 
         lines = [line.decode() for line in output.stdout.splitlines()]
-        self.get_logger().info('Vampire output:\n' + '\n'.join(lines))
+        self.get_logger().info('Vampire assembly output:\n' + '\n'.join(lines))
         return lines
+
+    def _validate_vampire(self, engines, requirements):
+        self.get_logger().info('Validating heuristic')
+
+        # write validation conjecture to file
+        tff_path = os.path.join(self.get_parameter('working_directory').value, 'validate_heuristic.tff')
+        with open(tff_path, 'w') as f:
+            f.write("include('decision-logic/tff/model/decision-engines.tff').\n")
+            f.write("include('decision-logic/tff/model/decision-properties-fixed.tff').\n")
+            f.write('tff(question_decl, conjecture,\n')#) <-- for editor to find closing brace
+            f.write('  ?[M : modelet')#] <-- for editor to find closing brace
+            for i in range(len(engines)):
+                f.write(f', MS{i} : modelet_set')
+            f.write(']:\n  (\n    (\n') #)) <-- for editor to find closing brace
+            for i in range(len(engines) - 1):
+                f.write(f'      s(exert({engines[-(1 + i)]}_engine, MS{i}), MS{i}) = MS{i + 1}\n      &\n')
+            f.write(f'      exert({engines[0]}_engine, MS{len(engines) - 1}) = M\n')
+            f.write('    )\n    =>\n    (\n')
+            f.write('      modelet_models_concept(M, decision)\n')
+            for requirement in requirements:
+                f.write(f'      &\n      modelet_has_property(M, {requirement}_prop)\n')
+            f.write('    )\n  )\n).')
+
+        VAMPIRE_SHELL = ' '.join(VAMPIRE_ARGS + VAMPIRE_VALIDATION_ARGS)
+        command = VAMPIRE_SHELL + ' ' + tff_path
+        self.get_logger().info('Executing command: ' + command)
+        output = subprocess.run(command, shell=True, capture_output=True)
+
+        lines = [line.decode() for line in output.stdout.splitlines()]
+        self.get_logger().info('Vampire validation output:\n' + '\n'.join(lines))
+        
+        return 'Refutation'.encode() in output.stdout
 
     def write_to_yaml(self, gap, pipeline, heuristic_dir, heuristic_name):
         params = {}
@@ -193,6 +231,11 @@ class AssembleDecisionHeuristicActionServer(PrologInterface):
             node_id = node.get('ID')
             if node_id is not None and node_id.endswith('_Template'):
                 node.set('ID', node_id.removesuffix('Template') + gap)
+
+    def _get_gap_requirements(self, gap):
+        answers = self.query(f"requirement_of(R, '{gap}')", maxresult=-1) 
+        requirements = [answer["R"][:-4] for answer in answers]
+        return requirements
 
     def _get_ros_node(self, engine):
         answers = self.query(f'engine({engine}), has_ros_node({engine}, N)', maxresult=1) 

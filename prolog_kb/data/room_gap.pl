@@ -1,5 +1,6 @@
 %%% Hand-made definitions (and predicates used as cues) for room-gap
 :- consult("gap.pl").
+:- consult("requirements.pl").
 
 gap(room_gap).
 
@@ -12,6 +13,9 @@ available_for('/visited', room_gap).
 available_for('/habits', room_gap).
 available_for('/doorway_status', room_gap).
 available_for('/distance', room_gap).
+
+%% requirements
+requirement_of(absolute_size_req, room_gap).
 
 
 %%% Room Cue cues (used to decide which cue to use next in ttb)

@@ -63,6 +63,13 @@ gap() :- fail.
 :- dynamic cue_of/2.
 :- multifile cue_of/2.
 
+% A condition to be implemented for each specific gap placing any requirements
+% on the acceptability of a choice (e.g. size, satisficing thresholds, etc.).
+%
+% alternative_of(?Alternative, ?Gap)
+:- dynamic requirement_of/2.
+:- multifile requirement_of/2.
+
 % A condition to be implemented for each specific gap on the set of possible
 % cues which could be used to evaluate the alternatives of the gap.
 % Assume every cue is some ROS service.
@@ -97,12 +104,14 @@ duplicate_gap(Gnew, Gold) :-
     assertz((gap(Gnew))), 
     assertz((alternative_of(A, Gnew) :- alternative_of(A, Gold))),
     assertz((cue_of(C, Gnew) :- cue_of(C, Gold))),
+    assertz((requirement_of(C, Gnew) :- requirement_of(C, Gold))),
     assertz((available_for(C, Gnew) :- available_for(C, Gold))),
     assertz((heuristic_of(Xml_file, Gnew) :- heuristic_of(Xml_file, Gold))),
     assertz((entry_point_of(BT, Gnew) :- entry_point_of(BT, Gold))),
     assertz((config_of(Yaml_file, Gnew) :- config_of(Yaml_file, Gold))).
 
 % Create a new gap for deciding cues based on a gap for deciding alternatives
+% TODO: does this need to take into account the requirements?
 %
 % create_cue_gap_from(--CueGap, ++AlternativeGap)
 create_cue_gap_from(Gnew, Gold) :-
