@@ -26,11 +26,9 @@ from decision_msgs.action import AssembleDecisionHeuristic
 from prolog_kb.prolog_interface import PrologInterface
 
 
-TEST_OUTPUT_FILE = os.path.expanduser('~/thesis/src/out.txt')
+GAP_FILE = os.path.join(os.environ['TPTP'], 'decision-logic/tff/tests/test-decision-questions.tff')
 
-GAP_FILE = os.path.expanduser('~/thesis/src/decision-logic/tff/tests/test-decision-questions.tff')
-
-VAMPIRE_ARGS = [os.path.expanduser('~/thesis/vampire/build-master/vampire'),
+VAMPIRE_ARGS = [os.environ['VAMPIRE'],
                 '--input_syntax', 'tptp', '--proof', 'off']
 
 VAMPIRE_ASSEMBLY_ARGS = ['-sa', 'lrs', '-s', '1010', '-nwc', '10.0'] # was -sa discount...
