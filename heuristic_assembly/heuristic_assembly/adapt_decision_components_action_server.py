@@ -21,6 +21,7 @@ from rclpy.node import Node
 from rclpy.action import ActionServer
 # from ros2param.api import call_get_parameters, call_set_parameters
 # from ros2param.api import load_parameter_file
+from ament_index_python.packages import get_package_share_directory
 
 # TODO: backport this from ROS 2 rolling?
 # from rclpy.parameter import parameter_dict_from_yaml_file
@@ -56,6 +57,8 @@ class AdaptDecisionComponentsActionServer(Node):
 
     def adapt_cb(self, goal_handle):
         params_file = goal_handle.request.params_file
+        if params_file[0] != '/':
+            params_file = os.path.join(get_package_share_directory('krr_btcpp_ros2'), params_file)
         with open(params_file, 'r') as f:
             nodes = list(yaml.safe_load(f).keys())
 

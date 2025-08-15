@@ -124,21 +124,9 @@ create_cue_gap_from(Gnew, Gold) :-
     % For now, always use Take-The-Best
     assertz((cue_of(A, Gold) :- closed_with(Gnew, A))), % This prevents cues that were previously tried from being used again.
     assertz((cue_of('/validity', Gnew))),
-    assertz((heuristic_of(Path, Gnew) :- 
-              ament_package_share_prefix(Dir), 
-              atom_concat(Dir, 'behavior_trees/decision_heuristics/take_the_best.xml', Path))),
+    assertz((heuristic_of('behavior_trees/decision_heuristics/take_the_best.xml', Gnew))),
     assertz((entry_point_of('DecideOnGap_cues_ttb_gap', Gnew))),
-    assertz((config_of(Path, Gnew) :- 
-              ament_package_share_prefix(Dir), 
-              atom_concat(Dir, 'config/decision_heuristics/take_the_best.yaml', Path))).
-
-
-% The directory of the `krr_btcpp_ros2` package, as an atom.
-% TODO: get this from ROS instead
-%
-% ament_package_share_prefix(--Directory)
-ament_package_share_prefix('/mnt/Shared/School/Thesis/krr_ws/install/krr_btcpp_ros2/share/krr_btcpp_ros2/').
-
+    assertz((config_of('config/decision_heuristics/take_the_best.yaml', Gnew))).
 
 
 

@@ -17,11 +17,7 @@ available_for('/is_book', objects_gap).
 available_for('/in_doorway', objects_gap).
 
 %% runtime
-heuristic_of(Path, objects_gap) :- 
-    ament_package_share_prefix(Dir), 
-    atom_concat(Dir, 'behavior_trees/decision_heuristics/decide_on_objects.xml', Path).
+heuristic_of('behavior_trees/decision_heuristics/decide_on_objects.xml', objects_gap). 
 entry_point_of('DecideOnGap_objects_gap', objects_gap).
-config_of(Path, objects_gap) :- 
-    ament_package_share_prefix(Dir), 
-    atom_concat(Dir, 'config/decision_heuristics/decide_on_objects.yaml', Path).
+config_of('config/decision_heuristics/decide_on_objects.yaml', objects_gap).
 
