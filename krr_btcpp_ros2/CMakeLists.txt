@@ -232,7 +232,7 @@ install(TARGETS
 install(DIRECTORY
   behavior_trees
   config
-  launch
+  # launch
   DESTINATION share/${PROJECT_NAME}
 )
 
