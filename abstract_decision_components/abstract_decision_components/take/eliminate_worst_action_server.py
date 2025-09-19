@@ -21,12 +21,15 @@ from rclpy.action import ActionServer
 from decision_msgs.msg import AlternativeArray
 from decision_msgs.action import Take
 from abstract_decision_components.take import take
-
+from abstract_decision_components.util import load_cs_description
 
 class EliminateWorstActionServer(Node):
     def __init__(self):
+        self.policy_ = 'eliminate_worst'
         super().__init__('eliminate_worst_action_server')
         self.get_logger().info('Starting TAKE action server with policy: eliminate_worst')
+
+        self.declare_parameter('coresense_engine', load_cs_description(self.policy_))
 
         self.declare_parameter('n', 0)
         self.declare_parameter('random_ties', False)

@@ -21,7 +21,7 @@ from rclpy.action import ActionServer
 from decision_msgs.msg import Evaluation
 from decision_msgs.action import Aggregate
 
-from abstract_decision_components.util import validate_matrix
+from abstract_decision_components.util import validate_matrix, load_cs_description
 
 
 class AggregatePreferencesActionServer(Node):
@@ -29,8 +29,11 @@ class AggregatePreferencesActionServer(Node):
     Simply passes preferences along as judgments.
     """
     def __init__(self):
-        super().__init__('aggregate_preferences_action_server')
+        self.policy_ = 'aggregate_preferences'
+        super().__init__(f'{self.policy_}_action_server')
         self.get_logger().info('Starting AGGREGATE action server with policy: aggregate_preferences')
+
+        self.declare_parameter('coresense_engine', load_cs_description(self.policy_))
 
         self.action_server_ = ActionServer(
                 self,

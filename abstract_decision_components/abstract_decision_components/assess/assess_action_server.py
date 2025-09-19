@@ -26,6 +26,8 @@ from decision_msgs.msg import AssessmentMatrix
 from decision_msgs.srv import AssessAlternatives
 from decision_msgs.action import Assess
 
+from abstract_decision_components.util import load_cs_description
+
 
 class AssessActionServer(Node):
     """
@@ -37,8 +39,11 @@ class AssessActionServer(Node):
     """
 
     def __init__(self):
+        self.policy_ = 'assess'
         super().__init__('assess_action_server')
         self.get_logger().info('Starting ASSESS action server')
+
+        self.declare_parameter('coresense_engine', load_cs_description(self.policy_))
 
         self.cues_ = {}
         self.alternatives = {}

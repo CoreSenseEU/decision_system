@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 import numpy as np
+
+from ament_index_python import get_package_share_directory
 
 
 def validate_matrix(rows, cols, items):
@@ -38,3 +42,14 @@ def validate_matrix(rows, cols, items):
 
 def scores_to_np_array(scores, n_alternatives):
     return np.array(scores).reshape((n_alternatives, -1))
+
+def load_cs_description(name):
+    cs_json = os.path.join(
+            get_package_share_directory('abstract_decision_components'),
+            'config', 
+            'coresense_engines', 
+            name + '.json')
+    with open(cs_json, 'r') as f:
+        cs_description = f.read()
+    return cs_description
+

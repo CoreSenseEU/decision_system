@@ -22,6 +22,7 @@ from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from decision_msgs.action import UpdateCues
 from decision_msgs.srv import PrologQuery
 from decision_msgs.msg import CueArray, Cue
+from abstract_decision_components.util import load_cs_description
 
 
 class UpdateCuesPrologActionServer(Node):
@@ -38,6 +39,8 @@ class UpdateCuesPrologActionServer(Node):
     def __init__(self):
         super().__init__('update_cues_prolog_action_server')
         self.get_logger().info('Starting UPDATE_CUES action server')
+
+        self.declare_parameter('coresense_engine', load_cs_description('update_cues'))
 
         self.declare_parameter('reuse', True)
         self.declare_parameter('iter_add', 0)

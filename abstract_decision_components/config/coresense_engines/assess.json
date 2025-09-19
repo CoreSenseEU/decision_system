@@ -1,0 +1,39 @@
+{
+  "name": "assess",
+  "inputs": [
+    {
+      "name": "alternatives",
+      "concept": "alternative_array",
+      "formalism": "alternative_array_msg",
+      "representation_class": "choice_set",
+      "requirements": []
+    },
+    {
+      "name": "cues",
+      "concept": "cue_array",
+      "formalism": "cue_array_msg",
+      "requirements": []
+    }
+  ],
+  "engine_output": {
+    "name": "assessments",
+    "concept": "assessment_matrix",
+    "formalism" : "assessment_matrix_msg",
+    "properties": [
+      {
+        "name": "entry_representation_class",
+        "datatype": "representation_class",
+        "value": "score"
+      }
+    ]
+  },
+  "time_delay": 0,
+  "energy_cost": 0.0,
+  "resources_consumed": [],
+  "resources_blocked": [
+    {
+      "name": "cpu",
+      "percentage": 0.0
+    },
+  ]
+}

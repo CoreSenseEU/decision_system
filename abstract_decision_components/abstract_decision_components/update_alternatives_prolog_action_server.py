@@ -22,6 +22,7 @@ from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from decision_msgs.action import UpdateAlternatives
 from decision_msgs.srv import PrologQuery
 from decision_msgs.msg import AlternativeArray, Alternative
+from abstract_decision_components.util import load_cs_description
 
 
 class UpdateAlternativesActionServer(Node):
@@ -43,6 +44,8 @@ class UpdateAlternativesActionServer(Node):
     def __init__(self):
         super().__init__('update_alternatives_prolog_action_server')
         self.get_logger().info('Starting UPDATE_ALTERNATIVES action server')
+
+        self.declare_parameter('coresense_engine', load_cs_description('update_alternatives'))
 
         self.declare_parameter('keep_policy', 'taken')
         self.declare_parameter('capacity', 0)

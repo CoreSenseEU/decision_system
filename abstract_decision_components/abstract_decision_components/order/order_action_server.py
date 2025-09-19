@@ -17,7 +17,7 @@ from rclpy.action import ActionServer
 
 from decision_msgs.msg import WeakOrdering, OrderedEvaluation
 from decision_msgs.action import Order
-from abstract_decision_components.util import validate_matrix
+from abstract_decision_components.util import validate_matrix, load_cs_description
 
 
 class OrderActionServer(Node):
@@ -30,6 +30,7 @@ class OrderActionServer(Node):
 
         super().__init__(f'{self.policy_}_action_server')
         self.get_logger().info(f'Starting ORDER action server with policy: {self.policy_}')
+        self.declare_parameter('coresense_engine', load_cs_description(self.policy_))
 
         self.action_server_ = ActionServer(
                 self,

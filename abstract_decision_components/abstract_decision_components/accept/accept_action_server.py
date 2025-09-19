@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from rclpy.node import Node
 from rclpy.action import ActionServer
 
 from decision_msgs.msg import Decision
 from decision_msgs.action import Accept
+from abstract_decision_components.util import load_cs_description
 
 
 class AcceptActionServer(Node):
@@ -28,6 +28,8 @@ class AcceptActionServer(Node):
 
         super().__init__(f'{self.policy_}_action_server')
         self.get_logger().info(f'Starting ACCEPT action server with policy: {self.policy_}')
+
+        self.declare_parameter('coresense_engine', load_cs_description(self.policy_))
 
         self.action_server_ = ActionServer(
                 self,

@@ -20,6 +20,7 @@ from rclpy.action import ActionServer
 from decision_msgs.msg import AlternativeArray
 from decision_msgs.action import Take
 from abstract_decision_components.take import take
+from abstract_decision_components.util import load_cs_description
 
 
 class TakeBestActionServer(Node):
@@ -30,8 +31,11 @@ class TakeBestActionServer(Node):
     :param random_ties: If `True`, break ties randomly, default to False
     """
     def __init__(self):
+        self.policy_ = 'take_best'
         super().__init__('take_best_action_server')
         self.get_logger().info('Starting TAKE action server with policy: take_best')
+
+        self.declare_parameter('coresense_engine', load_cs_description(self.policy_))
 
         self.declare_parameter('n', 0)
         self.declare_parameter('random_ties', False)

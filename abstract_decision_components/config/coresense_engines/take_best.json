@@ -1,0 +1,27 @@
+{
+  "name": "take_best",
+  "inputs": [
+    {
+      "name": "ordering",
+      "concept": "weak_ordering",
+      "formalism" : "weak_ordering_msg",
+      "requirements": []
+    }
+  ],
+  "engine_output": {
+    "name": "choice",
+    "concept": "alternative_array",
+    "formalism" : "alternative_array_msg",
+    "representation_class": "choice",
+    "properties": []
+  },
+  "time_delay": 0,
+  "energy_cost": 0.0,
+  "resources_consumed": [],
+  "resources_blocked": [
+    {
+      "name": "cpu",
+      "percentage": 0.0
+    },
+  ]
+}

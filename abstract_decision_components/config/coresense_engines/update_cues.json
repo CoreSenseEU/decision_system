@@ -1,0 +1,19 @@
+{
+  "name": "update_cues",
+  "inputs": [],
+  "engine_output": {
+    "name": "cues",
+    "concept": "cue_array",
+    "formalism" : "cue_array_msg",
+    "properties": []
+  },
+  "time_delay": 0,
+  "energy_cost": 0.0,
+  "resources_consumed": [],
+  "resources_blocked": [
+    {
+      "name": "cpu",
+      "percentage": 0.0
+    },
+  ]
+}

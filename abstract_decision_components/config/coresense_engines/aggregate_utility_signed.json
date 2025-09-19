@@ -1,0 +1,37 @@
+{
+  "name": "aggregate_utility_signed",
+  "inputs": [
+    {
+      "name": "assessments",
+      "concept": "assessment_matrix",
+      "formalism" : "assessment_matrix_msg",
+      "requirements": []
+    }
+  ],
+  "engine_output": {
+    "name": "evaluation",
+    "concept": "evaluation",
+    "formalism" : "evaluation_msg",
+    "properties": [
+      {
+        "name": "num_axes",
+        "datatype": "unsigned",
+        "value": 1
+      },
+      {
+        "name": "entry_representation_class",
+        "datatype": "representation_class",
+        "value": "sign"
+      }
+    ]
+  },
+  "time_delay": 0,
+  "energy_cost": 0.0,
+  "resources_consumed": [],
+  "resources_blocked": [
+    {
+      "name": "cpu",
+      "percentage": 0.0
+    },
+  ]
+}

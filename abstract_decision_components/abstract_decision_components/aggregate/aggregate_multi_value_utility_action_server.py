@@ -23,7 +23,7 @@ from rclpy.action import ActionServer, ActionClient
 
 from decision_msgs.msg import Evaluation, AssessmentMatrix
 from decision_msgs.action import Aggregate
-from abstract_decision_components.util import scores_to_np_array
+from abstract_decision_components.util import scores_to_np_array, load_cs_description
 
 
 class AggregateMultiValueUtilityActionServer(Node):
@@ -37,8 +37,11 @@ class AggregateMultiValueUtilityActionServer(Node):
     #    similar to AssessNode and doesn't require buffering
 
     def __init__(self):
+        self.policy_ = 'aggregate_multi_value_utility'
         super().__init__('aggregate_multi_value_utility_action_server')
         self.get_logger().info('Starting AGGREGATE action_server with policy: aggregate_multi_value_utility')
+
+        self.declare_parameter('coresense_engine', load_cs_description(self.policy_))
 
         self.clients_ = {}
 

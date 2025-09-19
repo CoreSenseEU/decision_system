@@ -1,4 +1,5 @@
 from setuptools import find_packages, setup
+from glob import glob
 
 package_name = 'abstract_decision_components'
 
@@ -10,6 +11,8 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name + '/config/coresense_engines/', 
+            glob('config/coresense_engines/*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

@@ -1,0 +1,39 @@
+{
+  "name": "accept_size",
+  "inputs": [
+    {
+      "name": "choice",
+      "concept": "alternative_array",
+      "formalism" : "alternative_array_msg",
+      "representation_class": "choice",
+      "requirements": []
+    },
+    {
+      "name": "evaluation",
+      "concept": "evaluation",
+      "formalism" : "evaluation_msg",
+      "requirements": []
+    }
+  ],
+  "engine_output": {
+    "name": "decision",
+    "concept": "decision",
+    "formalism" : "decision_msg",
+    "properties": [
+      {
+        "name": "absolute_size_fixed",
+        "datatype": "boolean",
+        "value": true
+      }
+    ]
+  },
+  "time_delay": 0,
+  "energy_cost": 0.0,
+  "resources_consumed": [],
+  "resources_blocked": [
+    {
+      "name": "cpu",
+      "percentage": 0.0
+    },
+  ]
+}
