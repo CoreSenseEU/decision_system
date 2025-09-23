@@ -10,7 +10,7 @@
           "name": "entry_representation_class",
           "datatype": "representation_class",
           "value": "boolean"
-        },
+        }
       ]
     }
   ],
@@ -38,6 +38,6 @@
     {
       "name": "cpu",
       "percentage": 0.0
-    },
+    }
   ]
 }
