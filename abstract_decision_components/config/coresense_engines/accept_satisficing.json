@@ -1,38 +1,37 @@
 {
-  "name": "accept_satisficing",
+  "name": "accept_satisficing_engine",
   "inputs": [
     {
-      "name": "choice",
-      "concept": "alternative_array",
-      "formalism" : "alternative_array_msg",
-      "representation_class": "choice",
-      "requirements": []
-    },
-    {
-      "name": "evaluation",
-      "concept": "evaluation",
-      "formalism" : "evaluation_msg",
+      "name": "choice_3_template",
+      "formalism": "alternative_array_msg",
+      "representation_classes": ["choice_rc", "alternative_array_rc"],
+      "concepts": [],
+      "creator": "",
       "requirements": []
     }
   ],
   "engine_output": {
-    "name": "decision",
-    "concept": "decision",
-    "formalism" : "decision_msg",
+    "name": "accept_satisficing_engine_output_modelet",
+    "formalism": "decision_msg",
+    "representation_classes": ["decision_rc"],
+    "concepts": [],
     "properties": [
       {
-        "name": "decision_quality",
-        "datatype": "string",
+        "name": "decision_quality_property",
+        "datatype": "string_datatype",
         "value": "satisficing"
       }
     ]
   },
+  "transit_properties": [
+    "absolute_size_property"
+  ],
   "time_delay": 0,
   "energy_cost": 0.0,
   "resources_consumed": [],
   "resources_blocked": [
     {
-      "name": "cpu",
+      "name": "cpu_resource",
       "percentage": 0.0
     }
   ]

@@ -1,39 +1,44 @@
 {
-  "name": "assess",
+  "name": "assess_engine",
   "inputs": [
     {
-      "name": "alternatives",
-      "concept": "alternative_array",
+      "name": "choice_set_template",
       "formalism": "alternative_array_msg",
-      "representation_class": "choice_set",
+      "representation_classes": ["choice_set_rc", "alternative_array_rc"],
+      "concepts": [],
+      "creator" : "",
       "requirements": []
     },
     {
-      "name": "cues",
-      "concept": "cue_array",
+      "name": "cue_array_template",
       "formalism": "cue_array_msg",
+      "representation_classes": ["cue_array_rc"],
+      "concepts": [],
+      "creator" : "",
       "requirements": []
     }
   ],
   "engine_output": {
-    "name": "assessments",
-    "concept": "assessment_matrix",
+    "name": "assessments_modelet",
+    "representation_classes": ["assessment_matrix_rc"],
+    "concepts": [],
     "formalism" : "assessment_matrix_msg",
     "properties": [
       {
-        "name": "entry_representation_class",
-        "datatype": "representation_class",
+        "name": "entry_representation_class_property",
+        "datatype": "representation_class_datatype",
         "value": "score"
       }
     ]
   },
+  "transit_properties": [],
   "time_delay": 0,
   "energy_cost": 0.0,
   "resources_consumed": [],
   "resources_blocked": [
     {
-      "name": "cpu",
+      "name": "cpu_resource",
       "percentage": 0.0
-    },
+    }
   ]
 }

@@ -1,25 +1,29 @@
 {
-  "name": "order_dominating",
+  "name": "order_dominating_engine",
   "inputs": [
     {
-      "name": "evaluation",
-      "concept": "evaluation",
+      "name": "evaluation_2_template",
       "formalism" : "evaluation_msg",
+      "representation_classes": ["evaluation_rc"],
+      "concepts": [],
+      "creator" : "",
       "requirements": []
     }
   ],
   "engine_output": {
-    "name": "ordering",
-    "concept": "weak_ordering",
-    "formalism" : "weak_ordering_msg",
+    "name": "order_dominating_engine_output_modelet",
+    "formalism": "weak_ordering_msg",
+    "representation_classes": ["weak_ordering_rc"],
+    "concepts": [],
     "properties": []
   },
+  "transit_properties": [],
   "time_delay": 0,
   "energy_cost": 0.0,
   "resources_consumed": [],
   "resources_blocked": [
     {
-      "name": "cpu",
+      "name": "cpu_resource",
       "percentage": 0.0
     }
   ]

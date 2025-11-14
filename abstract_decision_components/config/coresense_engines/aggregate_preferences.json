@@ -1,25 +1,29 @@
 {
-  "name": "aggregate_preferences",
+  "name": "aggregate_preferences_engine",
   "inputs": [
     {
-      "name": "assessments",
-      "concept": "assessment_matrix",
+      "name": "assessment_matrix_1_template",
       "formalism" : "assessment_matrix_msg",
+      "representation_classes": ["assessment_matrix_rc"],
+      "concepts": [],
+      "creator" : "",
       "requirements": []
     }
   ],
   "engine_output": {
-    "name": "evaluation",
-    "concept": "evaluation",
+    "name": "evaluation_modelet",
     "formalism" : "evaluation_msg",
+    "representation_classes": ["evaluation_rc"],
+    "concepts": [],
     "properties": []
   },
+  "transit_properties": [],
   "time_delay": 0,
   "energy_cost": 0.0,
   "resources_consumed": [],
   "resources_blocked": [
     {
-      "name": "cpu",
+      "name": "cpu_resource",
       "percentage": 0.0
     }
   ]
