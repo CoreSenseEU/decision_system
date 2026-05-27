@@ -2,7 +2,7 @@
   "name": "order_lexicographical_engine",
   "inputs": [
     {
-      "name": "evaluation_3_template",
+      "name": "evaluation_template",
       "formalism": "evaluation_msg",
       "representation_classes": ["evaluation_rc"],
       "concepts": [],

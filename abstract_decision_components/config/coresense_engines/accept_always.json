@@ -2,7 +2,7 @@
   "name": "accept_always_engine",
   "inputs": [
     {
-      "name": "choice_1_template",
+      "name": "choice_template",
       "formalism": "alternative_array_msg",
       "representation_classes": ["choice_rc", "alternative_array_rc"],
       "concepts": [],

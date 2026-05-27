@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="order_condorcet_extension_engine">
+    <Sequence>
+      <Order evaluation="{evaluation}"
+             ordering="{ordering}"
+             action_name="/order_condorcet/Order"/>
+    </Sequence>
+  </BehaviorTree>
+</root>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="accept_satisficing_engine">
+    <Sequence>
+      <Accept choice="{choice}"
+              evaluation="{evaluation}"
+              accepted="{accepted}"
+              action_name="/accept_satisficing/Accept"/>
+    </Sequence>
+  </BehaviorTree>
+</root>

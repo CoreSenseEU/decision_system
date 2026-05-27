@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="eliminate_worst_engine">
+    <Sequence>
+      <Take ordering="{ordering}"
+            choice="{choice}"
+            action_name="/eliminate_worst/Take"/>
+    </Sequence>
+  </BehaviorTree>
+</root>

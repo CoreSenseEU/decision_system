@@ -2,7 +2,7 @@
   "name": "order_dominating_engine",
   "inputs": [
     {
-      "name": "evaluation_2_template",
+      "name": "evaluation_template",
       "formalism" : "evaluation_msg",
       "representation_classes": ["evaluation_rc"],
       "concepts": [],

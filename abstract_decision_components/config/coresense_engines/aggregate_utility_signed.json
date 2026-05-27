@@ -2,7 +2,7 @@
   "name": "aggregate_utility_signed_engine",
   "inputs": [
     {
-      "name": "assessment_matrix_4_template",
+      "name": "assessment_matrix_template",
       "formalism" : "assessment_matrix_msg",
       "representation_classes": ["assessment_matrix_rc"],
       "concepts": [],

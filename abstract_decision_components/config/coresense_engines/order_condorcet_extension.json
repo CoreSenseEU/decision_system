@@ -2,7 +2,7 @@
   "name": "order_condorcet_extension_engine",
   "inputs": [
     {
-      "name": "evaluation_1_template",
+      "name": "evaluation_template",
       "formalism": "evaluation_msg",
       "representation_classes": ["evaluation_rc"],
       "concepts": [],
