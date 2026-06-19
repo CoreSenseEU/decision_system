@@ -1,25 +1,24 @@
 {
-  "name": "take_best_engine",
+  "name": "take_best",
   "inputs": [
     {
-      "name": "weak_ordering_template",
+      "name": "weak_ordering",
       "formalism": "weak_ordering_msg",
-      "representation_classes": ["weak_ordering_rc"],
+      "representation_classes": ["weak_ordering"],
       "concepts": [],
       "creator": "",
       "requirements": []
     }
   ],
   "engine_output": {
-    "name": "take_best_engine_output_modelet",
+    "name": "take_best_engine_output",
     "formalism": "alternative_array_msg",
-    "representation_classes": ["choice_rc", "alternative_array_rc"],
+    "representation_classes": ["choice", "alternative_array"],
     "concepts": [],
     "properties": [
       {
-        "name": "absolute_size_property",
-        "datatype": "integer_datatype",
-        "value": "1.0"
+        "klass": "absolute_size",
+        "value": "\"1\"^^xsd:integer"
       }
     ]
   },
@@ -29,7 +28,7 @@
   "resources_consumed": [],
   "resources_blocked": [
     {
-      "name": "cpu_resource",
+      "name": "cpu",
       "percentage": 0.0
     }
   ]

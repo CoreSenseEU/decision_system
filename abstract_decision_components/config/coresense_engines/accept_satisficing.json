@@ -1,37 +1,36 @@
 {
-  "name": "accept_satisficing_engine",
+  "name": "accept_satisficing",
   "inputs": [
     {
-      "name": "choice_template",
+      "name": "choice",
       "formalism": "alternative_array_msg",
-      "representation_classes": ["choice_rc", "alternative_array_rc"],
+      "representation_classes": ["choice", "alternative_array"],
       "concepts": [],
       "creator": "",
       "requirements": []
     }
   ],
   "engine_output": {
-    "name": "accept_satisficing_engine_output_modelet",
+    "name": "accept_satisficing_engine_output",
     "formalism": "decision_msg",
-    "representation_classes": ["decision_rc"],
+    "representation_classes": ["decision"],
     "concepts": [],
     "properties": [
       {
-        "name": "decision_quality_property",
-        "datatype": "string_datatype",
-        "value": "satisficing"
+        "klass": "decision_quality",
+        "value": "\"satisficing\"^^xsd:string"
       }
     ]
   },
   "transit_properties": [
-    "absolute_size_property"
+    "absolute_size"
   ],
   "time_delay": 0,
   "energy_cost": 0.0,
   "resources_consumed": [],
   "resources_blocked": [
     {
-      "name": "cpu_resource",
+      "name": "cpu",
       "percentage": 0.0
     }
   ]

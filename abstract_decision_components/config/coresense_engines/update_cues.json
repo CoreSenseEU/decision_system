@@ -1,9 +1,9 @@
 {
-  "name": "update_cues_take_the_best_engine",
+  "name": "update_cues_take_the_best",
   "inputs": [],
   "engine_output": {
-    "name": "update_cues_take_the_best_engine_output_modelet",
-    "representation_classes": ["cue_array_rc"],
+    "name": "update_cues_take_the_best_engine_output",
+    "representation_classes": ["cue_array"],
     "concepts": [],
     "formalism" : "cue_array_msg",
     "properties": []
@@ -14,7 +14,7 @@
   "resources_consumed": [],
   "resources_blocked": [
     {
-      "name": "cpu_resource",
+      "name": "cpu",
       "percentage": 0.0
     }
   ]

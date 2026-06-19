@@ -1,30 +1,28 @@
 {
-  "name": "aggregate_utility_boolean_engine",
+  "name": "aggregate_utility_boolean",
   "inputs": [
     {
-      "name": "assessment_matrix_template",
+      "name": "assessment_matrix",
       "formalism" : "assessment_matrix_msg",
-      "representation_classes": ["assessment_matrix_rc"],
+      "representation_classes": ["assessment_matrix"],
       "concepts": [],
       "creator" : "",
       "requirements": []
     }
   ],
   "engine_output": {
-    "name": "evaluation_modelet",
+    "name": "evaluation",
     "formalism" : "evaluation_msg",
-    "representation_classes": ["evaluation_rc"],
+    "representation_classes": ["evaluation"],
     "concepts": [],
     "properties": [
       {
-        "name": "num_axes_property",
-        "datatype": "unsigned_datatype",
-        "value": "1"
+        "klass": "num_axes",
+        "value": "\"1\"^^xsd:integer"
       },
       {
-        "name": "entry_representation_class_property",
-        "datatype": "representation_class_datatype",
-        "value": "boolean"
+        "klass": "entry_representation_class",
+        "value": "\"boolean\"^^xsd:string"
       }
     ]
   },
@@ -34,7 +32,7 @@
   "resources_consumed": [],
   "resources_blocked": [
     {
-      "name": "cpu_resource",
+      "name": "cpu",
       "percentage": 0.0
     }
   ]

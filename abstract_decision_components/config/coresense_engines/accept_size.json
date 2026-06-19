@@ -1,41 +1,38 @@
 {
-  "name": "accept_size_engine",
+  "name": "accept_size",
   "inputs": [
     {
-      "name": "choice_template",
+      "name": "choice",
       "formalism": "alternative_array_msg",
-      "representation_classes": ["choice_rc", "alternative_array_rc"],
+      "representation_classes": ["choice", "alternative_array"],
       "concepts": [],
       "creator": "",
       "requirements": []
     }
   ],
   "engine_output": {
-    "name": "accept_size_engine_output_modelet",
+    "name": "accept_size_engine_output",
     "formalism": "decision_msg",
-    "representation_classes": ["decision_rc"],
+    "representation_classes": ["decision"],
     "concepts": [],
     "properties": [
       {
-        "name": "absolute_size_property",
-        "datatype": "choice_size_datatype",
-        "value": "1.0"
+        "klass": "absolute_size",
+        "value": "\"1\"^^xsd:integer"
       }
     ]
   },
   "transit_properties": [
-    "absolute_size_property"
+    "absolute_size"
   ],
   "engine_properties": [
     {
-      "name": "n_parameter_prop",
-      "type": "boolean_datatype",
-      "value": "true"
+      "klass": "n_parameter",
+      "value": "\"true\"^^xsd:boolean"
     },
     {
-      "name": "relation_parameter_prop",
-      "type": "boolean_datatype",
-      "value": "true"
+      "klass": "relation_parameter",
+      "value": "\"true\"^^xsd:boolean"
     }
   ],
   "time_delay": 0,
@@ -43,7 +40,7 @@
   "resources_consumed": [],
   "resources_blocked": [
     {
-      "name": "cpu_resource",
+      "name": "cpu",
       "percentage": 0.0
     }
   ]

@@ -1,10 +1,10 @@
 {
-  "name": "update_alternatives_elim_engine",
+  "name": "update_alternatives_elim",
   "inputs": [],
   "engine_output": {
-    "name": "update_alternatives_engine_output_modelet",
+    "name": "update_alternatives_engine_output",
     "formalism": "alternative_array_msg",
-    "representation_classes": ["choice_set_rc", "alternative_array_rc"],
+    "representation_classes": ["choice_set", "alternative_array"],
     "concepts": [],
     "properties": []
   },
@@ -14,7 +14,7 @@
   "resources_consumed": [],
   "resources_blocked": [
     {
-      "name": "cpu_resource",
+      "name": "cpu",
       "percentage": 0.0
     }
   ]

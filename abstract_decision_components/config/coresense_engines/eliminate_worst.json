@@ -1,19 +1,19 @@
 {
-  "name": "eliminate_worst_engine",
+  "name": "eliminate_worst",
   "inputs": [
     {
-      "name": "weak_ordering_template",
+      "name": "weak_ordering",
       "formalism": "weak_ordering_msg",
-      "representation_classes": ["weak_ordering_rc"],
+      "representation_classes": ["weak_ordering"],
       "concepts": [],
       "creator": "",
       "requirements": []
     }
   ],
   "engine_output": {
-    "name": "eliminate_worst_engine_output_modelet",
+    "name": "eliminate_worst_engine_output",
     "formalism": "alternative_array_msg",
-    "representation_classes": ["choice_rc", "alternative_array_rc"],
+    "representation_classes": ["choice", "alternative_array"],
     "concepts": [],
     "properties": []
   },
@@ -23,7 +23,7 @@
   "resources_consumed": [],
   "resources_blocked": [
     {
-      "name": "cpu_resource",
+      "name": "cpu",
       "percentage": 0.0
     }
   ]
