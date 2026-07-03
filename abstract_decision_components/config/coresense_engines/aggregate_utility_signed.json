@@ -17,11 +17,11 @@
     "concepts": [],
     "properties": [
       {
-        "name": "num_axes",
-        "value": "\"1\"^^xsd:intger"
+        "klass": "num_axes",
+        "value": "\"1\"^^xsd:integer"
       },
       {
-        "name": "entry_representation_class",
+        "klass": "entry_representation_class",
         "value": "\"sign\"^^xsd:string"
       }
     ]
