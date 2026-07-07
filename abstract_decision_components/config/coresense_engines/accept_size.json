@@ -7,24 +7,22 @@
       "representation_classes": ["choice", "alternative_array"],
       "concepts": [],
       "creator": "",
-      "requirements": []
+      "requirements": [
+        {
+          "klass": "absolute_size",
+          "value_range": "\"[1,50]\"^^xsd:integer"
+        }
+      ]
     }
   ],
   "engine_output": {
     "name": "accept_size_engine_output",
     "formalism": "decision_msg",
     "representation_classes": ["decision"],
-    "concepts": [],
-    "properties": [
-      {
-        "klass": "absolute_size",
-        "value": "\"1\"^^xsd:integer"
-      }
-    ]
+    "properties": [],
+    "concepts": []
   },
-  "transit_properties": [
-    "absolute_size"
-  ],
+  "blocked_properties": [],
   "engine_properties": [
     {
       "klass": "n_parameter",

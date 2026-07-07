@@ -17,9 +17,7 @@
     "concepts": [],
     "properties": []
   },
-  "transit_properties": [
-    "absolute_size"
-  ],
+  "blocked_properties": [],
   "time_delay": 0,
   "energy_cost": 0.0,
   "resources_consumed": [],
