@@ -2,7 +2,7 @@
   "name": "assess",
   "inputs": [
     {
-      "name": "choice_set",
+      "name": "alternatives",
       "formalism": "alternative_array_msg",
       "representation_classes": ["choice_set", "alternative_array"],
       "concepts": [],
@@ -10,7 +10,7 @@
       "requirements": []
     },
     {
-      "name": "cue_array",
+      "name": "cues",
       "formalism": "cue_array_msg",
       "representation_classes": ["cue_array"],
       "concepts": [],

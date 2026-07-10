@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
-  <BehaviorTree ID="accept_size_engine">
+  <BehaviorTree ID="accept_size">
     <Sequence>
       <Accept choice="{choice}"
               evaluation="{evaluation}"

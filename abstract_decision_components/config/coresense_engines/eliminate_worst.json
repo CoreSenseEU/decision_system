@@ -11,7 +11,7 @@
     }
   ],
   "engine_output": {
-    "name": "eliminate_worst_engine_output",
+    "name": "choice",
     "formalism": "alternative_array_msg",
     "representation_classes": ["choice", "alternative_array"],
     "concepts": [],

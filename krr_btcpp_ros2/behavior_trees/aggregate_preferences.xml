@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
-  <BehaviorTree ID="aggregate_preferences_engine">
+  <BehaviorTree ID="aggregate_preferences">
     <Sequence>
       <Aggregate assessments="{assessments}"
                  evaluation="{evaluation}"

@@ -16,7 +16,7 @@
     }
   ],
   "engine_output": {
-    "name": "accept_size_engine_output",
+    "name": "accepted",
     "formalism": "decision_msg",
     "representation_classes": ["decision"],
     "properties": [],

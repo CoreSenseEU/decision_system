@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
-  <BehaviorTree ID="eliminate_worst_engine">
+  <BehaviorTree ID="eliminate_worst">
     <Sequence>
       <Take ordering="{ordering}"
             choice="{choice}"

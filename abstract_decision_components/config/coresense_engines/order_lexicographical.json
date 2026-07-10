@@ -11,7 +11,7 @@
     }
   ],
   "engine_output": {
-    "name": "order_lexicographical_engine_output",
+    "name": "weak_ordering",
     "formalism": "weak_ordering_msg",
     "representation_classes": ["weak_ordering"],
     "concepts": [],

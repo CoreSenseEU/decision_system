@@ -2,7 +2,7 @@
   "name": "aggregate_utility_sum",
   "inputs": [
     {
-      "name": "assessment_matrix",
+      "name": "assessments",
       "formalism" : "assessment_matrix_msg",
       "representation_classes": ["assessment_matrix"],
       "concepts": [],
