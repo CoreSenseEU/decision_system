@@ -3,7 +3,7 @@
   "inputs": [],
   "engine_output": {
     "name": "update_alternatives_engine_output",
-    "formalism": "alternative_array_msg",
+    "formalism": "ros:msg:decision_msgs/msg/AlternativeArray",
     "representation_classes": ["choice_set", "alternative_array"],
     "concepts": [],
     "properties": []

@@ -3,7 +3,7 @@
   "inputs": [
     {
       "name": "alternatives",
-      "formalism": "alternative_array_msg",
+      "formalism": "ros:msg:decision_msgs/msg/AlternativeArray",
       "representation_classes": ["choice_set", "alternative_array"],
       "concepts": [],
       "creator" : "",
@@ -11,7 +11,7 @@
     },
     {
       "name": "cues",
-      "formalism": "cue_array_msg",
+      "formalism": "ros:msg:decision_msgs/msg/CueArray",
       "representation_classes": ["cue_array"],
       "concepts": [],
       "creator" : "",
@@ -22,7 +22,7 @@
     "name": "assessments",
     "representation_classes": ["assessment_matrix"],
     "concepts": [],
-    "formalism" : "assessment_matrix_msg",
+    "formalism" : "ros:msg:decision_msgs/msg/AssessmentMatrix",
     "properties": [
       {
         "klass": "entry_representation_class",

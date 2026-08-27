@@ -3,7 +3,7 @@
   "inputs": [
     {
       "name": "assessments",
-      "formalism" : "assessment_matrix_msg",
+      "formalism" : "ros:msg:decision_msgs/msg/AssessmentMatrix",
       "representation_classes": ["assessment_matrix"],
       "concepts": [],
       "creator" : "",
@@ -17,7 +17,7 @@
   ],
   "engine_output": {
     "name": "evaluation",
-    "formalism" : "evaluation_msg",
+    "formalism" : "ros:msg:decision_msgs/msg/Evaluation",
     "representation_classes": ["evaluation"],
     "concepts": [],
     "properties": [

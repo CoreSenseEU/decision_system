@@ -3,7 +3,7 @@
   "inputs": [
     {
       "name": "choice",
-      "formalism": "alternative_array_msg",
+      "formalism": "ros:msg:decision_msgs/msg/AlternativeArray",
       "representation_classes": ["choice", "alternative_array"],
       "concepts": [],
       "creator": "",
@@ -17,7 +17,7 @@
   ],
   "engine_output": {
     "name": "accepted",
-    "formalism": "decision_msg",
+    "formalism": "ros:msg:decision_msgs/msg/Decision",
     "representation_classes": ["decision"],
     "properties": [],
     "concepts": []

@@ -3,7 +3,7 @@
   "inputs": [
     {
       "name": "weak_ordering",
-      "formalism": "weak_ordering_msg",
+      "formalism": "ros:msg:decision_msgs/msg/WeakOrdering",
       "representation_classes": ["weak_ordering"],
       "concepts": [],
       "creator": "",
@@ -12,7 +12,7 @@
   ],
   "engine_output": {
     "name": "choice",
-    "formalism": "alternative_array_msg",
+    "formalism": "ros:msg:decision_msgs/msg/AlternativeArray",
     "representation_classes": ["choice", "alternative_array"],
     "concepts": [],
     "properties": []

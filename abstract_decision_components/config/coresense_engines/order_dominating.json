@@ -3,7 +3,7 @@
   "inputs": [
     {
       "name": "evaluation",
-      "formalism" : "evaluation_msg",
+      "formalism" : "ros:msg:decision_msgs/msg/Evaluation",
       "representation_classes": ["evaluation"],
       "concepts": [],
       "creator" : "",
@@ -12,7 +12,7 @@
   ],
   "engine_output": {
     "name": "weak_ordering",
-    "formalism": "weak_ordering_msg",
+    "formalism": "ros:msg:decision_msgs/msg/WeakOrdering",
     "representation_classes": ["weak_ordering"],
     "concepts": [],
     "properties": []
