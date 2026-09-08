@@ -1,0 +1,5 @@
+repositories:
+  BehaviorTree.ROS2:
+    type: git
+    url: https://github.com/alex-quin-gabriel/BehaviorTree.ROS2.git
+    version: parallel_goals
